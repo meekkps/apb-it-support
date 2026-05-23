@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>APB IT Support 2026</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4199ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="APB-IT">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#f0f4fa;--bg1:#e8eef8;--bg2:#dde6f5;
+  --glass:rgba(255,255,255,0.95);--glass2:rgba(255,255,255,0.8);
+  --border:rgba(65,153,236,0.15);--border2:rgba(65,153,236,0.3);
+  --text:#1a2744;--text2:#4a6080;--text3:#8aa0c0;
+  --p:#4199ec;--p2:#2176d9;--p3:#1560c0;
+  --cyan:#0abfcc;--pink:#e0457a;--amber:#e08a00;--green:#0fa968;--red:#e03b5a;
+  --grad1:linear-gradient(135deg,#4199ec,#0abfcc);
+  --grad2:linear-gradient(135deg,#e0457a,#4199ec);
+  --grad3:linear-gradient(135deg,#0abfcc,#0fa968);
+  --shadow:0 2px 12px rgba(65,153,236,0.1);
+  --shadow-md:0 4px 24px rgba(65,153,236,0.15);
+  --nav-h:64px;--head-h:56px;
+}
+body.dark{
+  --bg0:#060612;--bg1:#0d0d20;
+  --glass:rgba(20,20,40,0.95);--glass2:rgba(30,30,60,0.8);
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.18);
+  --text:#ffffff;--text2:#c0bedd;--text3:#8880aa;
+  --p:#7c6fe0;--p2:#a89cf5;--p3:#c8beff;
+  --cyan:#00e5cc;--pink:#ff6eb4;--amber:#ffb347;--green:#39e89a;--red:#ff5c7a;
+  --grad1:linear-gradient(135deg,#7c6fe0,#00e5cc);
+  --grad2:linear-gradient(135deg,#ff6eb4,#7c6fe0);
+  --grad3:linear-gradient(135deg,#00e5cc,#39e89a);
+  --shadow:0 2px 12px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body,button,input,select,textarea{font-family:'Noto Sans Lao',sans-serif;}
+body{background:var(--bg0);color:var(--text);min-height:100vh;font-size:15px;line-height:1.7;overflow-x:hidden;padding-bottom:var(--nav-h);transition:background 0.25s,color 0.25s;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:200;height:var(--head-h);background:var(--glass);backdrop-filter:blur(20px);border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1rem;box-shadow:var(--shadow);}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.logo{width:34px;height:34px;background:var(--grad1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0;}
+.brand-name{font-size:15px;font-weight:700;color:var(--text);}
+.brand-sub{font-size:11px;color:var(--text2);}
+.topbar-right{display:flex;align-items:center;gap:6px;}
+.date-chip{font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);background:var(--bg1);border:1px solid var(--border);padding:4px 8px;border-radius:8px;white-space:nowrap;}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.sync-chip{display:flex;align-items:center;gap:5px;background:var(--bg1);border:1.5px solid var(--border);padding:4px 10px;border-radius:8px;}
+.topbar-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:var(--glass2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--text);transition:all 0.2s;}
+.logout-btn{padding:5px 10px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.08);color:#e03b5a;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;height:var(--nav-h);background:var(--glass);backdrop-filter:blur(24px);border-top:1.5px solid var(--border);display:flex;align-items:stretch;}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;font-size:10px;color:var(--text3);padding:4px 2px;transition:color 0.2s;}
+.bn-item.active{color:var(--p);}
+.bn-icon{font-size:18px;line-height:1;}
+.bn-badge{position:absolute;top:5px;right:calc(50% - 16px);background:var(--grad1);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;}
+
+/* SIDEBAR */
+.sidebar{width:224px;flex-shrink:0;background:var(--glass);backdrop-filter:blur(20px);border-right:1.5px solid var(--border);padding:1.25rem 0;display:flex;flex-direction:column;overflow-y:auto;}
+.ng{padding:0 0.75rem;margin-bottom:0.5rem;}
+.ng-lbl{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:0 4px;margin-bottom:6px;}
+.nb-d{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:all 0.18s;border-radius:12px;}
+.nb-d:hover{background:var(--bg1);}
+.nb-d.active{background:linear-gradient(135deg,rgba(65,153,236,0.12),rgba(10,191,204,0.08));border:1.5px solid var(--border2);color:var(--p2);font-weight:600;}
+.ni{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.ndiv{border:none;border-top:1.5px solid var(--border);margin:0.75rem 0.75rem;}
+.sfoot{margin-top:auto;padding:1rem 0.75rem;}
+.uchip{background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;}
+.uav{width:32px;height:32px;border-radius:50%;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;flex-shrink:0;}
+.unm{font-size:13px;font-weight:600;color:var(--text);}
+.url{font-size:11px;color:var(--text2);}
+
+/* LAYOUT */
+.app-layout{position:relative;z-index:1;}
+.main{padding:1rem;max-width:900px;margin:0 auto;}
+.tab-pane{display:none;animation:fadeUp 0.2s ease;}
+.tab-pane.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page-hd{margin-bottom:1.25rem;}
+.page-title{font-size:20px;font-weight:700;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.stat-card{background:var(--glass);border:1.5px solid var(--border);border-radius:16px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.stat-card:nth-child(1)::before{background:var(--grad1);}
+.stat-card:nth-child(2)::before{background:var(--grad2);}
+.stat-card:nth-child(3)::before{background:var(--grad3);}
+.stat-card:nth-child(4)::before{background:linear-gradient(135deg,var(--amber),var(--pink));}
+.stat-lbl{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+.stat-num{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.stat-card:nth-child(2) .stat-num{background:var(--grad2);-webkit-background-clip:text;background-clip:text;}
+.stat-card:nth-child(3) .stat-num{background:var(--grad3);-webkit-background-clip:text;background-clip:text;}
+.stat-card:nth-child(4) .stat-num{background:linear-gradient(135deg,var(--amber),var(--pink));-webkit-background-clip:text;background-clip:text;}
+.stat-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+
+/* CARD */
+.card{background:var(--glass);border:1.5px solid var(--border);border-radius:18px;margin-bottom:1rem;overflow:hidden;box-shadow:var(--shadow);}
+.card-hd{padding:14px 16px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg1);}
+.card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;color:var(--text);}
+.cdot{width:6px;height:6px;border-radius:50%;background:var(--grad1);flex-shrink:0;}
+.card-body{padding:16px;}
+
+/* FORM */
+.frow{display:grid;gap:12px;margin-bottom:12px;}
+.frow.c2{grid-template-columns:1fr 1fr;}
+.frow.c3{grid-template-columns:1fr 1fr 1fr;}
+.frow.c1{grid-template-columns:1fr;}
+.field label{display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;font-size:15px;color:var(--text);outline:none;transition:all 0.2s;-webkit-appearance:none;appearance:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(65,153,236,0.12);}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234199ec' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;background-color:var(--glass);}
+.field select option{background:var(--bg0);color:var(--text);}
+.field textarea{resize:vertical;min-height:76px;line-height:1.6;}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;padding-top:4px;}
+.btn{padding:11px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--glass);font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.18s;min-height:44px;}
+.btn:hover{border-color:var(--p);background:var(--bg1);}
+.btn:active{transform:scale(0.97);}
+.btn-grad{background:var(--grad1);border:none;color:#fff;box-shadow:0 4px 14px rgba(65,153,236,0.3);}
+.btn-grad:hover{opacity:0.9;}
+.btn-green{background:var(--grad3);border:none;color:#fff;}
+.btn-sm{padding:8px 14px;font-size:13px;min-height:36px;}
+.btn-full{width:100%;text-align:center;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Noto Sans Lao',sans-serif;white-space:nowrap;}
+.b-open{background:#fff8e1;color:#e08a00;border:1.5px solid #ffd180;}
+.b-done{background:#e8f8f0;color:#0fa968;border:1.5px solid #a8e6c8;}
+.b-pending{background:#e8f2fc;color:#2176d9;border:1.5px solid #aad0f5;}
+.b-critical{background:#fde8ec;color:#e03b5a;border:1.5px solid #f5aab8;animation:crp 1.5s infinite;}
+@keyframes crp{0%,100%{box-shadow:0 0 0 0 rgba(224,59,90,0.2)}50%{box-shadow:0 0 0 4px rgba(224,59,90,0)}}
+@keyframes pulseRed{0%,100%{box-shadow:0 3px 12px rgba(224,59,90,0.5)}50%{box-shadow:0 3px 18px rgba(224,59,90,0.9),0 0 0 6px rgba(224,59,90,0.2)}}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{background:var(--bg1);}
+th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);border-bottom:1.5px solid var(--border);}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+tbody tr:hover{background:var(--bg1);}
+tbody tr:last-child td{border-bottom:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);background:var(--grad1);color:#fff;font-weight:600;font-size:13px;padding:11px 20px;border-radius:12px;z-index:9999;opacity:0;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(65,153,236,0.35);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,39,68,0.4);backdrop-filter:blur(6px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.modal-box{background:var(--glass);border:1.5px solid var(--border);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+.modal-hd{padding:16px 20px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg1);border-radius:20px 20px 0 0;position:sticky;top:0;}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);}
+.modal-close{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:20px;}
+.detail-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.detail-row:last-child{border-bottom:none;}
+.detail-lbl{font-size:12px;font-weight:600;color:var(--text2);width:130px;flex-shrink:0;}
+.detail-val{font-size:14px;color:var(--text);flex:1;word-break:break-all;}
+.detail-section{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--p);margin:14px 0 6px;}
+
+/* INFO BOX */
+.info-box{background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.8;color:var(--text2);}
+
+/* MISC */
+.nbadge{margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:2px 7px;background:var(--grad1);border-radius:20px;color:#fff;}
+
+@media(min-width:700px){
+  body{padding-bottom:0;}
+  .bottom-nav{display:none;}
+  .app-layout{display:flex;height:calc(100vh - var(--head-h));}
+  .sidebar{display:flex!important;}
+  .main{flex:1;overflow-y:auto;padding:1.5rem;max-width:none;}
+  .stats-grid{grid-template-columns:repeat(4,1fr);}
+  .toast{bottom:1.5rem;}
+}
+@media(max-width:699px){
+  .sidebar{display:none;}
+  .frow.c3{grid-template-columns:1fr 1fr;}
+  .frow.c2{grid-template-columns:1fr;}
+  .main{padding:0.75rem;}
+  .page-title{font-size:17px;}
+  .page-hd{margin-bottom:10px;}
+  .card{border-radius:14px;margin-bottom:0.75rem;}
+  .card-hd{padding:10px 12px;flex-wrap:wrap;gap:6px;}
+  .card-title{font-size:13px;}
+  .card-body{padding:12px;}
+  .stats-grid{gap:8px;margin-bottom:0.9rem;}
+  .stat-card{padding:10px 12px;border-radius:13px;}
+  .stat-num{font-size:22px;}
+  .stat-lbl{font-size:10px;}
+  .stat-sub{font-size:10px;}
+  /* Filters: stack ໃຫ້ເຫມາະ */
+  [id$="-search"]{font-size:14px;padding:9px 12px;}
+  select[id*="-f-"],input[type="date"][id*="-f-"]{min-width:0!important;flex:1 1 calc(50% - 4px)!important;font-size:12px!important;padding:7px 8px!important;}
+  /* Buttons */
+  .btn{padding:10px 14px;font-size:13px;min-height:42px;}
+  .btn-sm{padding:7px 10px;font-size:12px;min-height:34px;}
+  .btn-row{flex-wrap:wrap;}
+  /* Form fields */
+  .field input,.field select,.field textarea{font-size:16px;padding:10px 12px;}/* 16px ກັນ iOS zoom */
+  .field label{font-size:11px;}
+  /* Modal */
+  .modal-overlay{padding:0.5rem;}
+  .modal-box{max-height:94vh;border-radius:16px;}
+  .modal-hd{padding:12px 14px;}
+  .modal-title{font-size:14px;}
+  .modal-body{padding:14px;}
+  .detail-row{flex-direction:column;gap:2px;padding:8px 0;}
+  .detail-lbl{width:auto;font-size:11px;}
+  .detail-val{font-size:13px;}
+  /* Table */
+  table{font-size:12px;}
+  th{padding:7px 8px;font-size:9px;}
+  td{padding:7px 8px;}
+  /* Header */
+  .brand-name{font-size:13px;}
+  .brand-sub{font-size:10px;}
+  .date-chip{font-size:9px;padding:3px 6px;}
+  /* Bottom nav */
+  .bn-icon{font-size:16px;}
+  .bn-item{font-size:9px;}
+}
+@media(max-width:380px){
+  .frow.c3{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .stat-num{font-size:20px;}
+  select[id*="-f-"],input[type="date"][id*="-f-"]{flex:1 1 100%!important;}
+  .page-title{font-size:16px;}
+}
+</style>
+<script>
+/* ===== AUTH ===== */
+const USERS=[
+  {user:'Mee',pass:'95407675',role:'admin',display:'ຫມີ'},
+  {user:'user1',pass:'123456',role:'viewer',display:'ຜູ້ໃຊ້ 1'}
+];
+/* role: 'admin' = ເຫັນທຸກໜ້າ, 'viewer' = ເຫັນສະເພາະ Dashboard */
+function applyRole(){
+  let u={};try{u=JSON.parse(sessionStorage.getItem('apb_user')||'{}');}catch(e){}
+  const isViewer=u.role==='viewer';
+  // Tabs ທີ່ viewer ບໍ່ໃຫ້ເຫັນ
+  const hiddenTabs=['atm','repair','report','atmlist','ip','drive'];
+  // Hide/show desktop nav buttons
+  document.querySelectorAll('.nb-d').forEach(btn=>{
+    const onc=btn.getAttribute('onclick')||'';
+    const m=onc.match(/goTab\('([^']+)'/);
+    if(m&&hiddenTabs.includes(m[1])){btn.style.display=isViewer?'none':'';}
+    // ປຸ່ມ Export/Backup/Import/Clear ກໍຊ່ອນຈາກ viewer
+    if(!m&&isViewer&&/export|Backup|Import|ລ້າງ/i.test(onc)){btn.style.display='none';}
+    else if(!m&&!isViewer){btn.style.display='';}
+  });
+  // Hide/show bottom nav buttons
+  document.querySelectorAll('.bn-item').forEach(btn=>{
+    const tab=btn.getAttribute('data-tab')||'';
+    if(hiddenTabs.includes(tab)){btn.style.display=isViewer?'none':'';}
+  });
+  // ຖ້າເປັນ viewer ແລະ tab ປັດຈຸບັນບໍ່ແມ່ນ dashboard → ກັບໄປ dashboard
+  if(isViewer){
+    const cur=document.querySelector('.tab-pane.active');
+    if(!cur||cur.id!=='tab-dashboard'){
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+      const d=document.getElementById('tab-dashboard');if(d)d.classList.add('active');
+      document.querySelectorAll('.nb-d,.bn-item').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('[data-tab="dashboard"]').forEach(b=>b.classList.add('active'));
+    }
+  }
+}
+function doLogin(){
+  const u=(document.getElementById('login-user').value||'').trim();
+  const p=(document.getElementById('login-pass').value||'').trim();
+  const found=USERS.find(x=>x.user.toLowerCase()===u.toLowerCase()&&x.pass===p);
+  if(!found){const e=document.getElementById('login-err');if(e)e.style.display='block';document.getElementById('login-pass').value='';return;}
+  sessionStorage.setItem('apb_user',JSON.stringify(found));
+  document.getElementById('login-screen').style.display='none';
+  const hu=document.getElementById('hdr-user');if(hu){hu.textContent='👤 '+found.display;hu.style.display='inline';}
+  const unm=document.querySelector('.unm');if(unm)unm.textContent=found.display;
+  try{AUDIT.log('login','Auth',found.user,found.display);}catch(e){}
+  applyRole();
+}
+function doLogout(){
+  if(!confirm('ອອກຈາກລະບົບ?'))return;
+  try{const u=JSON.parse(sessionStorage.getItem('apb_user')||'{}');if(u.user)AUDIT.log('logout','Auth',u.user,u.display||'');}catch(e){}
+  sessionStorage.removeItem('apb_user');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  const e=document.getElementById('login-err');if(e)e.style.display='none';
+}
+function checkAuth(){
+  const s=sessionStorage.getItem('apb_user');
+  if(s){
+    document.getElementById('login-screen').style.display='none';
+    const u=JSON.parse(s);
+    const hu=document.getElementById('hdr-user');if(hu){hu.textContent='👤 '+u.display;hu.style.display='inline';}
+    const unm=document.querySelector('.unm');if(unm)unm.textContent=u.display;
+    applyRole();
+  } else {
+    document.getElementById('login-screen').style.display='flex';
+  }
+}
+function goTab(name,btn){
+  // ປ້ອງກັນ viewer ເຂົ້າໜ້າທີ່ບໍ່ໄດ້ຮັບອະນຸຍາດ
+  let u={};try{u=JSON.parse(sessionStorage.getItem('apb_user')||'{}');}catch(e){}
+  if(u.role==='viewer'&&name!=='dashboard'){
+    toast('🔒 ບໍ່ມີສິດເຂົ້າໜ້ານີ້');
+    return;
+  }
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb-d,.bn-item').forEach(b=>b.classList.remove('active'));
+  const t=document.getElementById('tab-'+name);if(t)t.classList.add('active');
+  if(btn){btn.classList.add('active');document.querySelectorAll('[data-tab="'+name+'"]').forEach(b=>b.classList.add('active'));}
+}
+function toggleTheme(){
+  const dark=document.body.classList.toggle('dark');
+  localStorage.setItem('apb26_theme',dark?'dark':'light');
+  const btn=document.getElementById('theme-btn');if(btn)btn.textContent=dark?'☀️':'🌙';
+  if(typeof toast==='function')toast(dark?'🌙 Dark Mode':'☀️ Light Mode');
+}
+</script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" style="position:fixed;inset:0;z-index:99999;background:var(--bg0);display:flex;align-items:center;justify-content:center;padding:1rem;">
+  <div style="width:100%;max-width:380px;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <div style="width:64px;height:64px;background:var(--grad1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff;margin:0 auto 16px;box-shadow:0 8px 24px rgba(65,153,236,0.35);">APB</div>
+      <div style="font-size:22px;font-weight:700;color:var(--text);">IT Support</div>
+      <div style="font-size:13px;color:var(--text2);">APB Bank Laos</div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="card-body">
+        <div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;">🔐 ເຂົ້າສູ່ລະບົບ</div>
+        <div class="field" style="margin-bottom:14px;"><label>ຊື່ຜູ້ໃຊ້</label><input type="text" id="login-user" placeholder="Username" onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()"></div>
+        <div class="field" style="margin-bottom:16px;"><label>ລະຫັດຜ່ານ</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div id="login-err" style="display:none;background:#fde8ec;border:1.5px solid #f5aab8;border-radius:10px;padding:10px;font-size:13px;color:#e03b5a;text-align:center;margin-bottom:14px;">❌ ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານຜິດ</div>
+        <button onclick="doLogin()" class="btn btn-grad btn-full" style="font-size:16px;font-weight:700;">ເຂົ້າສູ່ລະບົບ</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2);">APB Bank Laos © 2026</div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">APB</div>
+    <div><div class="brand-name">IT Support</div><div class="brand-sub">APB Bank Laos</div></div>
+  </div>
+  <div class="topbar-right">
+    <div class="date-chip" id="hdr-date">—</div>
+    <span id="hdr-user" style="display:none;font-size:12px;font-weight:600;color:var(--p2);"></span>
+    <button class="topbar-btn" id="theme-btn" onclick="toggleTheme()" title="Dark/Light">🌙</button>
+    <button class="logout-btn" onclick="doLogout()">🚪 ອອກ</button>
+    <div class="dot-live"></div>
+    <div class="sync-chip"><div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:all 0.3s;"></div><span id="sync-lbl" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);">Offline</span></div>
+  </div>
+</header>
+
+<div class="app-layout">
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="ng">
+    <div class="ng-lbl">ເມນູ</div>
+    <button class="nb-d active" onclick="goTab('dashboard',this)"><span class="ni">⬡</span>Dashboard</button>
+    <button class="nb-d" onclick="goTab('atm',this)"><span class="ni">◫</span>ATM</button>
+    <button class="nb-d" onclick="goTab('repair',this)"><span class="ni">⚙</span>ສ້ອມແປງ</button>
+    <button class="nb-d" onclick="goTab('report',this)"><span class="ni">◈</span>ລາຍງານ</button>
+    <button class="nb-d" onclick="goTab('atmlist',this)"><span class="ni">📍</span>ATM ຂໍ້ມູນຕູ້</button>
+    <button class="nb-d" onclick="goTab('ip',this)"><span class="ni">⊞</span>IP Manager</button>
+    <button class="nb-d" onclick="goTab('drive',this)"><span class="ni">☁</span>Backup/Drive</button>
+  </div>
+  <hr class="ndiv">
+  <div class="ng">
+    <div class="ng-lbl">ຈັດການ</div>
+    <button class="nb-d" id="pwa-install-btn" onclick="installPWA()" style="display:none;color:var(--green);font-weight:600;"><span class="ni">📲</span>ຕິດຕັ້ງເປັນແອັບ</button>
+    <button class="nb-d" onclick="exportXlsx()"><span class="ni">📊</span>Export Excel</button>
+    <button class="nb-d" onclick="exportTxt()"><span class="ni">↓</span>Export .txt</button>
+    <button class="nb-d" onclick="exportJSON()"><span class="ni">⊞</span>Backup JSON</button>
+    <button class="nb-d" onclick="document.getElementById('import-file').click()"><span class="ni">↑</span>Import JSON</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+    <button class="nb-d" onclick="if(confirm('ລ້າງຂໍ້ມູນທັງໝົດ?')){DB.atm=[];DB.rep=[];DB.rpt=[];DB.ip=[];DB.save();renderAll();toast('🗑 ລ້າງແລ້ວ');}"><span class="ni">⊘</span>ລ້າງຂໍ້ມູນ</button>
+  </div>
+  <div class="sfoot">
+    <div class="uchip"><div class="uav">ຫ</div><div><div class="unm">ຫມີ</div><div class="url">IT Support · APB</div></div></div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-pane active">
+  <div class="page-hd"><div class="page-title">Dashboard</div><div class="page-sub" id="dash-sub">ສະຫຼຸບພາບລວມ</div></div>
+
+  <!-- Global Filter -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>🔍 ກອງຂໍ້ມູນ Dashboard</span><button class="btn btn-sm" onclick="['dash-search','dash-f-br','dash-f-st','dash-f-from','dash-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderDash();">✕ ລ້າງ</button></div>
+    <div class="card-body" style="padding:12px 16px;">
+      <input type="text" id="dash-search" placeholder="🔍 ຄົ້ນຫາທຸກໜ້າ..." oninput="renderDash()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="dash-f-br" onchange="renderDash()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📍 ທຸກໜ່ວຍ</option>
+          <option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option>
+        </select>
+        <select id="dash-f-st" onchange="renderDash()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📊 ທຸກສະຖານະ</option><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="critical">🚨 ດ່ວນ</option><option value="done">✅ ສຳເລັດ</option>
+        </select>
+        <span style="font-size:13px;color:var(--text2);">ຈາກ</span>
+        <input type="date" id="dash-f-from" onchange="renderDash()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <span style="font-size:13px;color:var(--text2);">ຫາ</span>
+        <input type="date" id="dash-f-to" onchange="renderDash()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-lbl">ATM</div><div class="stat-num" id="s-atm">0</div><div class="stat-sub" id="s-atm2">Open: 0</div></div>
+    <div class="stat-card"><div class="stat-lbl">ສ້ອມແປງ</div><div class="stat-num" id="s-rep">0</div><div class="stat-sub" id="s-rep2">ຄ້າງ: 0</div></div>
+    <div class="stat-card"><div class="stat-lbl">ລາຍງານ</div><div class="stat-num" id="s-rpt">0</div><div class="stat-sub">ສ່ງໜ່ວຍໜ້າ</div></div>
+    <div class="stat-card"><div class="stat-lbl">ສຳເລັດ</div><div class="stat-num" id="s-done">0</div><div class="stat-sub">ທັງໝົດ</div></div>
+  </div>
+  <!-- Today -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>📅 ສະຫຼຸບມື້ນີ້</span><span style="font-size:12px;color:var(--text2);" id="today-label">—</span></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">
+        <div><div style="font-size:24px;font-weight:700;color:var(--p);" id="td-atm">0</div><div style="font-size:12px;color:var(--text2);">ATM</div></div>
+        <div><div style="font-size:24px;font-weight:700;color:var(--cyan);" id="td-rep">0</div><div style="font-size:12px;color:var(--text2);">ສ້ອມແປງ</div></div>
+        <div><div style="font-size:24px;font-weight:700;color:var(--green);" id="td-done">0</div><div style="font-size:12px;color:var(--text2);">ສຳເລັດ</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- Critical -->
+  <div class="card" id="critical-card" style="display:none;border-color:rgba(224,59,90,0.35);">
+    <div class="card-hd" style="background:rgba(224,59,90,0.05);"><span class="card-title" style="color:var(--red);">🚨 ATM ດ່ວນ</span><span class="nbadge" style="background:var(--red);" id="critical-cnt">0</span></div>
+    <div class="card-body" id="critical-list"></div>
+  </div>
+  <!-- Pending -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>⏳ ລາຍການທັງໝົດທີ່ຄ້າງ</span><span class="nbadge" id="pending-cnt">0</span></div>
+    <div class="card-body" style="padding:0 16px;" id="pending-list"><div style="text-align:center;padding:2rem;color:var(--green);font-size:13px;">✅ ບໍ່ມີລາຍການຄ້າງ</div></div>
+  </div>
+  <!-- Branch chart -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>📊 Cases ແຕ່ລະໜ່ວຍ</span></div>
+    <div class="card-body" id="branch-chart"><div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີຂໍ້ມູນ</div></div>
+  </div>
+
+  <!-- SLA -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>⏱ ເວລາແກ້ໄຂສະເລ່ຍ (SLA)</span><span style="font-size:11px;color:var(--text2);" id="sla-info">—</span></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;">
+        <div style="padding:14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg1);">
+          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="sla-atm">—</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">◫ ATM</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;" id="sla-atm-n">0 cases</div>
+        </div>
+        <div style="padding:14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg1);">
+          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="sla-rep">—</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">⚙ ສ້ອມແປງ</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;" id="sla-rep-n">0 cases</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trend -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>📈 ແນວໂນ້ມ Cases</span>
+      <select id="trend-period" onchange="renderTrend()" style="background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:4px 8px;font-size:12px;color:var(--text);outline:none;">
+        <option value="7">7 ມື້</option>
+        <option value="30" selected>30 ມື້</option>
+        <option value="90">90 ມື້</option>
+      </select>
+    </div>
+    <div class="card-body">
+      <div style="position:relative;height:240px;"><canvas id="trend-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Top Issues -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>🔥 ບັນຫາທີ່ພົບຫຼາຍສຸດ</span></div>
+    <div class="card-body" id="top-issues" style="padding:12px 16px;"></div>
+  </div>
+
+  <!-- Activity Feed (hidden) -->
+  <div class="card" style="display:none;">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>📰 ກິດຈະກຳລ່າສຸດ</span>
+      <button class="btn btn-sm" onclick="goTab('drive')">ເບິ່ງທັງໝົດ →</button>
+    </div>
+    <div class="card-body" id="activity-feed" style="padding:0 16px;"></div>
+  </div>
+
+  <!-- ATM Map -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>🗺️ ສະຖານທີ່ ATM ທັງໝົດ</span>
+      <span style="font-size:11px;color:var(--text2);" id="dash-map-stats">📍 0 ມີຈຸດ · ⚠️ 0 ບໍ່ມີ</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div id="dash-map" style="width:100%;height:340px;border-radius:0 0 18px 18px;background:var(--bg1);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ATM -->
+<div id="tab-atm" class="tab-pane">
+  <div class="page-hd"><div class="page-title">ລາຍງານ ATM</div><div class="page-sub">ບັນທຶກ ແລະ ຕິດຕາມ ATM</div></div>
+  <div class="card" id="atm-form-card">
+    <div class="card-hd"><span class="card-title" id="atm-form-title"><span class="cdot"></span>+ ເພີ່ມ ATM ໃໝ່</span></div>
+    <div class="card-body">
+      <input type="hidden" id="a-edit-id" value="">
+      <div class="frow c2">
+        <div class="field"><label>ATM ID *</label><select id="a-id" onchange="onATMIDChange(this)"><option value="">-- ເລືອກ ATM ID --</option></select></div>
+        <div class="field"><label>ໜ່ວຍບໍລິການ *</label>
+          <select id="a-br" onchange="onBranchChange(this)"><option value="">-- ເລືອກໜ່ວຍ --</option><option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option></select>
+        </div>
+      </div>
+      <div class="frow c3">
+        <div class="field"><label>ວັນທີ</label><input type="date" id="a-dt"></div>
+        <div class="field"><label>ເວລາ</label><input type="time" id="a-tm"></div>
+        <div class="field"><label>ສະຖານະ</label>
+          <select id="a-st"><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນການ</option><option value="critical">🚨 ດ່ວນ</option><option value="done">✅ ສຳເລັດ</option></select>
+        </div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ປະເພດ</label>
+          <select id="a-tp" onchange="onATMTypeChange(this)"></select>
+        </div>
+        <div class="field"><label>ຜູ້ຮ້ອງ</label><input id="a-rq" type="text" placeholder="ຊື່/ເບີ"></div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ລາຍລະອຽດ</label><textarea id="a-ds" placeholder="ອະທິບາຍບັນຫາ..."></textarea></div></div>
+      <div class="frow c1"><div class="field"><label>ການດຳເນີນການ</label><textarea id="a-ac" placeholder="ສິ່ງທີ່ດຳເນີນ..."></textarea></div></div>
+      <div class="btn-row"><button class="btn" onclick="clrATM()">ລ້າງ</button><button class="btn btn-grad" id="atm-save-btn" onclick="svATM()">💾 ບັນທຶກ</button></div>
+    </div>
+  </div>
+  <!-- Filter -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການທັງໝົດ</span><span class="nbadge" id="atm-cnt">0</span></div>
+    <div class="card-body" style="padding:12px 16px;">
+      <input type="text" id="atm-search" placeholder="🔍 ຄົ້ນຫາ ID, ປະເພດ, ໜ່ວຍ, ຜູ້ຮ້ອງ..." oninput="renderATM()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="atm-f-br" onchange="renderATM()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📍 ທຸກໜ່ວຍ</option>
+          <option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option>
+        </select>
+        <select id="atm-f-st" onchange="renderATM()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📊 ທຸກສະຖານະ</option><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="critical">🚨 ດ່ວນ</option><option value="done">✅ ສຳເລັດ</option>
+        </select>
+        <span style="font-size:13px;color:var(--text2);">ຈາກ</span>
+        <input type="date" id="atm-f-from" onchange="renderATM()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <span style="font-size:13px;color:var(--text2);">ຫາ</span>
+        <input type="date" id="atm-f-to" onchange="renderATM()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <button class="btn btn-sm" onclick="['atm-search','atm-f-br','atm-f-st','atm-f-from','atm-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderATM();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="atm-list"><div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີ ATM</div></div>
+  </div>
+</div>
+
+<!-- REPAIR -->
+<div id="tab-repair" class="tab-pane">
+  <div class="page-hd"><div class="page-title">ສ້ອມແປງ</div><div class="page-sub">ບັນທຶກການສ້ອມແປງ IT</div></div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title" id="rep-form-title"><span class="cdot"></span>+ ເພີ່ມລາຍການ</span></div>
+    <div class="card-body">
+      <input type="hidden" id="r-edit-id" value="">
+      <div class="frow c2">
+        <div class="field"><label>ອຸປະກອນ *</label><input id="r-dv" type="text" placeholder="Printer, UPS, ATM..."></div>
+        <div class="field"><label>ໜ່ວຍ *</label>
+          <select id="r-br" onchange="onBranchChange(this)"><option value="">-- ເລືອກໜ່ວຍ --</option><option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option></select>
+        </div>
+      </div>
+      <div class="frow c3">
+        <div class="field"><label>ວັນທີ</label><input type="date" id="r-dt"></div>
+        <div class="field"><label>ເວລາ</label><input type="time" id="r-tm"></div>
+        <div class="field"><label>ສະຖານະ</label>
+          <select id="r-st"><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="done">✅ ສຳເລັດ</option></select>
+        </div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ຊ່າງ</label><input id="r-tc" type="text" placeholder="ຊ່າງ/ທີມ"></div>
+        <div class="field"><label>ຊົ່ວໂມງ</label><input id="r-hr" type="number" step="0.5" placeholder="2.5"></div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ອາການ / ບັນຫາ *</label><textarea id="r-is" placeholder="ອາການທີ່ພົບ..."></textarea></div></div>
+      <div class="frow c1"><div class="field"><label>ຜົນການສ້ອມ</label><textarea id="r-rs" placeholder="ຜົນລັບ..."></textarea></div></div>
+      <div class="btn-row"><button class="btn" onclick="clrRep()">ລ້າງ</button><button class="btn btn-grad" id="rep-save-btn" onclick="svRep()">💾 ບັນທຶກ</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການທັງໝົດ</span><span class="nbadge" id="rep-cnt">0</span></div>
+    <div class="card-body" style="padding:12px 16px;">
+      <input type="text" id="rep-search" placeholder="🔍 ຄົ້ນຫາ ອຸປະກອນ, ໜ່ວຍ, ຊ່າງ, ອາການ..." oninput="renderRep()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="rep-f-br" onchange="renderRep()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📍 ທຸກໜ່ວຍ</option>
+          <option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option>
+        </select>
+        <select id="rep-f-st" onchange="renderRep()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📊 ທຸກສະຖານະ</option><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="done">✅ ສຳເລັດ</option>
+        </select>
+        <span style="font-size:13px;color:var(--text2);">ຈາກ</span>
+        <input type="date" id="rep-f-from" onchange="renderRep()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <span style="font-size:13px;color:var(--text2);">ຫາ</span>
+        <input type="date" id="rep-f-to" onchange="renderRep()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <button class="btn btn-sm" onclick="['rep-search','rep-f-br','rep-f-st','rep-f-from','rep-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderRep();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="rep-list"></div>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div id="tab-report" class="tab-pane">
+  <div class="page-hd"><div class="page-title">ລາຍງານ</div><div class="page-sub">ສ້າງ ແລະ Export ລາຍງານ</div></div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ຂໍ້ມູນລາຍງານ</span></div>
+    <div class="card-body">
+      <div class="frow c2">
+        <div class="field"><label>ຊ່ວງວັນທີ ຈາກ</label><input type="date" id="rpt-f-from"></div>
+        <div class="field"><label>ຫາ</label><input type="date" id="rpt-f-to"></div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ຜູ້ລາຍງານ</label><input id="p-au" type="text" placeholder="ຊື່ຜູ້ລາຍງານ"></div>
+        <div class="field"><label>ຕຳແໜ່ງ</label><input id="p-pos" type="text" placeholder="IT Support"></div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ສະຫຼຸບ ATM</label><textarea id="p-at" placeholder="ສະຫຼຸບ ATM..."></textarea></div></div>
+      <div class="frow c1"><div class="field"><label>ສະຫຼຸບ IT ສ້ອມແປງ</label><textarea id="p-it" placeholder="ສະຫຼຸບ IT..."></textarea></div></div>
+      <div class="frow c1"><div class="field"><label>ລາຍການທີ່ຍັງຄ້າງ</label><textarea id="p-pd" placeholder="ລາຍການຄ້າງ..."></textarea></div></div>
+      <div class="frow c1"><div class="field"><label>ໝາຍເຫດ</label><textarea id="p-nt" placeholder="ໝາຍເຫດ..."></textarea></div></div>
+      <div class="btn-row">
+        <button class="btn" onclick="autoFill()">🔄 ດຶງຂໍ້ມູນ</button>
+        <button class="btn btn-grad" onclick="updPrev()">👁 Preview</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>Preview</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="exportPdf()">📄 PDF</button>
+        <button class="btn btn-sm" onclick="exportXlsx()">📊 Excel</button>
+        <button class="btn btn-sm btn-grad" onclick="exportRptWord()">📝 Word</button>
+      </div>
+    </div>
+    <div class="card-body"><div id="rpt-prev" style="background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:16px;font-family:'Space Mono',monospace;font-size:12px;line-height:1.9;color:var(--text2);white-space:pre-wrap;min-height:160px;"></div></div>
+  </div>
+</div>
+
+<!-- ATM LIST / MANAGE -->
+<div id="tab-atmlist" class="tab-pane">
+  <div class="page-hd"><div class="page-title">📍 ATM ຂໍ້ມູນຕູ້</div><div class="page-sub">ຈັດການ ATM IDs ແລະ ສະຖານທີ່</div></div>
+
+  <!-- Branches Manager -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>🏢 ຈັດການໜ່ວຍ/ສາຂາ</span>
+      <button class="btn btn-sm btn-grad" onclick="addBranchPrompt()">+ ເພີ່ມໜ່ວຍ</button>
+    </div>
+    <div class="card-body" style="padding:12px 16px;" id="branch-mgr-list"></div>
+  </div>
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;">
+    <div class="stat-card"><div class="stat-lbl">ATM ທັງໝົດ</div><div class="stat-num" id="atmlist-total">0</div></div>
+    <div class="stat-card"><div class="stat-lbl">📍 ມີສະຖານທີ່</div><div class="stat-num" id="atmlist-located" style="background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
+    <div class="stat-card"><div class="stat-lbl">⚠️ ບໍ່ມີ</div><div class="stat-num" id="atmlist-nolocation" style="background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
+  </div>
+
+  <!-- Form -->
+  <div class="card" id="atmlist-form-card">
+    <div class="card-hd"><span class="card-title" id="atmlist-form-title"><span class="cdot"></span>+ ເພີ່ມ ATM ໃໝ່</span></div>
+    <div class="card-body">
+      <input type="hidden" id="al-edit-id" value="">
+      <div class="frow c2">
+        <div class="field"><label>ATM ID *</label><input id="al-id" type="text" placeholder="500202, APB-ATM-001..."></div>
+        <div class="field"><label>ໜ່ວຍ/ສາຂາ *</label><select id="al-br" onchange="onBranchChange(this)"><option value="">-- ເລືອກໜ່ວຍ --</option></select></div>
+      </div>
+      <div class="frow c1">
+        <div class="field"><label>📍 ສະຖານທີ່ຕັ້ງ (Location)</label><input id="al-loc" type="text" placeholder="ເຊັ່ນ: ໜ້າທະນາຄານ, ຕະຫຼາດເຊ, ປ້ຳນ້ຳມັນ..."></div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>🗺️ ກຳນົດຈຸດໃນແຜນທີ່ <span style="font-weight:400;font-size:11px;color:var(--text2);">(ກົດໃສ່ map ຫຼື ພິມໃສ່ໂດຍກົງ)</span></label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="al-lat" placeholder="Latitude (ເຊັ່ນ: 14.883300)" oninput="onLatLngTyped()" style="flex:1;font-size:13px;font-family:'Space Mono',monospace;">
+          <input type="text" id="al-lng" placeholder="Longitude (ເຊັ່ນ: 105.783300)" oninput="onLatLngTyped()" style="flex:1;font-size:13px;font-family:'Space Mono',monospace;">
+          <button type="button" onclick="clrALLocation()" class="btn btn-sm" style="white-space:nowrap;">✕ ລ້າງ</button>
+        </div>
+      </div>
+      <div class="frow c1">
+        <div class="field"><label>ໝາຍເຫດ</label><textarea id="al-note" rows="2" placeholder="ໝາຍເຫດເພີ່ມເຕີມ..."></textarea></div>
+      </div>
+      <div class="btn-row"><button class="btn" onclick="clrATMList()">ລ້າງ / ຍົກເລີກ</button><button class="btn btn-grad" id="atmlist-save-btn" onclick="svATMList()">💾 ບັນທຶກ</button></div>
+    </div>
+  </div>
+
+  <!-- Map -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>🗺️ ແຜນທີ່ສະຖານທີ່ ATM</span>
+      <span style="font-size:11px;color:var(--text2);">ກົດໃສ່ map ເພື່ອກຳນົດຈຸດ ATM ທີ່ກຳລັງເພີ່ມ/ແກ້ໄຂ</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div id="al-map" style="width:100%;height:380px;border-radius:0 0 18px 18px;background:var(--bg1);"></div>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການ ATM</span><span class="nbadge" id="atmlist-cnt">0</span></div>
+    <div class="card-body" style="padding:12px 16px;">
+      <input type="text" id="atmlist-search" placeholder="🔍 ຄົ້ນຫາ ID, ໜ່ວຍ, ສະຖານທີ່..." oninput="renderATMList()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="atmlist-f-br" onchange="renderATMList()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📍 ທຸກໜ່ວຍ</option>
+        </select>
+        <button class="btn btn-sm" onclick="document.getElementById('atmlist-search').value='';document.getElementById('atmlist-f-br').value='';renderATMList();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="atmlist-list"></div>
+  </div>
+</div>
+
+<!-- IP MANAGER -->
+<div id="tab-ip" class="tab-pane">
+  <div class="page-hd"><div class="page-title">IP Manager</div><div class="page-sub">ຈັດການ IP ຄອມໃນທະນາຄານ</div></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;" id="ip-stat-row">
+    <div class="stat-card"><div class="stat-lbl">ທັງໝົດ</div><div class="stat-num" id="ip-s-total">0</div></div>
+    <div class="stat-card"><div class="stat-lbl">ໃຊ້ງານ</div><div class="stat-num" id="ip-s-used" style="background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
+    <div class="stat-card"><div class="stat-lbl">ວ່າງ</div><div class="stat-num" id="ip-s-free" style="background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
+    <div class="stat-card"><div class="stat-lbl">ປິດ/ສຳຮອງ</div><div class="stat-num" id="ip-s-off" style="background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title" id="ip-form-title"><span class="cdot"></span>+ ເພີ່ມ IP ໃໝ່</span></div>
+    <div class="card-body">
+      <input type="hidden" id="ip-edit-id" value="">
+      <div class="frow c2">
+        <div class="field"><label>ຊື່ຄອມ *</label><input id="ip-name" type="text" placeholder="PC-APB-001"></div>
+        <div class="field"><label>IP Address *</label><input id="ip-addr" type="text" placeholder="10.1.12.10"></div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>MAC Address</label><input id="ip-mac" type="text" placeholder="00:1A:2B:3C:4D:5E"></div>
+        <div class="field"><label>ໜ່ວຍ *</label>
+          <select id="ip-br" onchange="onBranchChange(this)"><option value="">-- ເລືອກ --</option><option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option></select>
+        </div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ຜູ້ໃຊ້</label><input id="ip-user" type="text" placeholder="ຊື່ພະນັກງານ"></div>
+        <div class="field"><label>OS</label>
+          <select id="ip-os"><option>Windows 11</option><option>Windows 10</option><option>Windows 7</option><option>Linux</option><option>macOS</option><option>ອື່ນໆ</option></select>
+        </div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ປະເພດ IP</label>
+          <select id="ip-type"><option>Static (ຄົງທີ)</option><option>DHCP (ອັດຕະໂນມັດ)</option></select>
+        </div>
+        <div class="field"><label>ສະຖານະ</label>
+          <select id="ip-st"><option value="active">🟢 ໃຊ້ງານ</option><option value="free">⚪ ວ່າງ</option><option value="reserve">🟡 ສຳຮອງ</option><option value="off">⚫ ປິດ</option></select>
+        </div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ໝາຍເຫດ</label><textarea id="ip-note" rows="2" placeholder="ໝາຍເຫດ..."></textarea></div></div>
+      <div class="btn-row"><button class="btn" onclick="clrIP()">ລ້າງ</button><button class="btn btn-grad" onclick="svIP()">💾 ບັນທຶກ</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການ IP</span><span class="nbadge" id="ip-cnt">0</span></div>
+    <div class="card-body" style="padding:12px 16px;">
+      <input type="text" id="ip-search" placeholder="🔍 ຄົ້ນຫາ ຊື່ຄອມ, IP, MAC, ຜູ້ໃຊ້..." oninput="renderIP()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="ip-f-br" onchange="renderIP()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📍 ທຸກໜ່ວຍ</option>
+          <option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option>
+        </select>
+        <select id="ip-f-st" onchange="renderIP()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📊 ທຸກສະຖານະ</option><option value="active">🟢 ໃຊ້ງານ</option><option value="free">⚪ ວ່າງ</option><option value="reserve">🟡 ສຳຮອງ</option><option value="off">⚫ ປິດ</option>
+        </select>
+        <button class="btn btn-sm" onclick="['ip-search','ip-f-br','ip-f-st'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderIP();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="ip-list"></div>
+  </div>
+</div>
+
+<!-- BACKUP/DRIVE -->
+<div id="tab-drive" class="tab-pane">
+  <div class="page-hd"><div class="page-title">Backup / Drive</div><div class="page-sub">ຈັດການຂໍ້ມູນ ແລະ Sync</div></div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>☁️ Supabase Database</span></div>
+    <div class="card-body">
+      <div class="info-box">🗄️ ຂໍ້ມູນ sync ກັບ <strong>Supabase</strong> ອັດຕະໂນມັດທຸກຄັ້ງທີ່ Save</div>
+      <div style="display:grid;gap:10px;">
+        <button class="btn btn-full" style="background:linear-gradient(135deg,#3ecf8e,#1a9e6e);color:#fff;border:none;" onclick="sbPullAndRender()">🗄️ Pull ຈາກ Supabase</button>
+        <button class="btn btn-full" onclick="sbCheckOnly()">🔍 ກວດເບິ່ງ Supabase (ບໍ່ overwrite)</button>
+        <button class="btn btn-grad btn-full" onclick="pullFromSheets()">🔄 Pull ຈາກ Google Sheets</button>
+        <button class="btn btn-full" style="background:var(--grad1);color:#fff;border:none;" onclick="forceSyncAll()">☁️ Force Sync → Sheets</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>🛡️ Auto Backup</span></div>
+    <div class="card-body">
+      <div class="info-box">💡 ລະບົບ backup ອັດຕະໂນມັດທຸກຄັ້ງທີ່ Save — ເກັບ 5 ຊຸດລ່າສຸດ</div>
+      <div id="auto-backup-list"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>📋 Audit Log — ປະຫວັດການແກ້ໄຂ</span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm" onclick="exportAuditXlsx()">📊 Excel</button>
+        <button class="btn btn-sm" style="border:1.5px solid rgba(224,59,90,0.3);color:var(--red);" onclick="AUDIT.clear()">🗑 ລ້າງ</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="info-box">📝 ບັນທຶກໃຜແກ້ໄຂຫຍັງ ເມື່ອໃດ (ເກັບ 1000 ລາຍການລ່າສຸດ)</div>
+      <input type="text" id="audit-search" placeholder="🔍 ຄົ້ນຫາ user, entity, id..." oninput="renderAudit()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        <select id="audit-f-act" onchange="renderAudit()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">-- ປະເພດ --</option><option value="add">➕ Add</option><option value="edit">✏️ Edit</option><option value="delete">🗑 Delete</option><option value="done">✅ Done</option>
+        </select>
+        <select id="audit-f-ent" onchange="renderAudit()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">-- Entity --</option><option value="ATM">ATM</option><option value="Repair">Repair</option><option value="IP">IP</option><option value="Branch">Branch</option>
+        </select>
+        <input type="date" id="audit-f-from" onchange="renderAudit()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <input type="date" id="audit-f-to" onchange="renderAudit()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <button class="btn btn-sm" onclick="['audit-search','audit-f-act','audit-f-ent','audit-f-from','audit-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderAudit();">✕</button>
+      </div>
+      <div id="audit-list" style="max-height:500px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+</main><!-- end .main -->
+</div><!-- end .app-layout -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bn-item active" onclick="goTab('dashboard',this)" data-tab="dashboard"><span class="bn-icon">⬡</span><span>ຫຼັກ</span></button>
+  <button class="bn-item" onclick="goTab('atm',this)" data-tab="atm"><span class="bn-icon">◫</span><span>ATM</span></button>
+  <button class="bn-item" onclick="goTab('repair',this)" data-tab="repair"><span class="bn-icon">⚙</span><span>ສ້ອມ</span></button>
+  <button class="bn-item" onclick="goTab('atmlist',this)" data-tab="atmlist"><span class="bn-icon">📍</span><span>ຕູ້</span></button>
+  <button class="bn-item" onclick="goTab('ip',this)" data-tab="ip"><span class="bn-icon">⊞</span><span>IP</span></button>
+  <button class="bn-item" onclick="goTab('report',this)" data-tab="report"><span class="bn-icon">◈</span><span>ລາຍງານ</span></button>
+  <button class="bn-item" onclick="goTab('drive',this)" data-tab="drive"><span class="bn-icon">☁</span><span>Backup</span></button>
+</nav>
+
+<!-- MODALS -->
+<div id="detail-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box"><div class="modal-hd"><div class="modal-title" id="modal-title">ລາຍລະອຽດ</div><button class="modal-close" onclick="document.getElementById('detail-modal').style.display='none'">✕</button></div><div class="modal-body" id="modal-body"></div></div>
+</div>
+<div id="atm-type-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-hd">
+      <div class="modal-title">✏️ ຈັດການປະເພດ ATM</div>
+      <button class="modal-close" onclick="document.getElementById('atm-type-modal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="atm-type-new-inp" placeholder="ຊື່ປະເພດໃໝ່..." style="flex:1;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--text);outline:none;" onkeydown="if(event.key==='Enter')addATMTypeFromMgr()">
+        <button class="btn btn-grad" onclick="addATMTypeFromMgr()" style="white-space:nowrap;">➕ ເພີ່ມ</button>
+      </div>
+      <div id="atm-type-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="done-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-hd" style="background:linear-gradient(135deg,rgba(15,169,104,0.1),rgba(10,191,204,0.06));border-bottom:1.5px solid rgba(15,169,104,0.2);"><div class="modal-title" style="color:var(--green);" id="done-modal-title">✅ ຢືນຢັນສຳເລັດ</div><button class="modal-close" onclick="document.getElementById('done-modal').style.display='none'">✕</button></div>
+    <div class="modal-body">
+      <div style="background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;" id="done-modal-sub"></div>
+      <div style="background:rgba(224,138,0,0.08);border:1.5px solid rgba(224,138,0,0.2);border-radius:12px;padding:12px;margin-bottom:14px;" id="done-modal-info"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--green);margin-bottom:10px;">✅ ເວລາສຳເລັດ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div class="field"><label>ວັນທີ</label><input type="date" id="done-date" style="background:var(--bg1);"></div>
+        <div class="field"><label>ເວລາ</label><input type="time" id="done-time" style="background:var(--bg1);"></div>
+      </div>
+      <div class="field" style="margin-bottom:14px;"><label>🔧 ວິທີແກ້ໄຂ</label><textarea id="done-solution" rows="3" placeholder="ອະທິບາຍວິທີແກ້ໄຂ..."></textarea></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1;" onclick="document.getElementById('done-modal').style.display='none'">ຍົກເລີກ</button>
+        <button class="btn btn-green" style="flex:2;" onclick="confirmDone()">✅ ຢືນຢັນສຳເລັດ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ===== CONFIG ===== */
+const SHEETS_URL='https://script.google.com/macros/s/AKfycbwpCvgRzDATvUO67XMoRsEfeYL6qjUc-mkL-CpJs2qwQkti_R5lqMvv268nfDW91Y-a/exec';
+const SB_URL='https://mcxsvdkhwhfkaoutlmhf.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jeHN2ZGtod2hma2FvdXRsbWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNzE3NDksImV4cCI6MjA5NDc0Nzc0OX0.rFsgqhE6I3jbUVcJqSe-dQ3HsurXP-w3QjQzbg1z81g';
+const BRANCHES=['ສາຂາຈຳປາສັກ'];
+
+/* ===== HELPERS ===== */
+const g=id=>document.getElementById(id);
+const v=id=>g(id)?g(id).value.trim():'';
+
+function toast(msg,dur=2800){
+  const t=g('toast');if(!t)return;
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+function showSyncStatus(s){
+  const dot=g('sync-dot'),lbl=g('sync-lbl');if(!dot||!lbl)return;
+  if(s==='syncing'){dot.style.background='var(--amber)';lbl.textContent='Syncing...';}
+  else if(s==='ok'){dot.style.background='var(--green)';lbl.textContent='Synced ✓';}
+  else{dot.style.background='var(--red)';lbl.textContent='Sync Error';}
+}
+function checkOnline(){window.addEventListener('online',()=>showSyncStatus('ok'));window.addEventListener('offline',()=>showSyncStatus('error'));}
+function sbadge(s){const m={open:'b-open',done:'b-done',pending:'b-pending',critical:'b-critical'};const l={open:'Open',done:'ສຳເລັດ',pending:'ດຳເນີນ',critical:'🚨ດ່ວນ'};return`<span class="badge ${m[s]||'b-open'}">${l[s]||s}</span>`;}
+function ipBadge(s){const m={active:'🟢 ໃຊ້ງານ',free:'⚪ ວ່າງ',reserve:'🟡 ສຳຮອງ',off:'⚫ ປິດ'};const c={active:'#e8f8f0',free:'#f0f4fa',reserve:'#fff8e1',off:'#f5f5f5'};const tc={active:'#0fa968',free:'#4a6080',reserve:'#e08a00',off:'#8aa0c0'};return`<span style="font-size:11px;padding:3px 9px;border-radius:20px;background:${c[s]||c.free};color:${tc[s]||tc.free};font-weight:600;border:1.5px solid ${tc[s]||tc.free}33;">${m[s]||s}</span>`;}
+function fmtDate(val){
+  if(!val||val==='')return '';const s=String(val).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  if(s.includes('T')||s.includes('Z')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}catch(e){}}
+  if(/^\d{5,}(\.\d+)?$/.test(s)){try{const d=new Date(Math.round((parseFloat(s)-25569)*86400*1000));return`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;}catch(e){}}
+  return s.slice(0,10)||'';
+}
+function fmtTime(val){
+  if(!val||val==='')return '';const s=String(val).trim();
+  if(/^\d{2}:\d{2}$/.test(s))return s;
+  if(s.includes('T')||s.includes('Z')){try{const d=new Date(s);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){}}
+  if(/^0\.\d+$/.test(s)){const f=parseFloat(s),m=Math.round(f*1440);return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+  if(s.includes('1899')){try{const d=new Date(s);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){}}
+  return s.slice(0,5)||'';
+}
+
+/* ===== CONFIG (custom branches + ATM IDs + ATM Types) ===== */
+const ATM_TYPES_DEFAULT=['ເງິນໝົດ/ເຕີມ','ບັດຄ້າງ','ເຄື່ອງບໍ່ເຮັດວຽກ','ໜ້າຈໍຜິດ','ເຄືອຂ່າຍຂາດ','Printer','CCTV','ອື່ນໆ'];
+const CFG={
+  branches:JSON.parse(localStorage.getItem('apb26_branches')||'null')||BRANCHES.slice(),
+  atmIds:JSON.parse(localStorage.getItem('apb26_atmids')||'[]'),
+  atmTypes:JSON.parse(localStorage.getItem('apb26_atmtypes')||'null')||ATM_TYPES_DEFAULT.slice(),
+  save(){
+    localStorage.setItem('apb26_branches',JSON.stringify(this.branches));
+    localStorage.setItem('apb26_atmids',JSON.stringify(this.atmIds));
+    localStorage.setItem('apb26_atmtypes',JSON.stringify(this.atmTypes));
+    if(navigator.onLine)sbPushConfig();
+  }
+};
+
+function getBranches(){
+  // Merge: configured + auto-detected from existing records
+  const s=new Set(CFG.branches);
+  DB.atm.forEach(r=>{if(r.br)s.add(r.br);});
+  DB.rep.forEach(r=>{if(r.br)s.add(r.br);});
+  DB.ip.forEach(r=>{if(r.br)s.add(r.br);});
+  return [...s].filter(x=>x).sort();
+}
+
+function getATMIds(){
+  const m=new Map();
+  CFG.atmIds.forEach(x=>{
+    if(!x||!x.id)return;
+    const key=String(x.id).trim();
+    if(key)m.set(key,{...x,id:key});
+  });
+  DB.atm.forEach(r=>{
+    if(!r.atmId)return;
+    const key=String(r.atmId).trim();
+    if(key&&!m.has(key))m.set(key,{id:key,br:r.br||'',location:'',note:'',lat:'',lng:''});
+  });
+  return [...m.values()].sort((a,b)=>String(a.id).localeCompare(String(b.id)));
+}
+
+function populateBranchDropdowns(){
+  const list=getBranches();
+  ['a-br','r-br','ip-br','atm-f-br','rep-f-br','ip-f-br','dash-f-br','al-br','atmlist-f-br'].forEach(id=>{
+    const el=g(id);if(!el)return;
+    const cur=el.value;
+    const isFilter=id.includes('-f-') || id === 'atmlist-f-br';
+    let html=isFilter?'<option value="">📍 ທຸກໜ່ວຍ</option>':'<option value="">-- ເລືອກໜ່ວຍ --</option>';
+    list.forEach(b=>{html+='<option value="'+b+'">'+b+'</option>';});
+    if(!isFilter)html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມໜ່ວຍໃໝ່...</option>';
+    el.innerHTML=html;
+    if(cur)el.value=cur;
+  });
+}
+
+function populateATMIDDropdown(){
+  const el=g('a-id');if(!el)return;
+  const cur=el.value;
+  const list=getATMIds();
+  let html='<option value="">-- ເລືອກ ATM ID --</option>';
+  list.forEach(a=>{html+='<option value="'+a.id+'">'+a.id+(a.br?' · '+a.br:'')+'</option>';});
+  html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມ ATM ID ໃໝ່...</option>';
+  el.innerHTML=html;
+  if(cur)el.value=cur;
+}
+
+function onBranchChange(el){
+  if(el.value!=='__ADD__')return;
+  el.value='';
+  const name=prompt('➕ ເພີ່ມໜ່ວຍ/ສາຂາໃໝ່\n\nຊື່ໜ່ວຍ:');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(CFG.branches.includes(n)||getBranches().includes(n)){toast('⚠️ ມີໜ່ວຍນີ້ແລ້ວ');return;}
+  CFG.branches.push(n);CFG.save();
+  populateBranchDropdowns();
+  el.value=n;
+  toast('✅ ເພີ່ມໜ່ວຍ "'+n+'" ແລ້ວ!');
+}
+
+function onATMIDChange(el){
+  if(el.value!=='__ADD__')return;
+  el.value='';
+  const id=prompt('➕ ເພີ່ມ ATM ID ໃໝ່\n\nATM ID (ເຊັ່ນ: 511, APB-ATM-018):');
+  if(!id||!id.trim())return;
+  const newId=id.trim();
+  if(getATMIds().some(x=>x.id===newId)){toast('⚠️ ມີ ATM ID ນີ້ແລ້ວ');return;}
+  const br=prompt('ໜ່ວຍ/ສາຂາ (ບໍ່ບັງຄັບ):');
+  CFG.atmIds.push({id:newId,br:(br||'').trim(),location:''});CFG.save();
+  populateATMIDDropdown();
+  el.value=newId;
+  // Auto-fill branch if provided
+  if(br&&br.trim()){
+    const brSel=g('a-br');
+    if(brSel){
+      // Make sure branch exists in dropdown
+      if(!getBranches().includes(br.trim())){
+        CFG.branches.push(br.trim());CFG.save();
+        populateBranchDropdowns();
+      }
+      brSel.value=br.trim();
+    }
+  }
+  toast('✅ ເພີ່ມ ATM ID "'+newId+'" ແລ້ວ!');
+}
+
+/* ===== ATM TYPE MANAGEMENT ===== */
+function populateATMTypeDropdown(){
+  const el=g('a-tp');if(!el)return;
+  const cur=el.value;
+  let html='';
+  CFG.atmTypes.forEach(t=>{html+='<option value="'+t+'">'+t+'</option>';});
+  html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມປະເພດໃໝ່...</option>';
+  html+='<option value="__MANAGE__" style="color:#1a4fa0;font-weight:600;background:#e8f0fe;">✏️ ຈັດການປະເພດ...</option>';
+  el.innerHTML=html;
+  if(cur&&CFG.atmTypes.includes(cur))el.value=cur;
+}
+
+function onATMTypeChange(el){
+  if(el.value==='__ADD__'){
+    el.value='';
+    const name=prompt('➕ ເພີ່ມປະເພດໃໝ່\n\nຊື່ປະເພດ:');
+    if(!name||!name.trim()){populateATMTypeDropdown();return;}
+    const n=name.trim();
+    if(CFG.atmTypes.includes(n)){toast('⚠️ ມີປະເພດນີ້ແລ້ວ');populateATMTypeDropdown();return;}
+    CFG.atmTypes.push(n);CFG.save();
+    populateATMTypeDropdown();
+    el.value=n;
+    toast('✅ ເພີ່ມປະເພດ "'+n+'" ແລ້ວ!');
+    return;
+  }
+  if(el.value==='__MANAGE__'){
+    el.value=CFG.atmTypes[0]||'';
+    openATMTypeMgr();
+    return;
+  }
+}
+
+function openATMTypeMgr(){
+  renderATMTypeMgr();
+  g('atm-type-modal').style.display='flex';
+}
+
+function renderATMTypeMgr(){
+  const list=g('atm-type-list');if(!list)return;
+  if(!CFG.atmTypes.length){list.innerHTML='<div style="text-align:center;color:var(--text2);padding:1rem;">ບໍ່ມີປະເພດ</div>';return;}
+  list.innerHTML=CFG.atmTypes.map((t,i)=>
+    '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);">'
+    +'<span style="flex:1;font-size:14px;color:var(--text);">'+t+'</span>'
+    +'<button class="btn btn-sm" onclick="editATMType('+i+')" title="ແກ້ໄຂ" style="padding:4px 10px;">✏️</button>'
+    +'<button class="btn btn-sm" onclick="deleteATMType('+i+')" title="ລຶບ" style="padding:4px 10px;color:#e53935;">🗑</button>'
+    +(i>0?'<button class="btn btn-sm" onclick="moveATMType('+i+',-1)" style="padding:4px 8px;">▲</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +(i<CFG.atmTypes.length-1?'<button class="btn btn-sm" onclick="moveATMType('+i+',1)" style="padding:4px 8px;">▼</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +'</div>'
+  ).join('');
+}
+
+function editATMType(i){
+  const old=CFG.atmTypes[i];
+  const name=prompt('✏️ ແກ້ໄຂປະເພດ\n\nຊື່ໃໝ່:',old);
+  if(!name||!name.trim()||name.trim()===old)return;
+  const n=name.trim();
+  if(CFG.atmTypes.includes(n)){toast('⚠️ ມີປະເພດນີ້ແລ້ວ');return;}
+  DB.atm.forEach(r=>{if(r.tp===old)r.tp=n;});
+  DB.save();
+  CFG.atmTypes[i]=n;CFG.save();
+  populateATMTypeDropdown();
+  renderATMTypeMgr();
+  toast('✅ ແກ້ໄຂເປັນ "'+n+'" ແລ້ວ!');
+}
+
+function deleteATMType(i){
+  const t=CFG.atmTypes[i];
+  if(!confirm('🗑 ລຶບປະເພດ "'+t+'"?\n\n(ລາຍການ ATM ທີ່ໃຊ້ປະເພດນີ້ຈະຍັງຄົງຢູ່)'))return;
+  CFG.atmTypes.splice(i,1);CFG.save();
+  populateATMTypeDropdown();
+  renderATMTypeMgr();
+  toast('🗑 ລຶບ "'+t+'" ແລ້ວ');
+}
+
+function moveATMType(i,dir){
+  const j=i+dir;
+  if(j<0||j>=CFG.atmTypes.length)return;
+  const tmp=CFG.atmTypes[i];CFG.atmTypes[i]=CFG.atmTypes[j];CFG.atmTypes[j]=tmp;
+  CFG.save();populateATMTypeDropdown();renderATMTypeMgr();
+}
+
+function addATMTypeFromMgr(){
+  const inp=g('atm-type-new-inp');if(!inp)return;
+  const n=inp.value.trim();
+  if(!n){toast('⚠️ ກະລຸນາໃສ່ຊື່ປະເພດ');return;}
+  if(CFG.atmTypes.includes(n)){toast('⚠️ ມີປະເພດນີ້ແລ້ວ');return;}
+  CFG.atmTypes.push(n);CFG.save();
+  inp.value='';
+  populateATMTypeDropdown();
+  renderATMTypeMgr();
+  toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
+}
+
+/* ===== AUDIT LOG ===== */
+const AUDIT={
+  list:JSON.parse(localStorage.getItem('apb26_audit')||'[]'),
+  who(){try{return JSON.parse(sessionStorage.getItem('apb_user')||'{}').display||'ບໍ່ຮູ້';}catch(e){return 'ບໍ່ຮູ້';}},
+  log(action,entity,id,info){
+    const e={ts:new Date().toISOString(),user:this.who(),action:action,entity:entity,id:String(id||''),info:String(info||'')};
+    this.list.unshift(e);
+    if(this.list.length>1000)this.list=this.list.slice(0,1000);
+    localStorage.setItem('apb26_audit',JSON.stringify(this.list));
+    if(typeof renderAudit==='function')renderAudit();
+  },
+  clear(){if(!confirm('ລ້າງ Audit Log ທັງໝົດ?'))return;this.list=[];localStorage.removeItem('apb26_audit');renderAudit();toast('🗑 ລ້າງ Log ແລ້ວ');}
+};
+
+/* ===== DB ===== */
+const DB={
+  atm:JSON.parse(localStorage.getItem('apb26_atm')||'[]'),
+  rep:JSON.parse(localStorage.getItem('apb26_rep')||'[]'),
+  rpt:JSON.parse(localStorage.getItem('apb26_rpt')||'[]'),
+  ip:JSON.parse(localStorage.getItem('apb26_ip')||'[]'),
+  save(){
+    localStorage.setItem('apb26_atm',JSON.stringify(this.atm));
+    localStorage.setItem('apb26_rep',JSON.stringify(this.rep));
+    localStorage.setItem('apb26_rpt',JSON.stringify(this.rpt));
+    localStorage.setItem('apb26_ip',JSON.stringify(this.ip));
+    autoBackup();
+    if(navigator.onLine)sbPush().then(ok=>showSyncStatus(ok?'ok':'error'));
+  }
+};
+
+/* ===== SUPABASE ===== */
+async function sbGet(tbl){const r=await fetch(`${SB_URL}/rest/v1/${tbl}?select=*`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});if(!r.ok)throw new Error(r.status);return r.json();}
+async function sbUpsert(tbl,id,data){const r=await fetch(`${SB_URL}/rest/v1/${tbl}`,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id,data,updated_at:new Date().toISOString()})});if(!r.ok){const t=await r.text();throw new Error(t);}}
+
+async function sbPushConfig(){
+  if(!navigator.onLine)return;
+  try{
+    await sbUpsert('config_data','main',{branches:CFG.branches,atmIds:CFG.atmIds,atmTypes:CFG.atmTypes});
+  }catch(e){console.error('sbPushConfig:',e);}
+}
+async function sbPullConfig(){
+  try{
+    const rows=await sbGet('config_data');
+    const r=rows.find(x=>x.id==='main');
+    if(r&&r.data){
+      if(Array.isArray(r.data.branches)&&r.data.branches.length){
+        CFG.branches=r.data.branches;
+        localStorage.setItem('apb26_branches',JSON.stringify(CFG.branches));
+      }
+      if(Array.isArray(r.data.atmIds)){
+        CFG.atmIds=r.data.atmIds;
+        localStorage.setItem('apb26_atmids',JSON.stringify(CFG.atmIds));
+      }
+      if(Array.isArray(r.data.atmTypes)&&r.data.atmTypes.length){
+        CFG.atmTypes=r.data.atmTypes;
+        localStorage.setItem('apb26_atmtypes',JSON.stringify(CFG.atmTypes));
+      }
+    }
+    return true;
+  }catch(e){console.error('sbPullConfig:',e);return false;}
+}
+
+async function sbPull(){
+  try{
+    const [ra,rr,rp,ri]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data')]);
+    const pr=rows=>{const r=rows.find(x=>x.id==='main');return r&&Array.isArray(r.data)?r.data:[];};
+    const dedup=arr=>{const m=new Map();(arr||[]).forEach(r=>{if(r.id)m.set(String(r.id),r);});return[...m.values()];};
+    const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
+    DB.atm=dedup(pr(ra).map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    DB.rep=dedup(pr(rr).map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    DB.rpt=dedup(pr(rp).map(r=>({...r,dt:fmtDate(r.dt)})));
+    DB.ip=dedup(pr(ri).map(r=>({...r,bought:fmtDate(r.bought)})));
+    localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
+    localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
+    localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
+    localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
+    await sbPullConfig();
+    return true;
+  }catch(e){console.error('sbPull:',e);return false;}
+}
+async function sbPush(){
+  try{
+    await Promise.all([
+      sbUpsert('atm_data','main',DB.atm),
+      sbUpsert('repair_data','main',DB.rep),
+      sbUpsert('report_data','main',DB.rpt),
+      sbUpsert('ip_data','main',DB.ip),
+      sbUpsert('config_data','main',{branches:CFG.branches,atmIds:CFG.atmIds,atmTypes:CFG.atmTypes})
+    ]);
+    return true;
+  }
+  catch(e){console.error('sbPush:',e);return false;}
+}
+async function sbPullAndRender(){
+  if(!navigator.onLine){toast('📴 Offline');return;}
+  showSyncStatus('syncing');toast('⏳ ດຶງຈາກ Supabase...');
+  // Count before
+  const before={atm:DB.atm.length,rep:DB.rep.length,rpt:DB.rpt.length,ip:DB.ip.length};
+  const ok=await sbPull();
+  if(ok){
+    renderAll();showSyncStatus('ok');
+    const after={atm:DB.atm.length,rep:DB.rep.length,rpt:DB.rpt.length,ip:DB.ip.length};
+    showPullSummary(before,after);
+  }
+  else{showSyncStatus('error');toast('⚠️ ດຶງ Supabase ບໍ່ໄດ້');}
+}
+
+async function sbCheckOnly(){
+  if(!navigator.onLine){toast('📴 Offline');return;}
+  toast('⏳ ກວດ Supabase...');
+  try{
+    const [ra,rr,rp,ri]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data')]);
+    const pr=rows=>{const r=rows.find(x=>x.id==='main');return r&&Array.isArray(r.data)?r.data:[];};
+    const atm=pr(ra),rep=pr(rr),rpt=pr(rp),ip=pr(ri);
+    // Get last updated timestamps
+    const tsOf=rows=>{const r=rows.find(x=>x.id==='main');return r&&r.updated_at?new Date(r.updated_at):null;};
+    const lastUpd={atm:tsOf(ra),rep:tsOf(rr),rpt:tsOf(rp),ip:tsOf(ri)};
+    const fmtTs=t=>t?t.toLocaleString('lo-LA'):'—';
+    
+    g('modal-title').textContent='🔍 ກວດ Supabase';
+    g('modal-body').innerHTML=
+      '<div style="background:rgba(65,153,236,0.08);border:1.5px solid rgba(65,153,236,0.25);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">'
+        +'<div style="font-size:32px;margin-bottom:6px;">🗄️</div>'
+        +'<div style="font-size:14px;font-weight:600;color:var(--p2);">ກວດເບິ່ງຂໍ້ມູນໃນ Supabase</div>'
+        +'<div style="font-size:11px;color:var(--text2);margin-top:4px;">ບໍ່ໄດ້ overwrite ຂໍ້ມູນ local</div>'
+      +'</div>'
+      +'<div class="detail-section">📊 ປຽບທຽບ Local vs Supabase</div>'
+      +'<table style="width:100%;font-size:13px;margin-bottom:14px;">'
+        +'<thead><tr style="background:var(--bg1);"><th style="text-align:left;padding:8px;font-size:11px;color:var(--text2);">ປະເພດ</th><th style="text-align:right;padding:8px;font-size:11px;color:var(--text2);">📱 Local</th><th style="text-align:right;padding:8px;font-size:11px;color:var(--text2);">☁️ Supabase</th><th style="text-align:center;padding:8px;font-size:11px;color:var(--text2);">ສະຖານະ</th></tr></thead>'
+        +'<tbody>'
+        +makeRow('◫ ATM',DB.atm.length,atm.length)
+        +makeRow('⚙ ສ້ອມ',DB.rep.length,rep.length)
+        +makeRow('◈ ລາຍງານ',DB.rpt.length,rpt.length)
+        +makeRow('⊞ IP',DB.ip.length,ip.length)
+        +'</tbody>'
+      +'</table>'
+      +'<div class="detail-section">📅 Update ລ່າສຸດ ໃນ Supabase</div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text2);">'
+        +'<div>◫ ATM: <strong style="color:var(--text);">'+fmtTs(lastUpd.atm)+'</strong></div>'
+        +'<div>⚙ ສ້ອມ: <strong style="color:var(--text);">'+fmtTs(lastUpd.rep)+'</strong></div>'
+        +'<div>◈ ລາຍງານ: <strong style="color:var(--text);">'+fmtTs(lastUpd.rpt)+'</strong></div>'
+        +'<div>⊞ IP: <strong style="color:var(--text);">'+fmtTs(lastUpd.ip)+'</strong></div>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:14px;">'
+        +'<button class="btn" style="flex:1;" onclick="document.getElementById(\'detail-modal\').style.display=\'none\'">ປິດ</button>'
+        +'<button class="btn btn-grad" style="flex:1;" onclick="document.getElementById(\'detail-modal\').style.display=\'none\';sbPullAndRender();">⬇️ Pull ມາ Local</button>'
+      +'</div>';
+    g('detail-modal').style.display='flex';
+    showSyncStatus('ok');
+  }catch(e){
+    console.error(e);showSyncStatus('error');toast('⚠️ ກວດ Supabase ບໍ່ໄດ້: '+e.message);
+  }
+}
+
+function makeRow(label,local,remote){
+  let stat='';
+  if(local===remote)stat='<span style="color:var(--green);">✅ ກົງ</span>';
+  else if(local<remote)stat='<span style="color:var(--p);">☁️ ມີຫຼາຍກວ່າ +'+(remote-local)+'</span>';
+  else stat='<span style="color:var(--amber);">📱 ມີຫຼາຍກວ່າ +'+(local-remote)+'</span>';
+  return '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px 8px;">'+label+'</td><td style="text-align:right;padding:10px 8px;font-family:Space Mono,monospace;font-weight:600;">'+local+'</td><td style="text-align:right;padding:10px 8px;font-family:Space Mono,monospace;font-weight:600;color:var(--p2);">'+remote+'</td><td style="text-align:center;padding:10px 8px;font-size:11px;">'+stat+'</td></tr>';
+}
+
+function showPullSummary(before,after){
+  // Build modal showing pull results
+  const diff=k=>{
+    const d=after[k]-before[k];
+    if(d===0)return '<span style="color:var(--text2);">±0</span>';
+    if(d>0)return '<span style="color:var(--green);font-weight:700;">+'+d+'</span>';
+    return '<span style="color:var(--red);font-weight:700;">'+d+'</span>';
+  };
+  g('modal-title').textContent='✅ ດຶງຂໍ້ມູນ Supabase ສຳເລັດ';
+  g('modal-body').innerHTML=
+    '<div style="background:rgba(15,169,104,0.08);border:1.5px solid rgba(15,169,104,0.25);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">'
+      +'<div style="font-size:32px;margin-bottom:6px;">🗄️</div>'
+      +'<div style="font-size:14px;font-weight:600;color:var(--green);">ດຶງສຳເລັດ — '+new Date().toLocaleTimeString('lo-LA')+'</div>'
+    +'</div>'
+    +'<div class="detail-section">📊 ສະຖິຕິຂໍ້ມູນ</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div style="background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;">'
+        +'<div style="font-size:11px;color:var(--text2);">◫ ATM Cases</div>'
+        +'<div style="font-family:Space Mono,monospace;font-size:24px;font-weight:700;color:var(--p2);">'+after.atm+'</div>'
+        +'<div style="font-size:11px;">'+diff('atm')+' ຈາກ '+before.atm+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;">'
+        +'<div style="font-size:11px;color:var(--text2);">⚙ ສ້ອມແປງ</div>'
+        +'<div style="font-family:Space Mono,monospace;font-size:24px;font-weight:700;color:var(--cyan);">'+after.rep+'</div>'
+        +'<div style="font-size:11px;">'+diff('rep')+' ຈາກ '+before.rep+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;">'
+        +'<div style="font-size:11px;color:var(--text2);">◈ ລາຍງານ</div>'
+        +'<div style="font-family:Space Mono,monospace;font-size:24px;font-weight:700;color:var(--pink);">'+after.rpt+'</div>'
+        +'<div style="font-size:11px;">'+diff('rpt')+' ຈາກ '+before.rpt+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg1);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;">'
+        +'<div style="font-size:11px;color:var(--text2);">⊞ IP Manager</div>'
+        +'<div style="font-family:Space Mono,monospace;font-size:24px;font-weight:700;color:var(--amber);">'+after.ip+'</div>'
+        +'<div style="font-size:11px;">'+diff('ip')+' ຈາກ '+before.ip+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="background:var(--bg1);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text2);">'
+      +'<div style="margin-bottom:4px;">📅 ດຶງລ່າສຸດ: <strong style="color:var(--text);">'+new Date().toLocaleString('lo-LA')+'</strong></div>'
+      +'<div>🗄️ ລວມທັງໝົດ: <strong style="color:var(--text);">'+(after.atm+after.rep+after.rpt+after.ip)+' records</strong></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:14px;">'
+      +'<button class="btn btn-grad" style="flex:1;" onclick="document.getElementById(\'detail-modal\').style.display=\'none\'">ປິດ</button>'
+    +'</div>';
+  g('detail-modal').style.display='flex';
+  toast('✅ ດຶງສຳເລັດ — '+(after.atm+after.rep+after.rpt+after.ip)+' records');
+}
+
+/* ===== SHEETS ===== */
+async function sheetsPost(b){try{const r=await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(b)});return await r.json();}catch(e){return{ok:false};}}
+async function sheetsGet(t){try{const r=await fetch(`${SHEETS_URL}?type=${t}`);return await r.json();}catch(e){return{ok:false,data:[]};}}
+async function syncToSheets(type,rows){
+  if(!navigator.onLine)return;
+  showSyncStatus('syncing');
+  const r=await sheetsPost({type,action:'overwrite',rows});
+  showSyncStatus(r.ok?'ok':'error');
+}
+async function pullFromSheets(){
+  if(!navigator.onLine){toast('📴 Offline');return;}
+  showSyncStatus('syncing');toast('⏳ ດຶງຈາກ Sheets...');
+  try{
+    const [ra,rr,rp,ri]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP')]);
+    const dedup=arr=>{const m=new Map();(arr||[]).forEach(r=>{if(r.id)m.set(String(r.id),r);});return[...m.values()];};
+    const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
+    if(ra.ok)DB.atm=dedup(ra.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    if(rr.ok)DB.rep=dedup(rr.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    if(rp.ok)DB.rpt=dedup(rp.data.map(r=>({...r,dt:fmtDate(r.dt)})));
+    if(ri.ok)DB.ip=dedup(ri.data.map(r=>({...r,bought:fmtDate(r.bought)})));
+    localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
+    localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
+    localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
+    localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
+    renderAll();showSyncStatus('ok');toast('✅ ດຶງ Sheets ສຳເລັດ!');
+  }catch(e){showSyncStatus('error');toast('⚠️ ດຶງ Sheets ບໍ່ໄດ້');}
+}
+async function forceSyncAll(){
+  if(!navigator.onLine){toast('📴 Offline');return;}
+  if(!confirm('Force Sync ທັງໝົດ → Sheets?'))return;
+  showSyncStatus('syncing');toast('☁️ Syncing...');
+  try{
+    await syncToSheets('ATM',DB.atm);await syncToSheets('Repair',DB.rep);
+    await syncToSheets('Report',DB.rpt);await syncToSheets('IP',DB.ip);
+    showSyncStatus('ok');toast('✅ Force Sync ສຳເລັດ!');
+  }catch(e){showSyncStatus('error');toast('⚠️ Sync ຜິດ');}
+}
+
+/* ===== ATM CRUD ===== */
+function svATM(){
+  if(!v('a-id'))return toast('⚠️ ໃສ່ ATM ID');
+  if(!v('a-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
+  const eid=v('a-edit-id');
+  const old=eid?DB.atm.find(x=>x.id===parseInt(eid)):null;
+  const rec={id:eid?parseInt(eid):Date.now(),atmId:v('a-id'),br:v('a-br'),dt:v('a-dt'),tm:v('a-tm'),st:v('a-st'),tp:v('a-tp'),rq:v('a-rq'),ds:v('a-ds'),ac:v('a-ac'),doneAt:old?old.doneAt||'':'',solution:old?old.solution||'':'',lat:old?old.lat||'':'',lng:old?old.lng||'':''};
+  if(eid){const i=DB.atm.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.atm[i]=rec;else DB.atm.push(rec);AUDIT.log('edit','ATM',rec.atmId,rec.br+' · '+rec.tp);toast('✅ ອັບເດດ ATM!');}
+  else{DB.atm.push(rec);AUDIT.log('add','ATM',rec.atmId,rec.br+' · '+rec.tp);toast('✅ ບັນທຶກ ATM!');}
+  DB.save();renderATM();updStats();clrATM();syncToSheets('ATM',DB.atm);
+}
+function clrATM(){['a-rq','a-ds','a-ac'].forEach(id=>{const e=g(id);if(e)e.value='';});g('a-id').value='';g('a-br').value='';g('a-st').value='open';g('a-edit-id').value='';const t=g('atm-form-title');if(t)t.innerHTML='<span class="cdot"></span>+ ເພີ່ມ ATM ໃໝ່';const b=g('atm-save-btn');if(b)b.textContent='💾 ບັນທຶກ';}
+function editATM(id){
+  const r=DB.atm.find(x=>x.id===id);if(!r)return;
+  populateATMIDDropdown();populateBranchDropdowns();
+  // Make sure the values are in the dropdowns
+  if(r.atmId&&!Array.from(g('a-id').options).some(o=>o.value===r.atmId)){
+    const opt=document.createElement('option');opt.value=r.atmId;opt.text=r.atmId+(r.br?' · '+r.br:'');g('a-id').insertBefore(opt,g('a-id').children[1]);
+  }
+  if(r.br&&!Array.from(g('a-br').options).some(o=>o.value===r.br)){
+    const opt=document.createElement('option');opt.value=r.br;opt.text=r.br;g('a-br').insertBefore(opt,g('a-br').children[1]);
+  }
+  g('a-edit-id').value=id;g('a-id').value=r.atmId||'';g('a-br').value=r.br||'';
+  g('a-dt').value=fmtDate(r.dt)||'';const atm=g('a-tm');if(atm)atm.value=fmtTime(r.tm)||'';
+  g('a-st').value=r.st||'open';g('a-tp').value=r.tp||'';g('a-rq').value=r.rq||'';g('a-ds').value=r.ds||'';g('a-ac').value=r.ac||'';
+  const t=g('atm-form-title');if(t)t.innerHTML=`<span class="cdot"></span>✏️ ແກ້ໄຂ: ${r.atmId}`;
+  const b=g('atm-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
+  g('atm-form-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function delATM(id){if(!confirm('ລຶບ?'))return;const r=DB.atm.find(x=>x.id===id);DB.atm=DB.atm.filter(x=>x.id!==id);if(r)AUDIT.log('delete','ATM',r.atmId,r.br+' · '+r.tp);DB.save();renderATM();updStats();syncToSheets('ATM',DB.atm);toast('🗑 ລຶບ ATM');}
+
+/* ===== REPAIR CRUD ===== */
+function svRep(){
+  if(!v('r-is'))return toast('⚠️ ໃສ່ອາການ');
+  if(!v('r-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
+  const eid=v('r-edit-id');
+  const old=eid?DB.rep.find(x=>x.id===parseInt(eid)):null;
+  const rec={id:eid?parseInt(eid):Date.now(),dv:v('r-dv'),br:v('r-br'),dt:v('r-dt'),tm:v('r-tm'),st:v('r-st'),tc:v('r-tc'),hr:v('r-hr'),is:v('r-is'),rs:v('r-rs'),doneAt:old?old.doneAt||'':'',solution:old?old.solution||'':''};
+  if(eid){const i=DB.rep.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.rep[i]=rec;else DB.rep.push(rec);AUDIT.log('edit','Repair',rec.dv,rec.br);toast('✅ ອັບເດດ!');}
+  else{DB.rep.push(rec);AUDIT.log('add','Repair',rec.dv,rec.br);toast('✅ ບັນທຶກ!');}
+  DB.save();renderRep();updStats();clrRep();syncToSheets('Repair',DB.rep);
+}
+function clrRep(){['r-dv','r-tc','r-hr','r-is','r-rs'].forEach(id=>{const e=g(id);if(e)e.value='';});g('r-br').value='';g('r-st').value='open';g('r-edit-id').value='';const b=g('rep-save-btn');if(b)b.textContent='💾 ບັນທຶກ';}
+function editRep(id){
+  const r=DB.rep.find(x=>x.id===id);if(!r)return;
+  g('r-edit-id').value=id;g('r-dv').value=r.dv||'';g('r-br').value=r.br||'';
+  g('r-dt').value=fmtDate(r.dt)||'';const rtm=g('r-tm');if(rtm)rtm.value=fmtTime(r.tm)||'';
+  g('r-st').value=r.st||'open';g('r-tc').value=r.tc||'';g('r-hr').value=r.hr||'';g('r-is').value=r.is||'';g('r-rs').value=r.rs||'';
+  const b=g('rep-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
+  g('tab-repair').scrollIntoView({behavior:'smooth'});
+}
+function delRep(id){if(!confirm('ລຶບ?'))return;const r=DB.rep.find(x=>x.id===id);DB.rep=DB.rep.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Repair',r.dv,r.br);DB.save();renderRep();updStats();syncToSheets('Repair',DB.rep);toast('🗑 ລຶບ');}
+
+/* ===== MARK DONE ===== */
+let _doneType='',_doneId=0;
+function markATMDone(id){
+  const r=DB.atm.find(x=>x.id===id);if(!r)return;
+  _doneType='atm';_doneId=id;
+  g('done-modal-title').innerHTML='✅ ຢືນຢັນ ATM ສຳເລັດ';
+  g('done-modal-sub').innerHTML=`<div style="font-size:15px;font-weight:700;color:var(--p2);">${r.atmId}</div><div style="font-size:13px;color:var(--text2);">${r.br||'—'} · ${r.tp||'—'}</div>`;
+  g('done-modal-info').innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:6px;">⏱ ເວລາເລີ່ມ</div><div style="font-family:'Space Mono',monospace;color:var(--amber);">${fmtDate(r.dt)} ${fmtTime(r.tm)||'—'}</div>`;
+  const now=new Date();g('done-date').value=now.toISOString().split('T')[0];g('done-time').value=now.toTimeString().slice(0,5);g('done-solution').value='';
+  g('done-modal').style.display='flex';
+}
+function markRepDone(id){
+  const r=DB.rep.find(x=>x.id===id);if(!r)return;
+  _doneType='rep';_doneId=id;
+  g('done-modal-title').innerHTML='✅ ຢືນຢັນສ້ອມ​ແ​ປງ​ສຳ​ເລັດ';
+  g('done-modal-sub').innerHTML=`<div style="font-size:15px;font-weight:700;color:var(--cyan);">${r.dv}</div><div style="font-size:13px;color:var(--text2);">${r.br||'—'}${r.tc?' · ຊ່າງ: '+r.tc:''}</div>`;
+  g('done-modal-info').innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:6px;">⏱ ເວລາເລີ່ມ</div><div style="font-family:'Space Mono',monospace;color:var(--amber);">${fmtDate(r.dt)} ${fmtTime(r.tm)||'—'}</div>`;
+  const now=new Date();g('done-date').value=now.toISOString().split('T')[0];g('done-time').value=now.toTimeString().slice(0,5);g('done-solution').value='';
+  g('done-modal').style.display='flex';
+}
+function confirmDone(){
+  const doneAt=(v('done-date')||new Date().toISOString().split('T')[0])+' '+(v('done-time')||new Date().toTimeString().slice(0,5));
+  const sol=v('done-solution');
+  if(_doneType==='atm'){
+    const i=DB.atm.findIndex(x=>x.id===_doneId);if(i<0)return;
+    DB.atm[i].st='done';DB.atm[i].doneAt=doneAt;if(sol)DB.atm[i].solution=sol;
+    AUDIT.log('done','ATM',DB.atm[i].atmId,sol||'');
+    DB.save();renderATM();updStats();syncToSheets('ATM',DB.atm);toast('✅ '+DB.atm[i].atmId+' ສຳເລັດ!');
+  }else{
+    const i=DB.rep.findIndex(x=>x.id===_doneId);if(i<0)return;
+    DB.rep[i].st='done';DB.rep[i].doneAt=doneAt;if(sol)DB.rep[i].solution=sol;
+    AUDIT.log('done','Repair',DB.rep[i].dv,sol||'');
+    DB.save();renderRep();updStats();syncToSheets('Repair',DB.rep);toast('✅ '+DB.rep[i].dv+' ສຳເລັດ!');
+  }
+  g('done-modal').style.display='none';
+}
+
+/* ===== SHOW DETAIL ===== */
+function showDetail(title,rows){
+  g('modal-title').textContent=title;
+  g('modal-body').innerHTML=rows.map(function(row){
+    const l=row[0],val=row[1],style=row[2]||'';
+    return '<div class="detail-row"><div class="detail-lbl">'+l+'</div><div class="detail-val"'+(style?' style="'+style+'"':'')+'>'+(val||'—')+'</div></div>';
+  }).join('');
+  g('detail-modal').style.display='flex';
+}
+function showATMDetail(id){
+  const r=DB.atm.find(x=>x.id===id);if(!r)return;
+  g('modal-title').textContent='ATM: '+r.atmId;
+  g('modal-body').innerHTML=`
+    <div class="detail-row"><div class="detail-lbl">ATM ID</div><div class="detail-val" style="font-weight:700;color:var(--p2);">${r.atmId}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ໜ່ວຍ</div><div class="detail-val">${r.br||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">⏱ ເລີ່ມ</div><div class="detail-val" style="font-family:'Space Mono',monospace;color:var(--amber);">${fmtDate(r.dt)} ${fmtTime(r.tm)||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ປະເພດ</div><div class="detail-val">${r.tp||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ສະຖານະ</div><div class="detail-val">${sbadge(r.st)}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ຜູ້ຮ້ອງ</div><div class="detail-val">${r.rq||'—'}</div></div>
+    ${r.ds?`<div class="detail-section">ລາຍລະອຽດ</div><div class="detail-row"><div class="detail-val" style="white-space:pre-wrap;">${r.ds}</div></div>`:''}
+    ${r.ac?`<div class="detail-section">ດຳເນີນການ</div><div class="detail-row"><div class="detail-val" style="white-space:pre-wrap;">${r.ac}</div></div>`:''}
+    ${r.doneAt?`<div class="detail-row"><div class="detail-lbl">✅ ສຳເລັດ</div><div class="detail-val" style="color:var(--green);font-family:'Space Mono',monospace;">${r.doneAt}</div></div>`:''}
+    ${r.solution?`<div class="detail-section" style="color:var(--green);">🔧 ວິທີແກ້ໄຂ</div><div class="detail-row"><div class="detail-val" style="white-space:pre-wrap;">${r.solution}</div></div>`:''}
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-grad" style="flex:1;" onclick="document.getElementById('detail-modal').style.display='none';editATM(${r.id})">✏️ ແກ້ໄຂ</button>
+      ${r.st!=='done'?`<button class="btn btn-green" style="flex:1;" onclick="document.getElementById('detail-modal').style.display='none';markATMDone(${r.id})">✅ ສຳເລັດ</button>`:''}
+    </div>`;
+  g('detail-modal').style.display='flex';
+}
+function showRepDetail(id){
+  const r=DB.rep.find(x=>x.id===id);if(!r)return;
+  g('modal-title').textContent='ສ້ອມ: '+r.dv;
+  g('modal-body').innerHTML=`
+    <div class="detail-row"><div class="detail-lbl">ອຸປະກອນ</div><div class="detail-val" style="font-weight:700;color:var(--cyan);">${r.dv}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ໜ່ວຍ</div><div class="detail-val">${r.br||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">⏱ ເລີ່ມ</div><div class="detail-val" style="font-family:'Space Mono',monospace;color:var(--amber);">${fmtDate(r.dt)} ${fmtTime(r.tm)||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ສະຖານະ</div><div class="detail-val">${sbadge(r.st)}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ຊ່າງ</div><div class="detail-val">${r.tc||'—'}${r.hr?' · '+r.hr+'ຊມ':''}</div></div>
+    ${r.is?`<div class="detail-section">ອາການ</div><div class="detail-row"><div class="detail-val" style="white-space:pre-wrap;">${r.is}</div></div>`:''}
+    ${r.rs?`<div class="detail-section">ຜົນ</div><div class="detail-row"><div class="detail-val" style="white-space:pre-wrap;">${r.rs}</div></div>`:''}
+    ${r.doneAt?`<div class="detail-row"><div class="detail-lbl">✅ ສຳເລັດ</div><div class="detail-val" style="color:var(--green);font-family:'Space Mono',monospace;">${r.doneAt}</div></div>`:''}
+    ${r.solution?`<div class="detail-section" style="color:var(--green);">🔧 ວິທີແກ້ໄຂ</div><div class="detail-row"><div class="detail-val" style="white-space:pre-wrap;">${r.solution}</div></div>`:''}
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-grad" style="flex:1;" onclick="document.getElementById('detail-modal').style.display='none';editRep(${r.id})">✏️ ແກ້ໄຂ</button>
+      ${r.st!=='done'?`<button class="btn btn-green" style="flex:1;" onclick="document.getElementById('detail-modal').style.display='none';markRepDone(${r.id})">✅ ສຳເລັດ</button>`:''}
+    </div>`;
+  g('detail-modal').style.display='flex';
+}
+function showIPDetail(id){
+  const r=DB.ip.find(x=>x.id===id);if(!r)return;
+  g('modal-title').textContent='IP: '+r.name;
+  g('modal-body').innerHTML=`
+    <div class="detail-row"><div class="detail-lbl">ຊື່ຄອມ</div><div class="detail-val" style="font-weight:700;color:var(--p2);">${r.name}</div></div>
+    <div class="detail-row"><div class="detail-lbl">IP Address</div><div class="detail-val" style="font-family:'Space Mono',monospace;color:var(--cyan);">${r.addr||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">MAC</div><div class="detail-val" style="font-family:'Space Mono',monospace;">${r.mac||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ໜ່ວຍ</div><div class="detail-val">${r.br||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ຜູ້ໃຊ້</div><div class="detail-val">${r.user||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">OS</div><div class="detail-val">${r.os||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ປະເພດ IP</div><div class="detail-val">${r.type||'—'}</div></div>
+    <div class="detail-row"><div class="detail-lbl">ສະຖານະ</div><div class="detail-val">${ipBadge(r.st)}</div></div>
+    ${r.note?`<div class="detail-row"><div class="detail-lbl">ໝາຍເຫດ</div><div class="detail-val">${r.note}</div></div>`:''}
+    <div style="margin-top:16px;"><button class="btn btn-grad btn-full" onclick="document.getElementById('detail-modal').style.display='none';editIP(${r.id})">✏️ ແກ້ໄຂ</button></div>`;
+  g('detail-modal').style.display='flex';
+}
+
+/* ===== RENDER ATM ===== */
+function renderATM(){
+  const q=(v('atm-search')||'').toLowerCase();
+  const fbr=v('atm-f-br'),fst=v('atm-f-st'),from=v('atm-f-from'),to=v('atm-f-to');
+  let list=DB.atm.slice().reverse();
+  if(q)list=list.filter(r=>((r.atmId||'')+(r.br||'')+(r.tp||'')+(r.rq||'')+(r.ds||'')+(r.ac||'')).toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>r.br===fbr);
+  if(fst)list=list.filter(r=>r.st===fst);
+  if(from)list=list.filter(r=>r.dt>=from);
+  if(to)list=list.filter(r=>r.dt<=to);
+  const hasFilter=q||fbr||fst||from||to;
+  g('atm-cnt').textContent=list.length+(hasFilter?'/'+DB.atm.length:'');
+  const c=g('atm-list');
+  if(!list.length){c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text2);">${from||to?'ບໍ່ພົບ':'ຍັງບໍ່ມີ ATM'}</div>`;return;}
+  c.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>ATM ID</th><th>ໜ່ວຍ</th><th>ປະເພດ</th><th>⏱ ເລີ່ມ</th><th>✅ ສຳເລັດ</th><th>🔧 ວິທີແກ້</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>
+    <tbody>${list.map((r,i)=>`<tr>
+      <td style="color:var(--text2);font-family:'Space Mono',monospace;">${i+1}</td>
+      <td style="font-weight:700;color:var(--p2);">${r.atmId||'—'}</td>
+      <td>${r.br||'—'}</td>
+      <td style="color:var(--text2);">${r.tp||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;">${fmtDate(r.dt)}<br>${fmtTime(r.tm)||''}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap;">${r.doneAt?`<span style="color:var(--green);">${r.doneAt}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td style="font-size:12px;max-width:140px;">${r.solution?`<span title="${r.solution}">${r.solution.length>30?r.solution.slice(0,30)+'…':r.solution}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td>${sbadge(r.st)}</td>
+      <td style="text-align:center;"><div style="display:inline-flex;gap:4px;">
+        <button title="ເບິ່ງ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border2);background:rgba(65,153,236,0.08);color:var(--p);cursor:pointer;" onclick="showATMDetail(${r.id})">👁</button>
+        ${r.st!=='done'?`<button title="ສຳເລັດ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markATMDone(${r.id})">✅</button>`:''}
+        <button title="ແກ້ໄຂ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editATM(${r.id})">✏️</button>
+        <button title="ລຶບ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delATM(${r.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ===== RENDER REPAIR ===== */
+function renderRep(){
+  const q=(v('rep-search')||'').toLowerCase();
+  const fbr=v('rep-f-br'),fst=v('rep-f-st'),from=v('rep-f-from'),to=v('rep-f-to');
+  let list=DB.rep.slice().reverse();
+  if(q)list=list.filter(r=>((r.dv||'')+(r.br||'')+(r.tc||'')+(r.is||'')+(r.rs||'')).toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>r.br===fbr);
+  if(fst)list=list.filter(r=>r.st===fst);
+  if(from)list=list.filter(r=>r.dt>=from);
+  if(to)list=list.filter(r=>r.dt<=to);
+  const hasFilter=q||fbr||fst||from||to;
+  g('rep-cnt').textContent=list.length+(hasFilter?'/'+DB.rep.length:'');
+  const c=g('rep-list');
+  if(!list.length){c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text2);">${from||to?'ບໍ່ພົບ':'ຍັງບໍ່ມີ'}</div>`;return;}
+  c.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>ອຸປະກອນ</th><th>ໜ່ວຍ</th><th>⏱ ເລີ່ມ</th><th>✅ ສຳເລັດ</th><th>🔧 ວິທີແກ້</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>
+    <tbody>${list.map((r,i)=>`<tr>
+      <td style="color:var(--text2);font-family:'Space Mono',monospace;">${i+1}</td>
+      <td style="font-weight:700;color:var(--cyan);">${r.dv||'—'}</td>
+      <td>${r.br||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;">${fmtDate(r.dt)}<br>${fmtTime(r.tm)||''}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap;">${r.doneAt?`<span style="color:var(--green);">${r.doneAt}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td style="font-size:12px;max-width:140px;">${r.solution?`<span title="${r.solution}">${r.solution.length>30?r.solution.slice(0,30)+'…':r.solution}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td>${sbadge(r.st)}</td>
+      <td style="text-align:center;"><div style="display:inline-flex;gap:4px;">
+        <button style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(10,191,204,0.3);background:rgba(10,191,204,0.08);color:var(--cyan);cursor:pointer;" onclick="showRepDetail(${r.id})">👁</button>
+        ${r.st!=='done'?`<button style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markRepDone(${r.id})">✅</button>`:''}
+        <button style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editRep(${r.id})">✏️</button>
+        <button style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delRep(${r.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ===== RENDER DASHBOARD ===== */
+function updStats(){
+  const aOpen=DB.atm.filter(x=>x.st!=='done').length;
+  const rOpen=DB.rep.filter(x=>x.st!=='done').length;
+  const done=DB.atm.filter(x=>x.st==='done').length+DB.rep.filter(x=>x.st==='done').length;
+  if(g('s-atm'))g('s-atm').textContent=DB.atm.length;
+  if(g('s-atm2'))g('s-atm2').textContent='Open: '+aOpen;
+  if(g('s-rep'))g('s-rep').textContent=DB.rep.length;
+  if(g('s-rep2'))g('s-rep2').textContent='ຄ້າງ: '+rOpen;
+  if(g('s-rpt'))g('s-rpt').textContent=DB.rpt.length;
+  if(g('s-done'))g('s-done').textContent=done;
+}
+function renderDash(){
+  // Apply global filter
+  const q=(v('dash-search')||'').toLowerCase();
+  const fbr=v('dash-f-br'),fst=v('dash-f-st'),from=v('dash-f-from'),to=v('dash-f-to');
+  let atms=DB.atm.slice(),reps=DB.rep.slice();
+  if(q){
+    atms=atms.filter(r=>((r.atmId||'')+(r.br||'')+(r.tp||'')+(r.rq||'')+(r.ds||'')+(r.ac||'')).toLowerCase().includes(q));
+    reps=reps.filter(r=>((r.dv||'')+(r.br||'')+(r.tc||'')+(r.is||'')+(r.rs||'')).toLowerCase().includes(q));
+  }
+  if(fbr){atms=atms.filter(r=>r.br===fbr);reps=reps.filter(r=>r.br===fbr);}
+  if(fst){atms=atms.filter(r=>r.st===fst);reps=reps.filter(r=>r.st===fst);}
+  if(from){atms=atms.filter(r=>r.dt>=from);reps=reps.filter(r=>r.dt>=from);}
+  if(to){atms=atms.filter(r=>r.dt<=to);reps=reps.filter(r=>r.dt<=to);}
+  const hasFilter=q||fbr||fst||from||to;
+  
+  // Stats
+  const aOpen=atms.filter(x=>x.st!=='done').length;
+  const rOpen=reps.filter(x=>x.st!=='done').length;
+  const done=atms.filter(x=>x.st==='done').length+reps.filter(x=>x.st==='done').length;
+  if(g('s-atm'))g('s-atm').textContent=atms.length+(hasFilter?'/'+DB.atm.length:'');
+  if(g('s-atm2'))g('s-atm2').textContent='Open: '+aOpen;
+  if(g('s-rep'))g('s-rep').textContent=reps.length+(hasFilter?'/'+DB.rep.length:'');
+  if(g('s-rep2'))g('s-rep2').textContent='ຄ້າງ: '+rOpen;
+  if(g('s-rpt'))g('s-rpt').textContent=DB.rpt.length;
+  if(g('s-done'))g('s-done').textContent=done;
+  const dsub=g('dash-sub');if(dsub)dsub.textContent=hasFilter?`🔍 ກອງຂໍ້ມູນ: ATM ${atms.length}, ສ້ອມ ${reps.length}`:'ສະຫຼຸບພາບລວມ';
+  
+  const today=new Date().toISOString().split('T')[0];
+  if(g('td-atm'))g('td-atm').textContent=atms.filter(x=>x.dt===today).length;
+  if(g('td-rep'))g('td-rep').textContent=reps.filter(x=>x.dt===today).length;
+  if(g('td-done'))g('td-done').textContent=atms.filter(x=>x.dt===today&&x.st==='done').length+reps.filter(x=>x.dt===today&&x.st==='done').length;
+  const now=new Date();const months=['ມັງ','ກຸມ','ມີ','ເມ','ພ','ມິ','ກ','ສ','ກັ','ຕ','ພ','ທ'];
+  if(g('today-label'))g('today-label').textContent=`${now.getDate()} ${months[now.getMonth()]}. ${now.getFullYear()}`;
+  // Critical
+  const crits=atms.filter(x=>x.st==='critical');
+  const cc=g('critical-card');if(cc){cc.style.display=crits.length?'block':'none';if(g('critical-cnt'))g('critical-cnt').textContent=crits.length;}
+  if(g('critical-list'))g('critical-list').innerHTML=crits.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="showATMDetail(${r.id})"><div style="font-size:20px;">🚨</div><div style="flex:1;"><div style="font-weight:600;color:var(--red);">${r.atmId} · ${r.br||'—'}</div><div style="font-size:12px;color:var(--text2);">${r.tp||'—'} · ${fmtDate(r.dt)}</div></div>${sbadge(r.st)}</div>`).join('');
+  // Pending
+  const pend=[...atms.filter(x=>x.st!=='done').map(x=>({id:x.id,type:'atm',icon:'◫',title:x.atmId+' · '+x.br,sub:x.tp+' · '+fmtDate(x.dt),st:x.st,c:'var(--p2)'})),...reps.filter(x=>x.st!=='done').map(x=>({id:x.id,type:'rep',icon:'⚙',title:x.dv+(x.br?' · '+x.br:''),sub:fmtDate(x.dt),st:x.st,c:'var(--cyan)'}))];
+  if(g('pending-cnt'))g('pending-cnt').textContent=pend.length;
+  if(g('pending-list'))g('pending-list').innerHTML=pend.length?pend.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="${r.type==='atm'?'showATMDetail':'showRepDetail'}(${r.id})"><div style="font-size:18px;color:${r.c};">${r.icon}</div><div style="flex:1;"><div style="font-weight:600;color:var(--text);">${r.title}</div><div style="font-size:12px;color:var(--text2);">${r.sub}</div></div>${sbadge(r.st)}</div>`).join(''):'<div style="text-align:center;padding:1.5rem;color:var(--green);">✅ ບໍ່ມີລາຍການຄ້າງ</div>';
+  // Branch chart with expandable details
+  const bm={};
+  [...atms,...reps].forEach(x=>{const b=x.br||'ບໍ່ລະບຸ';bm[b]=(bm[b]||0)+1;});
+  const branches=Object.entries(bm).sort((a,b)=>b[1]-a[1]);
+  const maxV=branches.length?branches[0][1]:1;
+  if(g('branch-chart'))g('branch-chart').innerHTML=branches.length?'<div style="display:flex;flex-direction:column;gap:6px;">'+branches.map((entry,i)=>{
+    const br=entry[0],cnt=entry[1];
+    const brAtms=atms.filter(x=>(x.br||'ບໍ່ລະບຸ')===br);
+    const brReps=reps.filter(x=>(x.br||'ບໍ່ລະບຸ')===br);
+    const aDone=brAtms.filter(x=>x.st==='done').length;
+    const rDone=brReps.filter(x=>x.st==='done').length;
+    const detailId='br-detail-'+i;
+    const aPct=Math.round(brAtms.length/maxV*100);
+    const rPct=Math.round(brReps.length/maxV*100);
+    return '<div style="border-bottom:1px solid var(--border);padding-bottom:8px;">'
+      +'<div onclick="toggleBranchDetail(\''+detailId+'\',this)" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0;">'
+      +'<span style="font-size:12px;color:var(--text2);width:14px;flex-shrink:0;transition:transform 0.2s;">▶</span>'
+      +'<div style="font-size:13px;color:var(--text);width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;">'+br+'</div>'
+      +'<div style="flex:1;display:flex;flex-direction:column;gap:3px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<span style="font-size:10px;color:var(--p);width:36px;font-weight:600;">◫ATM</span>'
+          +'<div style="flex:1;background:var(--bg2);border-radius:5px;height:16px;overflow:hidden;">'
+            +(brAtms.length?'<div style="height:100%;width:'+aPct+'%;background:var(--grad1);border-radius:5px;display:flex;align-items:center;padding-left:6px;min-width:24px;"><span style="font-size:10px;font-weight:700;color:#fff;">'+brAtms.length+'</span></div>':'')
+          +'</div>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<span style="font-size:10px;color:var(--cyan);width:36px;font-weight:600;">⚙ສ້ອມ</span>'
+          +'<div style="flex:1;background:var(--bg2);border-radius:5px;height:16px;overflow:hidden;">'
+            +(brReps.length?'<div style="height:100%;width:'+rPct+'%;background:var(--grad3);border-radius:5px;display:flex;align-items:center;padding-left:6px;min-width:24px;"><span style="font-size:10px;font-weight:700;color:#fff;">'+brReps.length+'</span></div>':'')
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--text2);width:80px;text-align:right;">ລວມ:'+cnt+'</div>'
+      +'</div>'
+      +'<div id="'+detailId+'" style="display:none;padding:8px 0 4px 30px;">'
+      +(brAtms.length?'<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:4px;">◫ ATM ('+brAtms.length+') · ✅'+aDone+'/'+brAtms.length+'</div>'+brAtms.slice().reverse().slice(0,10).map(r=>'<div onclick="event.stopPropagation();showATMDetail('+r.id+')" style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;" onmouseover="this.style.background=\'var(--bg1)\'" onmouseout="this.style.background=\'\'"><span style="color:var(--p2);font-weight:600;min-width:90px;">'+r.atmId+'</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.tp||'—')+'</span>'+sbadge(r.st)+'</div>').join(''):'')
+      +(brReps.length?'<div style="font-size:11px;font-weight:700;color:var(--cyan);margin:8px 0 4px;">⚙ ສ້ອມແປງ ('+brReps.length+') · ✅'+rDone+'/'+brReps.length+'</div>'+brReps.slice().reverse().slice(0,10).map(r=>'<div onclick="event.stopPropagation();showRepDetail('+r.id+')" style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;" onmouseover="this.style.background=\'var(--bg1)\'" onmouseout="this.style.background=\'\'"><span style="color:var(--cyan);font-weight:600;min-width:90px;">'+(r.dv||'—')+'</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.is||'—').slice(0,50)+'</span>'+sbadge(r.st)+'</div>').join(''):'')
+      +'</div>'
+      +'</div>';
+  }).join('')+'</div>':'<div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ມີຂໍ້ມູນ</div>';
+  // SLA / Trend / Top issues / Activity
+  renderSLA(atms,reps);
+  renderTrend(atms,reps);
+  renderTopIssues(atms,reps);
+  renderActivityFeed();
+  // Render dashboard map
+  renderDashMap(atms);
+}
+
+/* ===== SLA ===== */
+function calcHours(startDt,startTm,doneAt){
+  if(!startDt||!doneAt)return null;
+  try{
+    const s=new Date((startDt||'')+'T'+(startTm||'00:00')+':00');
+    const d=new Date(doneAt.replace(' ','T')+':00');
+    const diff=(d-s)/3600000;
+    return isFinite(diff)&&diff>=0?diff:null;
+  }catch(e){return null;}
+}
+function fmtHours(h){
+  if(h==null)return '—';
+  if(h<1)return Math.round(h*60)+' ນາທີ';
+  if(h<24)return h.toFixed(1)+' ຊມ.';
+  return (h/24).toFixed(1)+' ມື້';
+}
+function renderSLA(atms,reps){
+  const aDone=atms.filter(x=>x.st==='done'&&x.doneAt);
+  const rDone=reps.filter(x=>x.st==='done'&&x.doneAt);
+  const aHrs=aDone.map(x=>calcHours(x.dt,x.tm,x.doneAt)).filter(x=>x!=null);
+  const rHrs=rDone.map(x=>calcHours(x.dt,x.tm,x.doneAt)).filter(x=>x!=null);
+  const aAvg=aHrs.length?aHrs.reduce((a,b)=>a+b,0)/aHrs.length:null;
+  const rAvg=rHrs.length?rHrs.reduce((a,b)=>a+b,0)/rHrs.length:null;
+  if(g('sla-atm'))g('sla-atm').textContent=fmtHours(aAvg);
+  if(g('sla-rep'))g('sla-rep').textContent=fmtHours(rAvg);
+  if(g('sla-atm-n'))g('sla-atm-n').textContent=aHrs.length+' cases';
+  if(g('sla-rep-n'))g('sla-rep-n').textContent=rHrs.length+' cases';
+  if(g('sla-info'))g('sla-info').textContent='ຈາກ '+(aHrs.length+rHrs.length)+' cases ສຳເລັດ';
+}
+
+/* ===== TREND CHART ===== */
+let _trendChart=null;
+function loadChartThen(cb){
+  if(typeof Chart!=='undefined'){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+  s.onload=cb;s.onerror=()=>{const c=g('trend-chart');if(c&&c.parentElement)c.parentElement.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);font-size:12px;">⚠️ ໂຫຼດ Chart.js ບໍ່ໄດ້</div>';};
+  document.body.appendChild(s);
+}
+function renderTrend(atmsArg,repsArg){
+  const days=parseInt(v('trend-period')||'30');
+  const atms=atmsArg||DB.atm,reps=repsArg||DB.rep;
+  const labels=[],aCnt=[],rCnt=[],dCnt=[];
+  const now=new Date();now.setHours(0,0,0,0);
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10);
+    labels.push(`${d.getDate()}/${d.getMonth()+1}`);
+    aCnt.push(atms.filter(x=>x.dt===k).length);
+    rCnt.push(reps.filter(x=>x.dt===k).length);
+    dCnt.push(atms.filter(x=>x.doneAt&&x.doneAt.slice(0,10)===k).length+reps.filter(x=>x.doneAt&&x.doneAt.slice(0,10)===k).length);
+  }
+  loadChartThen(()=>{
+    const ctx=g('trend-chart');if(!ctx)return;
+    const isDark=document.body.classList.contains('dark');
+    const grid=isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)';
+    const text=isDark?'#c0bedd':'#4a6080';
+    if(_trendChart)_trendChart.destroy();
+    _trendChart=new Chart(ctx,{
+      type:'line',
+      data:{labels:labels,datasets:[
+        {label:'ATM',data:aCnt,borderColor:'#4199ec',backgroundColor:'rgba(65,153,236,0.12)',tension:0.35,fill:true,borderWidth:2,pointRadius:2},
+        {label:'ສ້ອມແປງ',data:rCnt,borderColor:'#0abfcc',backgroundColor:'rgba(10,191,204,0.12)',tension:0.35,fill:true,borderWidth:2,pointRadius:2},
+        {label:'ສຳເລັດ',data:dCnt,borderColor:'#0fa968',backgroundColor:'rgba(15,169,104,0.10)',tension:0.35,fill:false,borderWidth:2,pointRadius:2,borderDash:[5,4]}
+      ]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:text,font:{family:'Noto Sans Lao',size:11}}}},
+        scales:{
+          x:{grid:{color:grid},ticks:{color:text,font:{size:10}}},
+          y:{grid:{color:grid},ticks:{color:text,font:{size:10},stepSize:1},beginAtZero:true}
+        }
+      }
+    });
+  });
+}
+
+/* ===== TOP ISSUES ===== */
+function renderTopIssues(atms,reps){
+  const tpMap={},dvMap={};
+  atms.forEach(r=>{const k=(r.tp||'ບໍ່ລະບຸ').trim();if(k)tpMap[k]=(tpMap[k]||0)+1;});
+  reps.forEach(r=>{const k=(r.dv||'ບໍ່ລະບຸ').trim();if(k)dvMap[k]=(dvMap[k]||0)+1;});
+  const tpTop=Object.entries(tpMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const dvTop=Object.entries(dvMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const tpMax=tpTop.length?tpTop[0][1]:1;
+  const dvMax=dvTop.length?dvTop[0][1]:1;
+  const c=g('top-issues');if(!c)return;
+  const renderBars=(list,max,color)=>list.map(([k,v])=>{
+    const pct=Math.round(v/max*100);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:4px 0;font-size:13px;">
+      <div style="width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);">${k}</div>
+      <div style="flex:1;background:var(--bg2);border-radius:5px;height:14px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:5px;display:flex;align-items:center;padding-left:6px;min-width:24px;"><span style="font-size:10px;font-weight:700;color:#fff;">${v}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  c.innerHTML=
+    `<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:6px;letter-spacing:0.05em;">◫ ATM — ປະເພດບັນຫາ</div>`
+    +(tpTop.length?renderBars(tpTop,tpMax,'var(--grad1)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>')
+    +`<div style="font-size:11px;font-weight:700;color:var(--cyan);margin:14px 0 6px;letter-spacing:0.05em;">⚙ ສ້ອມແປງ — ອຸປະກອນ</div>`
+    +(dvTop.length?renderBars(dvTop,dvMax,'var(--grad3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>');
+}
+
+/* ===== ACTIVITY FEED ===== */
+function renderActivityFeed(){
+  const c=g('activity-feed');if(!c)return;
+  const list=(AUDIT.list||[]).slice(0,10);
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text2);font-size:12px;">ຍັງບໍ່ມີກິດຈະກຳ</div>';return;}
+  const actIcon={add:'➕',edit:'✏️',delete:'🗑',done:'✅',login:'🔓',logout:'🔒'};
+  const actColor={add:'var(--green)',edit:'var(--p)',delete:'var(--red)',done:'var(--cyan)',login:'var(--text2)',logout:'var(--text3)'};
+  const timeAgo=ts=>{
+    const d=new Date(ts),now=new Date();
+    const s=Math.round((now-d)/1000);
+    if(s<60)return s+' ວິ';
+    if(s<3600)return Math.round(s/60)+' ນາທີ';
+    if(s<86400)return Math.round(s/3600)+' ຊມ.';
+    return Math.round(s/86400)+' ມື້';
+  };
+  c.innerHTML=list.map(r=>{
+    const ic=actIcon[r.action]||'•',col=actColor[r.action]||'var(--text2)';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:16px;">${ic}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--text);"><b>${r.user||'—'}</b> <span style="color:${col};">${r.action}</span> ${r.entity}${r.id?' · <span style="color:var(--p2);font-family:\'Space Mono\',monospace;font-size:12px;">'+r.id+'</span>':''}</div>
+        ${r.info?'<div style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.info+'</div>':''}
+      </div>
+      <div style="font-size:11px;color:var(--text3);white-space:nowrap;">${timeAgo(r.ts)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ===== DASHBOARD MAP ===== */
+let _dashMap=null, _dashMarkers={};
+
+function renderDashMap(filteredAtms){
+  if(!g('dash-map'))return;
+  // Use filtered ATMs from dashboard filters, else all
+  const cases=filteredAtms||DB.atm;
+  // Build status per ATM ID (worst case wins: critical > pending > open > done)
+  const stMap={};
+  cases.forEach(c=>{
+    if(!c.atmId)return;
+    const cur=stMap[c.atmId];
+    const pri={critical:4,pending:3,open:2,done:1};
+    if(!cur||(pri[c.st]||0)>(pri[cur.st]||0)){
+      stMap[c.atmId]={st:c.st,case:c};
+    }
+  });
+  // Get all ATMs with location
+  const allIds=getATMIds();
+  const withLoc=allIds.filter(x=>x.lat&&x.lng);
+  const without=allIds.filter(x=>!x.lat||!x.lng);
+  if(g('dash-map-stats'))g('dash-map-stats').textContent='📍 '+withLoc.length+' ມີຈຸດ · ⚠️ '+without.length+' ບໍ່ມີ';
+  loadLeafletThen(()=>{
+    if(!_dashMap){
+      _dashMap=L.map('dash-map').setView([14.9,105.85],9);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19,subdomains:'abcd'}).addTo(_dashMap);
+    }
+    // Clear old markers
+    Object.values(_dashMarkers).forEach(m=>_dashMap.removeLayer(m));
+    _dashMarkers={};
+    const stColor={done:'#0fa968',open:'#4199ec',pending:'#e08a00',critical:'#e03b5a'};
+    const stLabel={done:'ສຳເລັດ',open:'ລໍຖ້າ',pending:'ດຳເນີນ',critical:'🚨ດ່ວນ'};
+    withLoc.forEach(r=>{
+      const status=stMap[r.id];
+      const st=status?status.st:'normal';
+      const col=stColor[st]||'#0fa968';
+      const isCritical=st==='critical';
+      _dashMarkers[r.id]=L.marker([parseFloat(r.lat),parseFloat(r.lng)],{
+        icon:L.divIcon({html:'<div style="width:'+(isCritical?32:26)+'px;height:'+(isCritical?32:26)+'px;border-radius:50%;background:'+col+';border:'+(isCritical?'3':'2')+'px solid #fff;box-shadow:0 '+(isCritical?'3px 12px':'2px 6px')+' rgba(0,0,0,'+(isCritical?'0.4':'0.25')+');display:flex;align-items:center;justify-content:center;color:#fff;font-size:'+(isCritical?14:12)+'px;font-weight:700;'+(isCritical?'animation:pulseRed 1.5s infinite;':'')+'">◫</div>',iconSize:[isCritical?32:26,isCritical?32:26],iconAnchor:[isCritical?16:13,isCritical?16:13],className:''})
+      }).addTo(_dashMap);
+      // Popup content
+      let popup='<div style="font-size:12px;min-width:160px;">';
+      popup+='<div style="font-weight:700;color:'+col+';font-size:14px;margin-bottom:2px;">'+(isCritical?'🚨 ':'')+r.id+'</div>';
+      popup+='<div style="color:#666;margin-bottom:4px;">'+(r.br||'—')+(r.location?' · '+r.location:'')+'</div>';
+      if(status&&status.case){
+        const c=status.case;
+        popup+='<div style="background:'+col+'15;color:'+col+';font-size:11px;padding:3px 7px;border-radius:6px;display:inline-block;margin-bottom:6px;">'+(c.tp||'—')+' · '+(stLabel[st]||st)+'</div>';
+        popup+='<div style="font-size:10px;color:#999;margin-bottom:6px;">📅 '+(fmtDate(c.dt)||'')+' '+(fmtTime(c.tm)||'')+'</div>';
+        popup+='<button onclick="document.querySelector(\'.leaflet-popup-close-button\').click();showATMDetail('+c.id+')" style="width:100%;padding:5px;font-size:11px;background:'+col+';color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;">→ ເບິ່ງລາຍລະອຽດ</button>';
+      } else {
+        popup+='<div style="font-size:11px;color:#999;">ບໍ່ມີ case ໃນ filter ປັດຈຸບັນ</div>';
+      }
+      popup+='</div>';
+      _dashMarkers[r.id].bindPopup(popup);
+    });
+    setTimeout(()=>_dashMap.invalidateSize(),200);
+  });
+}
+
+function toggleBranchDetail(id,headerEl){
+  const d=document.getElementById(id);if(!d)return;
+  const arrow=headerEl.querySelector('span:first-child');
+  if(d.style.display==='none'){d.style.display='block';if(arrow)arrow.style.transform='rotate(90deg)';}
+  else{d.style.display='none';if(arrow)arrow.style.transform='rotate(0deg)';}
+}
+
+/* ===== IP MANAGER ===== */
+/* ===== BRANCH MANAGER ===== */
+function addBranchPrompt(){
+  const name=prompt('➕ ເພີ່ມໜ່ວຍ/ສາຂາໃໝ່\n\nຊື່ໜ່ວຍ:');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(getBranches().includes(n)){toast('⚠️ ມີໜ່ວຍນີ້ແລ້ວ');return;}
+  CFG.branches.push(n);CFG.save();
+  AUDIT.log('add','Branch',n,'');
+  renderBranchMgr();populateBranchDropdowns();
+  toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
+}
+
+function editBranch(oldName){
+  const newName=prompt('✏️ ແກ້ໄຂຊື່ໜ່ວຍ\n\nຊື່ປັດຈຸບັນ: '+oldName+'\nຊື່ໃໝ່:',oldName);
+  if(!newName||!newName.trim()||newName.trim()===oldName)return;
+  const n=newName.trim();
+  if(getBranches().includes(n)){toast('⚠️ ມີໜ່ວຍ "'+n+'" ແລ້ວ');return;}
+  
+  // Update CFG.branches
+  const idx=CFG.branches.indexOf(oldName);
+  if(idx>=0)CFG.branches[idx]=n;
+  else CFG.branches.push(n);
+  
+  // Update all records
+  let updated=0;
+  DB.atm.forEach(r=>{if(r.br===oldName){r.br=n;updated++;}});
+  DB.rep.forEach(r=>{if(r.br===oldName){r.br=n;updated++;}});
+  DB.ip.forEach(r=>{if(r.br===oldName){r.br=n;updated++;}});
+  CFG.atmIds.forEach(r=>{if(r.br===oldName)r.br=n;});
+  
+  CFG.save();DB.save();
+  AUDIT.log('edit','Branch',oldName+' → '+n,updated+' records');
+  if(updated>0){
+    syncToSheets('ATM',DB.atm);syncToSheets('Repair',DB.rep);syncToSheets('IP',DB.ip);
+  }
+  renderAll();
+  toast('✅ ປ່ຽນ '+oldName+' → '+n+' ('+updated+' records)');
+}
+
+function delBranch(name){
+  // Count usage
+  const atmCnt=DB.atm.filter(r=>r.br===name).length;
+  const repCnt=DB.rep.filter(r=>r.br===name).length;
+  const ipCnt=DB.ip.filter(r=>r.br===name).length;
+  const atmIdCnt=CFG.atmIds.filter(r=>r.br===name).length;
+  const total=atmCnt+repCnt+ipCnt+atmIdCnt;
+  
+  let msg='ລຶບໜ່ວຍ "'+name+'"?';
+  if(total>0){
+    msg+='\n\n⚠️ ມີຂໍ້ມູນທີ່ໃຊ້ໜ່ວຍນີ້:';
+    if(atmCnt)msg+='\n• ATM cases: '+atmCnt;
+    if(repCnt)msg+='\n• ສ້ອມແປງ: '+repCnt;
+    if(ipCnt)msg+='\n• IP: '+ipCnt;
+    if(atmIdCnt)msg+='\n• ATM IDs: '+atmIdCnt;
+    msg+='\n\nຂໍ້ມູນຈະຍັງຢູ່ ແຕ່ໜ່ວຍຈະຫາຍຈາກ dropdown';
+  }
+  if(!confirm(msg))return;
+  
+  CFG.branches=CFG.branches.filter(x=>x!==name);CFG.save();
+  AUDIT.log('delete','Branch',name,'');
+  renderBranchMgr();populateBranchDropdowns();
+  toast('🗑 ລຶບ "'+name+'"');
+}
+
+function renderBranchMgr(){
+  const c=g('branch-mgr-list');if(!c)return;
+  const list=getBranches();
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text2);">ຍັງບໍ່ມີໜ່ວຍ — ກົດ "+ ເພີ່ມໜ່ວຍ"</div>';return;}
+  
+  // Count usage per branch
+  const usage={};
+  list.forEach(b=>{
+    usage[b]={atm:0,rep:0,ip:0,atmId:0};
+  });
+  DB.atm.forEach(r=>{if(usage[r.br])usage[r.br].atm++;});
+  DB.rep.forEach(r=>{if(usage[r.br])usage[r.br].rep++;});
+  DB.ip.forEach(r=>{if(usage[r.br])usage[r.br].ip++;});
+  CFG.atmIds.forEach(r=>{if(usage[r.br])usage[r.br].atmId++;});
+  
+  c.innerHTML='<div style="display:flex;flex-direction:column;gap:8px;">'+list.map(b=>{
+    const u=usage[b]||{atm:0,rep:0,ip:0,atmId:0};
+    const total=u.atm+u.rep+u.ip+u.atmId;
+    const isCustom=!BRANCHES.includes(b);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg1);">'
+      +'<div style="font-size:16px;">🏢</div>'
+      +'<div style="flex:1;">'
+        +'<div style="font-weight:600;color:var(--text);font-size:14px;">'+b+(isCustom?' <span style="font-size:10px;color:var(--p);background:rgba(65,153,236,0.1);padding:1px 6px;border-radius:8px;">ໃໝ່</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:var(--text2);">'+(total?'ATM:'+u.atm+' · ສ້ອມ:'+u.rep+' · IP:'+u.ip+' · ATM IDs:'+u.atmId:'ບໍ່ມີຂໍ້ມູນ')+'</div>'
+      +'</div>'
+      +'<button title="ແກ້ໄຂ" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border2);background:rgba(65,153,236,0.08);color:var(--p);cursor:pointer;" onclick="editBranch(\''+b.replace(/'/g,"\\'")+'\')">✏️</button>'
+      +'<button title="ລຶບ" style="width:32px;height:32px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delBranch(\''+b.replace(/'/g,"\\'")+'\')">🗑</button>'
+    +'</div>';
+  }).join('')+'</div>';
+}
+
+/* ===== ATM LIST MANAGE ===== */
+let _alMap=null, _alMarkers={}, _alSelectedMarker=null;
+
+function loadLeafletThen(cb){
+  if(typeof L!=='undefined'){cb();return;}
+  if(!document.getElementById('leaflet-css')){const lc=document.createElement('link');lc.id='leaflet-css';lc.rel='stylesheet';lc.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(lc);}
+  const ls=document.createElement('script');ls.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';ls.onload=cb;document.body.appendChild(ls);
+}
+
+function initALMap(){
+  loadLeafletThen(()=>{
+    if(!_alMap){
+      _alMap=L.map('al-map').setView([14.9,105.85],9);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19,subdomains:'abcd'}).addTo(_alMap);
+      _alMap.on('click',onALMapClick);
+    }
+    refreshALMarkers();
+    setTimeout(()=>_alMap.invalidateSize(),200);
+  });
+}
+
+function onALMapClick(e){
+  const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);
+  g('al-lat').value=lat;g('al-lng').value=lng;
+  // Remove old selected marker
+  if(_alSelectedMarker)_alMap.removeLayer(_alSelectedMarker);
+  _alSelectedMarker=L.marker([lat,lng],{
+    icon:L.divIcon({html:'<div style="width:32px;height:32px;border-radius:50%;background:#4199ec;border:4px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">◫</div>',iconSize:[32,32],iconAnchor:[16,16],className:''})
+  }).addTo(_alMap).bindPopup('📍 ຈຸດໃໝ່ '+lat+', '+lng).openPopup();
+  toast('📍 ກຳນົດຈຸດ '+lat+', '+lng);
+}
+
+function clrALLocation(){
+  g('al-lat').value='';g('al-lng').value='';
+  if(_alSelectedMarker&&_alMap){_alMap.removeLayer(_alSelectedMarker);_alSelectedMarker=null;}
+}
+
+function onLatLngTyped(){
+  const lat=parseFloat(v('al-lat')), lng=parseFloat(v('al-lng'));
+  if(isNaN(lat)||isNaN(lng))return;
+  if(lat<-90||lat>90||lng<-180||lng>180)return;
+  if(!_alMap)return;
+  if(_alSelectedMarker)_alMap.removeLayer(_alSelectedMarker);
+  _alSelectedMarker=L.marker([lat,lng],{
+    icon:L.divIcon({html:'<div style="width:32px;height:32px;border-radius:50%;background:#4199ec;border:4px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">◫</div>',iconSize:[32,32],iconAnchor:[16,16],className:''})
+  }).addTo(_alMap).bindPopup('📍 '+lat.toFixed(6)+', '+lng.toFixed(6));
+  _alMap.setView([lat,lng],14);
+}
+
+function refreshALMarkers(){
+  if(!_alMap)return;
+  Object.values(_alMarkers).forEach(m=>_alMap.removeLayer(m));_alMarkers={};
+  const list=getATMIds();
+  list.forEach(r=>{
+    if(!r.lat||!r.lng)return;
+    _alMarkers[r.id]=L.marker([parseFloat(r.lat),parseFloat(r.lng)],{
+      icon:L.divIcon({html:'<div style="width:28px;height:28px;border-radius:50%;background:#0fa968;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;">◫</div>',iconSize:[28,28],iconAnchor:[14,14],className:''})
+    }).addTo(_alMap).bindPopup('<b style="color:#0fa968">'+r.id+'</b><br>'+(r.br||'—')+'<br>'+(r.location||'—'));
+  });
+}
+
+function svATMList(){
+  if(!v('al-id'))return toast('⚠️ ໃສ່ ATM ID');
+  if(!v('al-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
+  const eid=v('al-edit-id');
+  const newId=v('al-id'),newBr=v('al-br'),newLoc=v('al-loc'),newNote=v('al-note');
+  const newLat=v('al-lat'),newLng=v('al-lng');
+  
+  // Check duplicate (not in edit mode)
+  if(!eid){
+    if(CFG.atmIds.some(x=>x.id===newId)){return toast('⚠️ ມີ ATM ID ນີ້ແລ້ວ');}
+  }
+  
+  if(eid){
+    const oldId=eid;
+    const idx=CFG.atmIds.findIndex(x=>x.id===oldId);
+    if(idx>=0){
+      CFG.atmIds[idx]={id:newId,br:newBr,location:newLoc,note:newNote,lat:newLat,lng:newLng};
+    } else {
+      CFG.atmIds.push({id:newId,br:newBr,location:newLoc,note:newNote,lat:newLat,lng:newLng});
+    }
+    if(oldId!==newId){
+      DB.atm.forEach(r=>{if(r.atmId===oldId)r.atmId=newId;});
+      DB.save();syncToSheets('ATM',DB.atm);
+    }
+    AUDIT.log('edit','ATM ID',newId,newBr+(newLoc?' · '+newLoc:''));
+    toast('✅ ອັບເດດ '+newId+'!');
+  } else {
+    CFG.atmIds.push({id:newId,br:newBr,location:newLoc,note:newNote,lat:newLat,lng:newLng});
+    AUDIT.log('add','ATM ID',newId,newBr+(newLoc?' · '+newLoc:''));
+    toast('✅ ເພີ່ມ '+newId+'!');
+  }
+  CFG.save();
+  renderATMList();populateATMIDDropdown();clrATMList();
+  if(_alMap){
+    if(_alSelectedMarker){_alMap.removeLayer(_alSelectedMarker);_alSelectedMarker=null;}
+    refreshALMarkers();
+  }
+}
+
+function clrATMList(){
+  ['al-id','al-loc','al-note','al-lat','al-lng'].forEach(id=>{const e=g(id);if(e)e.value='';});
+  g('al-br').value='';g('al-edit-id').value='';
+  if(_alSelectedMarker&&_alMap){_alMap.removeLayer(_alSelectedMarker);_alSelectedMarker=null;}
+  const t=g('atmlist-form-title');if(t)t.innerHTML='<span class="cdot"></span>+ ເພີ່ມ ATM ໃໝ່';
+  const b=g('atmlist-save-btn');if(b)b.textContent='💾 ບັນທຶກ';
+}
+
+function editATMList(id){
+  let rec=CFG.atmIds.find(x=>x.id===id);
+  if(!rec){
+    const atm=DB.atm.find(x=>x.atmId===id);
+    rec={id:id,br:atm?atm.br||'':'',location:'',note:'',lat:'',lng:''};
+  }
+  g('al-edit-id').value=id;
+  g('al-id').value=rec.id;
+  if(rec.br&&!Array.from(g('al-br').options).some(o=>o.value===rec.br)){
+    const opt=document.createElement('option');opt.value=rec.br;opt.text=rec.br;g('al-br').insertBefore(opt,g('al-br').children[1]);
+  }
+  g('al-br').value=rec.br||'';
+  g('al-loc').value=rec.location||'';
+  g('al-note').value=rec.note||'';
+  g('al-lat').value=rec.lat||'';
+  g('al-lng').value=rec.lng||'';
+  // Show location on map
+  if(rec.lat&&rec.lng&&_alMap){
+    if(_alSelectedMarker)_alMap.removeLayer(_alSelectedMarker);
+    _alSelectedMarker=L.marker([parseFloat(rec.lat),parseFloat(rec.lng)],{
+      icon:L.divIcon({html:'<div style="width:32px;height:32px;border-radius:50%;background:#4199ec;border:4px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">◫</div>',iconSize:[32,32],iconAnchor:[16,16],className:''})
+    }).addTo(_alMap).bindPopup('📍 '+rec.id).openPopup();
+    _alMap.setView([parseFloat(rec.lat),parseFloat(rec.lng)],15);
+  }
+  const t=g('atmlist-form-title');if(t)t.innerHTML='<span class="cdot"></span>✏️ ແກ້ໄຂ: '+id;
+  const b=g('atmlist-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
+  g('atmlist-form-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function delATMList(id){
+  const trimId=String(id).trim();
+  const atmCases=DB.atm.filter(x=>String(x.atmId||'').trim()===trimId);
+  let msg='ລຶບ ATM ID "'+trimId+'"?';
+  if(atmCases.length){
+    msg+='\n\n⚠️ ATM ນີ້ມີ '+atmCases.length+' cases ໃນລະບົບ\n\nເລືອກ:\nOK = ລຶບ ATM + ລຶບ cases ທັງໝົດ\nCancel = ຍົກເລີກ';
+  }
+  if(!confirm(msg))return;
+  // Remove from CFG (match trimmed)
+  CFG.atmIds=CFG.atmIds.filter(x=>String(x.id||'').trim()!==trimId);
+  CFG.save();
+  // Also remove all matching ATM cases (match trimmed)
+  if(atmCases.length){
+    DB.atm=DB.atm.filter(x=>String(x.atmId||'').trim()!==trimId);
+    DB.save();syncToSheets('ATM',DB.atm);
+  }
+  AUDIT.log('delete','ATM ID',trimId,atmCases.length?atmCases.length+' cases ຖືກລຶບ':'');
+  renderATMList();populateATMIDDropdown();renderATM();renderDash();
+  if(_alMap)refreshALMarkers();
+  toast('🗑 ລຶບ '+trimId+(atmCases.length?' + '+atmCases.length+' cases':''));
+}
+
+function renderATMList(){
+  const c=g('atmlist-list');
+  if(!c)return;
+  
+  // Get all ATMs (from CFG + from records)
+  const allIds=getATMIds();
+  
+  // Apply filters
+  const q=(v('atmlist-search')||'').toLowerCase();
+  const filterBr=v('atmlist-f-br');
+  let list=allIds.slice();
+  if(q)list=list.filter(r=>((r.id||'')+(r.br||'')+(r.location||'')+(r.note||'')).toLowerCase().includes(q));
+  if(filterBr)list=list.filter(r=>r.br===filterBr);
+  
+  // Stats
+  if(g('atmlist-total'))g('atmlist-total').textContent=allIds.length;
+  const located=allIds.filter(x=>(x.location&&x.location.trim())||(x.lat&&x.lng)).length;
+  if(g('atmlist-located'))g('atmlist-located').textContent=located;
+  if(g('atmlist-nolocation'))g('atmlist-nolocation').textContent=allIds.length-located;
+  if(g('atmlist-cnt'))g('atmlist-cnt').textContent=list.length+(q||filterBr?'/'+allIds.length:'');
+  
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">'+(q||filterBr?'ບໍ່ພົບຂໍ້ມູນ':'ຍັງບໍ່ມີ ATM — ກົດ "+ ເພີ່ມ ATM ໃໝ່" ດ້ານເທິງ')+'</div>';return;}
+  
+  // Count cases per ATM (use trimmed comparison)
+  const caseCnt={};
+  DB.atm.forEach(r=>{if(r.atmId){const k=String(r.atmId).trim();caseCnt[k]=(caseCnt[k]||0)+1;}});
+  
+  c.innerHTML='<div class="tbl-wrap"><table>'
+    +'<thead><tr><th>#</th><th>ATM ID</th><th>ໜ່ວຍ/ສາຂາ</th><th>📍 ສະຖານທີ່</th><th>🗺️ GPS</th><th>Cases</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>'
+    +'<tbody>'+list.map((r,i)=>'<tr>'
+      +'<td style="color:var(--text2);font-family:Space Mono,monospace;">'+(i+1)+'</td>'
+      +'<td style="font-weight:700;color:var(--p2);">'+r.id+'</td>'
+      +'<td>'+(r.br||'<span style="color:var(--text3);">—</span>')+'</td>'
+      +'<td style="font-size:13px;color:var(--text2);">'+(r.location||'<span style="color:var(--text3);">⚠️ ບໍ່ມີ</span>')+'</td>'
+      +'<td style="text-align:center;">'+(r.lat&&r.lng?'<button title="ເບິ່ງໃນ map" style="border:none;background:none;cursor:pointer;font-size:16px;" onclick="focusALPin(\''+r.id+'\')">📍</button>':'<span style="color:var(--text3);">—</span>')+'</td>'
+      +'<td style="text-align:center;"><span style="font-family:Space Mono,monospace;font-weight:700;color:var(--cyan);">'+(caseCnt[r.id]||0)+'</span></td>'
+      +'<td style="text-align:center;"><div style="display:inline-flex;gap:4px;">'
+        +'<button title="ແກ້ໄຂ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border2);background:rgba(65,153,236,0.08);color:var(--p);cursor:pointer;" onclick="editATMList(\''+r.id+'\')">✏️</button>'
+        +'<button title="ລຶບ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delATMList(\''+r.id+'\')">🗑</button>'
+      +'</div></td>'
+    +'</tr>').join('')+'</tbody></table></div>';
+}
+
+function focusALPin(id){
+  const r=CFG.atmIds.find(x=>x.id===id);if(!r||!r.lat||!r.lng)return;
+  if(_alMap){
+    _alMap.setView([parseFloat(r.lat),parseFloat(r.lng)],16);
+    if(_alMarkers[id])_alMarkers[id].openPopup();
+    g('al-map').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+}
+
+function svIP(){
+  if(!v('ip-name'))return toast('⚠️ ໃສ່ຊື່ຄອມ');
+  if(!v('ip-addr'))return toast('⚠️ ໃສ່ IP');
+  if(!v('ip-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
+  const eid=v('ip-edit-id');
+  const rec={id:eid?parseInt(eid):Date.now(),name:v('ip-name'),addr:v('ip-addr'),mac:v('ip-mac'),br:v('ip-br'),user:v('ip-user'),os:v('ip-os'),type:v('ip-type'),st:v('ip-st'),note:v('ip-note'),updated:new Date().toISOString().split('T')[0]};
+  if(eid){const i=DB.ip.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.ip[i]=rec;else DB.ip.push(rec);AUDIT.log('edit','IP',rec.name,rec.addr+' · '+rec.br);}
+  else{DB.ip.push(rec);AUDIT.log('add','IP',rec.name,rec.addr+' · '+rec.br);}
+  DB.save();renderIP();clrIP();syncToSheets('IP',DB.ip);toast('✅ ບັນທຶກ IP!');
+}
+function clrIP(){['ip-name','ip-addr','ip-mac','ip-user','ip-note'].forEach(id=>{const e=g(id);if(e)e.value='';});g('ip-br').value='';g('ip-st').value='active';g('ip-edit-id').value='';}
+function editIP(id){
+  const r=DB.ip.find(x=>x.id===id);if(!r)return;
+  g('ip-edit-id').value=id;g('ip-name').value=r.name||'';g('ip-addr').value=r.addr||'';g('ip-mac').value=r.mac||'';g('ip-br').value=r.br||'';g('ip-user').value=r.user||'';g('ip-os').value=r.os||'Windows 11';g('ip-type').value=r.type||'Static (ຄົງທີ)';g('ip-st').value=r.st||'active';g('ip-note').value=r.note||'';
+  g('tab-ip').scrollIntoView({behavior:'smooth'});
+}
+function delIP(id){if(!confirm('ລຶບ?'))return;const r=DB.ip.find(x=>x.id===id);DB.ip=DB.ip.filter(x=>x.id!==id);if(r)AUDIT.log('delete','IP',r.name,r.addr+' · '+r.br);DB.save();renderIP();syncToSheets('IP',DB.ip);toast('🗑 ລຶບ');}
+function updIPStats(){
+  if(g('ip-s-total'))g('ip-s-total').textContent=DB.ip.length;
+  if(g('ip-s-used'))g('ip-s-used').textContent=DB.ip.filter(x=>x.st==='active').length;
+  if(g('ip-s-free'))g('ip-s-free').textContent=DB.ip.filter(x=>x.st==='free').length;
+  if(g('ip-s-off'))g('ip-s-off').textContent=DB.ip.filter(x=>x.st==='reserve'||x.st==='off').length;
+}
+function renderIP(){
+  updIPStats();
+  const q=(v('ip-search')||'').toLowerCase();
+  const fbr=v('ip-f-br'),fst=v('ip-f-st');
+  let list=DB.ip.filter(r=>!q||(r.name||'').toLowerCase().includes(q)||(r.addr||'').includes(q)||(r.mac||'').toLowerCase().includes(q)||(r.br||'').includes(q)||(r.user||'').toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>r.br===fbr);
+  if(fst)list=list.filter(r=>r.st===fst);
+  g('ip-cnt').textContent=list.length+(q||fbr||fst?'/'+DB.ip.length:'');
+  const c=g('ip-list');
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີ IP</div>';return;}
+  c.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>ຊື່ຄອມ</th><th>IP Address</th><th>ໜ່ວຍ</th><th>OS</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>
+    <tbody>${list.map((r,i)=>`<tr>
+      <td style="color:var(--text2);">${i+1}</td>
+      <td style="font-weight:700;color:var(--p2);">${r.name}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:12px;color:var(--cyan);">${r.addr||'—'}</td>
+      <td style="color:var(--text2);">${r.br||'—'}</td>
+      <td style="font-size:12px;color:var(--text2);">${r.os||'—'}</td>
+      <td>${ipBadge(r.st)}</td>
+      <td style="text-align:center;"><div style="display:inline-flex;gap:4px;">
+        <button style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border2);background:rgba(65,153,236,0.08);color:var(--p);cursor:pointer;" onclick="showIPDetail(${r.id})">👁</button>
+        <button style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editIP(${r.id})">✏️</button>
+        <button style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delIP(${r.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ===== REPORT ===== */
+function autoFill(){
+  const from=v('rpt-f-from'),to=v('rpt-f-to');
+  let a=DB.atm.slice(),r=DB.rep.slice();
+  if(from){a=a.filter(x=>x.dt>=from);r=r.filter(x=>x.dt>=from);}
+  if(to){a=a.filter(x=>x.dt<=to);r=r.filter(x=>x.dt<=to);}
+  const aDone=a.filter(x=>x.st==='done').length,aOpen=a.filter(x=>x.st!=='done').length;
+  const rDone=r.filter(x=>x.st==='done').length,rOpen=r.filter(x=>x.st!=='done').length;
+  if(g('p-at'))g('p-at').value=`ATM: ${a.length} ເຄສ · ສຳເລັດ ${aDone} · ຄ້າງ ${aOpen}`;
+  if(g('p-it'))g('p-it').value=`ສ້ອມ: ${r.length} ລາຍ · ສຳເລັດ ${rDone} · ຄ້າງ ${rOpen}`;
+  const pd=[...a.filter(x=>x.st!=='done').map(x=>`[ATM] ${x.atmId}(${x.br}) - ${x.tp}`),...r.filter(x=>x.st!=='done').map(x=>`[IT] ${x.dv}(${x.br||'—'}) - ${(x.is||'').slice(0,30)}`)];
+  if(g('p-pd'))g('p-pd').value=pd.length?pd.join('\n'):'ບໍ່ມີຄ້າງ';
+  updPrev();toast('✅ ດຶງຂໍ້ມູນ!');
+}
+function updPrev(){
+  const now=new Date();
+  const months=['ມັງກອນ','ກຸມພາ','ມີນາ','ເມສາ','ພຶດສະພາ','ມິຖຸນາ','ກໍລະກົດ','ສິງຫາ','ກັນຍາ','ຕຸລາ','ພະຈິກ','ທັນວາ'];
+  const dateStr=`${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const txt=`${'═'.repeat(44)}
+ລາຍງານ IT Support — APB Bank Laos
+${'═'.repeat(44)}
+ວັນທີ: ${dateStr}
+ຜູ້ລາຍງານ: ${v('p-au')||'—'} | ຕຳແໜ່ງ: ${v('p-pos')||'IT Support'}
+${'─'.repeat(44)}
+
+[ATM]
+${v('p-at')||'—'}
+
+[IT ສ້ອມແປງ]
+${v('p-it')||'—'}
+
+[ລາຍການຄ້າງ]
+${v('p-pd')||'—'}
+
+[ໝາຍເຫດ]
+${v('p-nt')||'—'}
+${'═'.repeat(44)}`;
+  if(g('rpt-prev'))g('rpt-prev').textContent=txt;
+}
+function exportRptWord(){
+  const txt=g('rpt-prev')?g('rpt-prev').textContent:'';
+  const html=`<html><head><meta charset="utf-8"><style>body{font-family:'Noto Sans Lao',sans-serif;font-size:14pt;margin:2cm;line-height:1.8;}pre{white-space:pre-wrap;font-family:'Noto Sans Lao',sans-serif;}</style></head><body><pre>${txt}</pre></body></html>`;
+  const blob=new Blob([html],{type:'application/msword'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`APB_Report_${new Date().toISOString().slice(0,10)}.doc`;a.click();
+  toast('📄 Export Word!');
+}
+
+
+
+/* ===== BACKUP ===== */
+function autoBackup(){
+  try{
+    const snap={ts:new Date().toISOString(),atm:DB.atm,rep:DB.rep,rpt:DB.rpt,ip:DB.ip,branches:CFG.branches,atmIds:CFG.atmIds};
+    let snaps=[];try{snaps=JSON.parse(localStorage.getItem('apb26_autobackup')||'[]');}catch(e){}
+    snaps.unshift(snap);if(snaps.length>5)snaps=snaps.slice(0,5);
+    localStorage.setItem('apb26_autobackup',JSON.stringify(snaps));
+    renderBackupList();
+  }catch(e){}
+}
+function renderBackupList(){
+  const c=g('auto-backup-list');if(!c)return;
+  let snaps=[];try{snaps=JSON.parse(localStorage.getItem('apb26_autobackup')||'[]');}catch(e){}
+  if(!snaps.length){c.innerHTML='<div style="font-size:13px;color:var(--text2);">ຍັງບໍ່ມີ Auto Backup</div>';return;}
+  c.innerHTML=snaps.map((s,i)=>{
+    const d=new Date(s.ts);
+    const dt=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);"><div style="flex:1;"><div style="font-size:13px;font-weight:600;">${i===0?'🟢 ລ່າສຸດ':'ສຳຮອງ #'+(i+1)} — ${dt}</div><div style="font-size:11px;color:var(--text2);">ATM:${(s.atm||[]).length} · ສ້ອມ:${(s.rep||[]).length} · IP:${(s.ip||[]).length} · ຕູ້:${(s.atmIds||[]).length} · ໜ່ວຍ:${(s.branches||[]).length}</div></div><button onclick="restoreBackup(${i})" style="padding:7px 14px;border-radius:8px;border:1.5px solid var(--border2);background:rgba(65,153,236,0.08);color:var(--p);font-size:13px;cursor:pointer;">⏪ Restore</button></div>`;
+  }).join('');
+}
+function restoreBackup(idx){
+  let snaps=[];try{snaps=JSON.parse(localStorage.getItem('apb26_autobackup')||'[]');}catch(e){return;}
+  const s=snaps[idx];if(!s||!confirm('Restore ຈາກ backup #'+(idx+1)+'?'))return;
+  DB.atm=s.atm||[];DB.rep=s.rep||[];DB.rpt=s.rpt||[];DB.ip=s.ip||[];
+  localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
+  if(s.branches)CFG.branches=s.branches;
+  if(s.atmIds)CFG.atmIds=s.atmIds;
+  CFG.save();
+  renderAll();toast('✅ Restore ສຳເລັດ!');
+}
+/* ===== AUDIT LOG RENDER ===== */
+function renderAudit(){
+  const c=g('audit-list');if(!c)return;
+  const q=(v('audit-search')||'').toLowerCase();
+  const fa=v('audit-f-act'),fe=v('audit-f-ent'),from=v('audit-f-from'),to=v('audit-f-to');
+  let list=AUDIT.list.slice();
+  if(q)list=list.filter(r=>((r.user||'')+(r.entity||'')+(r.id||'')+(r.info||'')+(r.action||'')).toLowerCase().includes(q));
+  if(fa)list=list.filter(r=>r.action===fa);
+  if(fe)list=list.filter(r=>r.entity===fe);
+  if(from)list=list.filter(r=>(r.ts||'').slice(0,10)>=from);
+  if(to)list=list.filter(r=>(r.ts||'').slice(0,10)<=to);
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີ Log</div>';return;}
+  const actIcon={add:'➕',edit:'✏️',delete:'🗑',done:'✅'};
+  const actColor={add:'var(--green)',edit:'var(--p)',delete:'var(--red)',done:'var(--cyan)'};
+  c.innerHTML='<div class="tbl-wrap"><table>'
+    +'<thead><tr><th>ເວລາ</th><th>ຜູ້ໃຊ້</th><th>ການກະທຳ</th><th>ປະເພດ</th><th>ID</th><th>ຂໍ້ມູນ</th></tr></thead>'
+    +'<tbody>'+list.map(r=>{
+      const d=new Date(r.ts);
+      const dt=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const ic=actIcon[r.action]||'•',col=actColor[r.action]||'var(--text2)';
+      return `<tr>
+        <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;">${dt}</td>
+        <td style="font-weight:600;">${r.user||'—'}</td>
+        <td style="color:${col};font-weight:600;">${ic} ${r.action||'—'}</td>
+        <td>${r.entity||'—'}</td>
+        <td style="font-family:'Space Mono',monospace;color:var(--p2);">${r.id||'—'}</td>
+        <td style="font-size:12px;color:var(--text2);">${r.info||'—'}</td>
+      </tr>`;
+    }).join('')+'</tbody></table></div>'
+    +`<div style="margin-top:10px;font-size:12px;color:var(--text2);text-align:center;">ລວມ ${list.length}${list.length<AUDIT.list.length?' / '+AUDIT.list.length:''} ລາຍການ</div>`;
+}
+
+function exportAuditXlsx(){
+  if(!AUDIT.list.length){toast('⚠️ ບໍ່ມີ Log');return;}
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  loadXlsxThen(()=>{
+    const wb=XLSX.utils.book_new();
+    const rows=AUDIT.list.map((r,i)=>{
+      const d=new Date(r.ts);
+      const dt=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+      return {'#':i+1,'ເວລາ':dt,'ຜູ້ໃຊ້':r.user||'','ການກະທຳ':r.action||'','ປະເພດ':r.entity||'','ID':r.id||'','ຂໍ້ມູນ':r.info||''};
+    });
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Audit Log');
+    XLSX.writeFile(wb,`APB_Audit_${new Date().toISOString().slice(0,10)}.xlsx`);
+    toast('📊 Export ສຳເລັດ!');
+  });
+}
+
+/* ===== EXPORT EXCEL / PDF ===== */
+function loadXlsxThen(cb){
+  if(typeof XLSX!=='undefined'){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+  s.onload=cb;s.onerror=()=>toast('⚠️ ໂຫຼດ Library ບໍ່ໄດ້ (ກວດອິນເຕີເນັດ)');
+  document.body.appendChild(s);
+}
+function loadPdfThen(cb){
+  if(typeof html2pdf!=='undefined'){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+  s.onload=cb;s.onerror=()=>toast('⚠️ ໂຫຼດ Library ບໍ່ໄດ້ (ກວດອິນເຕີເນັດ)');
+  document.body.appendChild(s);
+}
+function exportXlsx(){
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  loadXlsxThen(()=>{
+    const wb=XLSX.utils.book_new();
+    const atmRows=DB.atm.map((r,i)=>({'#':i+1,'ATM ID':r.atmId||'','ໜ່ວຍ':r.br||'','ປະເພດ':r.tp||'','ວັນທີ':r.dt||'','ເວລາ':r.tm||'','ສຳເລັດເມື່ອ':r.doneAt||'','ສະຖານະ':r.st||'','ຜູ້ຮ້ອງ':r.rq||'','ອາການ':r.ds||'','ການແກ້ໄຂ':r.solution||r.ac||''}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(atmRows.length?atmRows:[{}]),'ATM');
+    const repRows=DB.rep.map((r,i)=>({'#':i+1,'ອຸປະກອນ':r.dv||'','ໜ່ວຍ':r.br||'','ວັນທີ':r.dt||'','ເວລາ':r.tm||'','ສຳເລັດເມື່ອ':r.doneAt||'','ສະຖານະ':r.st||'','ຊ່າງ':r.tc||'','ອາການ':r.is||''}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(repRows.length?repRows:[{}]),'ສ້ອມແປງ');
+    const ipRows=DB.ip.map((r,i)=>({'#':i+1,'ຊື່ຄອມ':r.name||'','IP':r.addr||'','MAC':r.mac||'','ໜ່ວຍ':r.br||'','OS':r.os||'','ຜູ້ໃຊ້':r.user||'','ສະຖານະ':r.st||''}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ipRows.length?ipRows:[{}]),'IP');
+    const atmIdRows=(CFG.atmIds||[]).map((r,i)=>({'#':i+1,'ATM ID':r.id||'','ໜ່ວຍ':r.br||'','ສະຖານທີ່':r.location||'','Lat':r.lat||'','Lng':r.lng||'','ໝາຍເຫດ':r.note||''}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(atmIdRows.length?atmIdRows:[{}]),'ATM IDs');
+    XLSX.writeFile(wb,`APB_IT_${new Date().toISOString().slice(0,10)}.xlsx`);
+    toast('📊 Export Excel ສຳເລັດ!');
+  });
+}
+function exportPdf(){
+  const el=g('rpt-prev');
+  if(!el||!el.textContent.trim()){toast('⚠️ ບໍ່ມີລາຍງານ — ກົດ Preview ກ່ອນ');return;}
+  toast('⏳ ກຳລັງສ້າງ PDF...');
+  loadPdfThen(()=>{
+    const wrapper=document.createElement('div');
+    wrapper.style.cssText='font-family:"Noto Sans Lao",sans-serif;font-size:11pt;line-height:1.7;padding:18px;color:#000;background:#fff;white-space:pre-wrap;word-break:break-word;';
+    wrapper.textContent=el.textContent;
+    html2pdf().set({margin:[10,10,10,10],filename:`APB_Report_${new Date().toISOString().slice(0,10)}.pdf`,image:{type:'jpeg',quality:0.95},html2canvas:{scale:2,useCORS:true,backgroundColor:'#fff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(wrapper).save().then(()=>toast('📄 Export PDF ສຳເລັດ!')).catch(e=>{console.error(e);toast('⚠️ ສ້າງ PDF ບໍ່ໄດ້');});
+  });
+}
+
+function exportTxt(){
+  let t=`${'═'.repeat(44)}\nAPB IT Support · ${new Date().toLocaleString()}\n${'═'.repeat(44)}\n\n[ATM — ${DB.atm.length}]\n`;
+  DB.atm.forEach((r,i)=>{t+=`${i+1}. ${r.atmId}|${r.br}|${r.tp}|${r.dt}|${r.st}\n`;if(r.ds)t+=`   ${r.ds}\n`;});
+  t+=`\n[ສ້ອມ — ${DB.rep.length}]\n`;DB.rep.forEach((r,i)=>{t+=`${i+1}. ${r.dv}|${r.br||''}|${r.dt}|${r.st}\n`;if(r.is)t+=`   ${r.is}\n`;});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain;charset=utf-8'}));a.download=`APB_IT_${new Date().toISOString().slice(0,10)}.txt`;a.click();toast('📥 Export .txt!');
+}
+function exportJSON(){
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({version:3,exported:new Date().toISOString(),atm:DB.atm,rep:DB.rep,rpt:DB.rpt,ip:DB.ip,branches:CFG.branches,atmIds:CFG.atmIds},null,2)],{type:'application/json'}));a.download=`APB_Backup_${new Date().toISOString().slice(0,10)}.json`;a.click();toast('💾 Backup JSON!');
+}
+function importJSON(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.atm)DB.atm=d.atm;if(d.rep)DB.rep=d.rep;if(d.rpt)DB.rpt=d.rpt;if(d.ip)DB.ip=d.ip;
+      if(d.branches)CFG.branches=d.branches;
+      if(d.atmIds)CFG.atmIds=d.atmIds;
+      CFG.save();
+      DB.save();renderAll();toast('✅ Import ສຳເລັດ!');
+    }catch(err){toast('⚠️ JSON ຜິດ');}
+  };
+  r.readAsText(file);e.target.value='';
+}
+
+/* ===== GOTO TAB ===== */
+function goTab(name,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb-d,.bn-item').forEach(b=>b.classList.remove('active'));
+  const t=document.getElementById('tab-'+name);if(t)t.classList.add('active');
+  if(btn){btn.classList.add('active');document.querySelectorAll('[data-tab="'+name+'"]').forEach(b=>b.classList.add('active'));}
+  if(name==='dashboard')renderDash();
+  if(name==='report')updPrev();
+  if(name==='atmlist'){renderBranchMgr();populateBranchDropdowns();renderATMList();setTimeout(()=>initALMap(),200);}
+}
+
+/* ===== RENDER ALL ===== */
+function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();renderATM();renderRep();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('audit-list'))renderAudit();updStats();}
+
+/* ===== INIT ===== */
+function initDates(){
+  const now=new Date();
+  const days=['ອາທິດ','ຈັນ','ອັງຄານ','ພຸດ','ພະຫັດ','ສຸກ','ເສົາ'];
+  const months=['ມັງກອນ','ກຸມພາ','ມີນາ','ເມສາ','ພຶດສະພາ','ມິຖຸນາ','ກໍລະກົດ','ສິງຫາ','ກັນຍາ','ຕຸລາ','ພະຈິກ','ທັນວາ'];
+  const hd=g('hdr-date');if(hd)hd.textContent=`${days[now.getDay()]}. ${now.getDate()} ${months[now.getMonth()]}. ${now.getFullYear()}`;
+  const adt=g('a-dt');if(adt&&!adt.value)adt.value=now.toISOString().split('T')[0];
+  const atm=g('a-tm');if(atm&&!atm.value)atm.value=now.toTimeString().slice(0,5);
+  const rdt=g('r-dt');if(rdt&&!rdt.value)rdt.value=now.toISOString().split('T')[0];
+  const rtm=g('r-tm');if(rtm&&!rtm.value)rtm.value=now.toTimeString().slice(0,5);
+  const pdt=g('rpt-f-from');
+  const f=new Date(now.getFullYear(),now.getMonth(),1);
+  if(pdt&&!pdt.value)pdt.value=f.toISOString().split('T')[0];
+}
+
+/* ===== STARTUP ===== */
+window.addEventListener('load',function(){
+  // Apply saved theme
+  const theme=localStorage.getItem('apb26_theme');
+  if(theme==='dark'){document.body.classList.add('dark');const btn=g('theme-btn');if(btn)btn.textContent='☀️';}
+  initDates();renderAll();renderBackupList();checkOnline();checkAuth();
+  if(navigator.onLine){
+    showSyncStatus('syncing');
+    sbPull().then(ok=>{
+      if(ok){renderAll();updIPStats();showSyncStatus('ok');toast('✅ ໂຫລດຂໍ້ມູນ Supabase ສຳເລັດ!');}
+      else{showSyncStatus('error');toast('⚠️ ໃຊ້ຂໍ້ມູນ local');}
+    });
+  } else showSyncStatus('error');
+});
+
+/* ===== PWA: Register Service Worker + Install Prompt ===== */
+let deferredInstallPrompt=null;
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg=>{console.log('✅ SW registered',reg.scope);})
+      .catch(err=>{console.warn('SW registration failed',err);});
+  });
+}
+
+// ຮັບ event ສຳລັບປຸ່ມ Install
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='inline-flex';
+});
+
+function installPWA(){
+  if(!deferredInstallPrompt){
+    toast('💡 ໄປທີ່ເມນູ browser → "Add to Home Screen"');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then((r)=>{
+    if(r.outcome==='accepted'){
+      toast('✅ ຕິດຕັ້ງສຳເລັດ!');
+      const btn=document.getElementById('pwa-install-btn');
+      if(btn)btn.style.display='none';
+    }
+    deferredInstallPrompt=null;
+  });
+}
+
+// ກວດວ່າຕິດຕັ້ງແລ້ວ
+window.addEventListener('appinstalled',()=>{
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='none';
+  toast('🎉 ຕິດຕັ້ງ APB-IT ສຳເລັດ!');
+});
+</script>
+</body>
+</html>
