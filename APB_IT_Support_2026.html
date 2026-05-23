@@ -231,6 +231,21 @@ tbody tr:last-child td{border-bottom:none;}
   .bn-icon{font-size:16px;}
   .bn-item{font-size:9px;}
 }
+/* === VIEWER MODE: ບລັອກປຸ່ມແກ້ໄຂ === */
+body.viewer-mode .modal-body .btn-grad,
+body.viewer-mode .modal-body .btn-green,
+body.viewer-mode .modal-body button[onclick*="editATM"],
+body.viewer-mode .modal-body button[onclick*="editRep"],
+body.viewer-mode .modal-body button[onclick*="markATMDone"],
+body.viewer-mode .modal-body button[onclick*="markRepDone"],
+body.viewer-mode .modal-body button[onclick*="delATM"],
+body.viewer-mode .modal-body button[onclick*="delRep"]{display:none!important;}
+body.viewer-mode .critical-list-item,
+body.viewer-mode .pending-list-item{cursor:default!important;}
+/* ປ້າຍບອກສະຖານະ viewer */
+body.viewer-mode .viewer-badge{display:inline-flex!important;}
+.viewer-badge{display:none;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;background:rgba(33,118,217,0.1);color:#2176d9;font-size:10px;font-weight:700;border:1px solid rgba(33,118,217,0.3);margin-left:8px;}
+
 @media(max-width:380px){
   .frow.c3{grid-template-columns:1fr;}
   .stats-grid{grid-template-columns:1fr 1fr;}
@@ -245,10 +260,19 @@ const USERS=[
   {user:'Mee',pass:'95407675',role:'admin',display:'ຫມີ'},
   {user:'user1',pass:'123456',role:'viewer',display:'ຜູ້ໃຊ້ 1'}
 ];
-/* role: 'admin' = ເຫັນທຸກໜ້າ, 'viewer' = ເຫັນສະເພາະ Dashboard */
+/* role: 'admin' = ເຫັນທຸກໜ້າ, 'viewer' = ເຫັນສະເພາະ Dashboard (ອ່ານຢ່າງດຽວ) */
+function isViewer(){
+  try{return (JSON.parse(sessionStorage.getItem('apb_user')||'{}').role)==='viewer';}catch(e){return false;}
+}
+function requireAdmin(){
+  if(isViewer()){toast('🔒 ບໍ່ມີສິດແກ້ໄຂຂໍ້ມູນ');return false;}
+  return true;
+}
 function applyRole(){
   let u={};try{u=JSON.parse(sessionStorage.getItem('apb_user')||'{}');}catch(e){}
   const isViewer=u.role==='viewer';
+  // Toggle viewer-mode class to body
+  document.body.classList.toggle('viewer-mode',isViewer);
   // Tabs ທີ່ viewer ບໍ່ໃຫ້ເຫັນ
   const hiddenTabs=['atm','repair','report','atmlist','ip','drive'];
   // Hide/show desktop nav buttons
@@ -1006,6 +1030,7 @@ function populateATMIDDropdown(){
 
 function onBranchChange(el){
   if(el.value!=='__ADD__')return;
+  if(isViewer()){el.value='';toast('🔒 ບໍ່ມີສິດເພີ່ມໜ່ວຍ');return;}
   el.value='';
   const name=prompt('➕ ເພີ່ມໜ່ວຍ/ສາຂາໃໝ່\n\nຊື່ໜ່ວຍ:');
   if(!name||!name.trim())return;
@@ -1019,6 +1044,7 @@ function onBranchChange(el){
 
 function onATMIDChange(el){
   if(el.value!=='__ADD__')return;
+  if(isViewer()){el.value='';toast('🔒 ບໍ່ມີສິດເພີ່ມ ATM ID');return;}
   el.value='';
   const id=prompt('➕ ເພີ່ມ ATM ID ໃໝ່\n\nATM ID (ເຊັ່ນ: 511, APB-ATM-018):');
   if(!id||!id.trim())return;
@@ -1056,6 +1082,7 @@ function populateATMTypeDropdown(){
 }
 
 function onATMTypeChange(el){
+  if(isViewer()){populateATMTypeDropdown();return;}
   if(el.value==='__ADD__'){
     el.value='';
     const name=prompt('➕ ເພີ່ມປະເພດໃໝ່\n\nຊື່ປະເພດ:');
@@ -1095,6 +1122,7 @@ function renderATMTypeMgr(){
 }
 
 function editATMType(i){
+  if(!requireAdmin())return;
   const old=CFG.atmTypes[i];
   const name=prompt('✏️ ແກ້ໄຂປະເພດ\n\nຊື່ໃໝ່:',old);
   if(!name||!name.trim()||name.trim()===old)return;
@@ -1109,6 +1137,7 @@ function editATMType(i){
 }
 
 function deleteATMType(i){
+  if(!requireAdmin())return;
   const t=CFG.atmTypes[i];
   if(!confirm('🗑 ລຶບປະເພດ "'+t+'"?\n\n(ລາຍການ ATM ທີ່ໃຊ້ປະເພດນີ້ຈະຍັງຄົງຢູ່)'))return;
   CFG.atmTypes.splice(i,1);CFG.save();
@@ -1125,6 +1154,7 @@ function moveATMType(i,dir){
 }
 
 function addATMTypeFromMgr(){
+  if(!requireAdmin())return;
   const inp=g('atm-type-new-inp');if(!inp)return;
   const n=inp.value.trim();
   if(!n){toast('⚠️ ກະລຸນາໃສ່ຊື່ປະເພດ');return;}
@@ -1386,6 +1416,7 @@ async function forceSyncAll(){
 
 /* ===== ATM CRUD ===== */
 function svATM(){
+  if(!requireAdmin())return;
   if(!v('a-id'))return toast('⚠️ ໃສ່ ATM ID');
   if(!v('a-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
   const eid=v('a-edit-id');
@@ -1397,6 +1428,7 @@ function svATM(){
 }
 function clrATM(){['a-rq','a-ds','a-ac'].forEach(id=>{const e=g(id);if(e)e.value='';});g('a-id').value='';g('a-br').value='';g('a-st').value='open';g('a-edit-id').value='';const t=g('atm-form-title');if(t)t.innerHTML='<span class="cdot"></span>+ ເພີ່ມ ATM ໃໝ່';const b=g('atm-save-btn');if(b)b.textContent='💾 ບັນທຶກ';}
 function editATM(id){
+  if(!requireAdmin())return;
   const r=DB.atm.find(x=>x.id===id);if(!r)return;
   populateATMIDDropdown();populateBranchDropdowns();
   // Make sure the values are in the dropdowns
@@ -1413,10 +1445,11 @@ function editATM(id){
   const b=g('atm-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
   g('atm-form-card').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function delATM(id){if(!confirm('ລຶບ?'))return;const r=DB.atm.find(x=>x.id===id);DB.atm=DB.atm.filter(x=>x.id!==id);if(r)AUDIT.log('delete','ATM',r.atmId,r.br+' · '+r.tp);DB.save();renderATM();updStats();syncToSheets('ATM',DB.atm);toast('🗑 ລຶບ ATM');}
+function delATM(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.atm.find(x=>x.id===id);DB.atm=DB.atm.filter(x=>x.id!==id);if(r)AUDIT.log('delete','ATM',r.atmId,r.br+' · '+r.tp);DB.save();renderATM();updStats();syncToSheets('ATM',DB.atm);toast('🗑 ລຶບ ATM');}
 
 /* ===== REPAIR CRUD ===== */
 function svRep(){
+  if(!requireAdmin())return;
   if(!v('r-is'))return toast('⚠️ ໃສ່ອາການ');
   if(!v('r-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
   const eid=v('r-edit-id');
@@ -1428,6 +1461,7 @@ function svRep(){
 }
 function clrRep(){['r-dv','r-tc','r-hr','r-is','r-rs'].forEach(id=>{const e=g(id);if(e)e.value='';});g('r-br').value='';g('r-st').value='open';g('r-edit-id').value='';const b=g('rep-save-btn');if(b)b.textContent='💾 ບັນທຶກ';}
 function editRep(id){
+  if(!requireAdmin())return;
   const r=DB.rep.find(x=>x.id===id);if(!r)return;
   g('r-edit-id').value=id;g('r-dv').value=r.dv||'';g('r-br').value=r.br||'';
   g('r-dt').value=fmtDate(r.dt)||'';const rtm=g('r-tm');if(rtm)rtm.value=fmtTime(r.tm)||'';
@@ -1435,11 +1469,12 @@ function editRep(id){
   const b=g('rep-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
   g('tab-repair').scrollIntoView({behavior:'smooth'});
 }
-function delRep(id){if(!confirm('ລຶບ?'))return;const r=DB.rep.find(x=>x.id===id);DB.rep=DB.rep.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Repair',r.dv,r.br);DB.save();renderRep();updStats();syncToSheets('Repair',DB.rep);toast('🗑 ລຶບ');}
+function delRep(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.rep.find(x=>x.id===id);DB.rep=DB.rep.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Repair',r.dv,r.br);DB.save();renderRep();updStats();syncToSheets('Repair',DB.rep);toast('🗑 ລຶບ');}
 
 /* ===== MARK DONE ===== */
 let _doneType='',_doneId=0;
 function markATMDone(id){
+  if(!requireAdmin())return;
   const r=DB.atm.find(x=>x.id===id);if(!r)return;
   _doneType='atm';_doneId=id;
   g('done-modal-title').innerHTML='✅ ຢືນຢັນ ATM ສຳເລັດ';
@@ -1449,6 +1484,7 @@ function markATMDone(id){
   g('done-modal').style.display='flex';
 }
 function markRepDone(id){
+  if(!requireAdmin())return;
   const r=DB.rep.find(x=>x.id===id);if(!r)return;
   _doneType='rep';_doneId=id;
   g('done-modal-title').innerHTML='✅ ຢືນຢັນສ້ອມ​ແ​ປງ​ສຳ​ເລັດ';
@@ -1458,6 +1494,7 @@ function markRepDone(id){
   g('done-modal').style.display='flex';
 }
 function confirmDone(){
+  if(!requireAdmin())return;
   const doneAt=(v('done-date')||new Date().toISOString().split('T')[0])+' '+(v('done-time')||new Date().toTimeString().slice(0,5));
   const sol=v('done-solution');
   if(_doneType==='atm'){
@@ -2063,6 +2100,7 @@ function refreshALMarkers(){
 }
 
 function svATMList(){
+  if(!requireAdmin())return;
   if(!v('al-id'))return toast('⚠️ ໃສ່ ATM ID');
   if(!v('al-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
   const eid=v('al-edit-id');
@@ -2110,6 +2148,7 @@ function clrATMList(){
 }
 
 function editATMList(id){
+  if(!requireAdmin())return;
   let rec=CFG.atmIds.find(x=>x.id===id);
   if(!rec){
     const atm=DB.atm.find(x=>x.atmId===id);
@@ -2139,6 +2178,7 @@ function editATMList(id){
 }
 
 function delATMList(id){
+  if(!requireAdmin())return;
   const trimId=String(id).trim();
   const atmCases=DB.atm.filter(x=>String(x.atmId||'').trim()===trimId);
   let msg='ລຶບ ATM ID "'+trimId+'"?';
@@ -2213,6 +2253,7 @@ function focusALPin(id){
 }
 
 function svIP(){
+  if(!requireAdmin())return;
   if(!v('ip-name'))return toast('⚠️ ໃສ່ຊື່ຄອມ');
   if(!v('ip-addr'))return toast('⚠️ ໃສ່ IP');
   if(!v('ip-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
@@ -2224,11 +2265,12 @@ function svIP(){
 }
 function clrIP(){['ip-name','ip-addr','ip-mac','ip-user','ip-note'].forEach(id=>{const e=g(id);if(e)e.value='';});g('ip-br').value='';g('ip-st').value='active';g('ip-edit-id').value='';}
 function editIP(id){
+  if(!requireAdmin())return;
   const r=DB.ip.find(x=>x.id===id);if(!r)return;
   g('ip-edit-id').value=id;g('ip-name').value=r.name||'';g('ip-addr').value=r.addr||'';g('ip-mac').value=r.mac||'';g('ip-br').value=r.br||'';g('ip-user').value=r.user||'';g('ip-os').value=r.os||'Windows 11';g('ip-type').value=r.type||'Static (ຄົງທີ)';g('ip-st').value=r.st||'active';g('ip-note').value=r.note||'';
   g('tab-ip').scrollIntoView({behavior:'smooth'});
 }
-function delIP(id){if(!confirm('ລຶບ?'))return;const r=DB.ip.find(x=>x.id===id);DB.ip=DB.ip.filter(x=>x.id!==id);if(r)AUDIT.log('delete','IP',r.name,r.addr+' · '+r.br);DB.save();renderIP();syncToSheets('IP',DB.ip);toast('🗑 ລຶບ');}
+function delIP(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.ip.find(x=>x.id===id);DB.ip=DB.ip.filter(x=>x.id!==id);if(r)AUDIT.log('delete','IP',r.name,r.addr+' · '+r.br);DB.save();renderIP();syncToSheets('IP',DB.ip);toast('🗑 ລຶບ');}
 function updIPStats(){
   if(g('ip-s-total'))g('ip-s-total').textContent=DB.ip.length;
   if(g('ip-s-used'))g('ip-s-used').textContent=DB.ip.filter(x=>x.st==='active').length;
