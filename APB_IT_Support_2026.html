@@ -210,52 +210,78 @@ body.dark .toast{background:#f1f5f9;color:#0f172a;}
   .toast{bottom:1.5rem;}
 }
 @media(max-width:699px){
+  :root{--head-h:54px;--nav-h:62px;}
   .sidebar{display:none;}
+  body{font-size:14px;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));}
+  /* Topbar — clean ແລະ ສົມສ່ວນ */
+  .topbar{padding:0 14px;height:var(--head-h);padding-top:env(safe-area-inset-top);height:calc(var(--head-h) + env(safe-area-inset-top));}
+  .topbar-left{gap:9px;}
+  .logo{width:32px;height:32px;border-radius:9px;font-size:10px;}
+  .brand-name{font-size:13.5px;letter-spacing:-0.01em;}
+  .brand-sub{font-size:10.5px;}
+  .topbar-right{gap:4px;}
+  .topbar-btn{width:30px;height:30px;font-size:14px;}
+  .date-chip{display:none;}
+  #hdr-user{display:none!important;}
+  .sync-chip{padding:3px 7px;border-radius:7px;}
+  .sync-chip span{display:none;}
+  .dot-live{display:none;}
+  .logout-btn{padding:5px 9px;font-size:11px;}
+  /* Main content */
+  .main{padding:14px 14px 18px;}
+  /* Page header */
+  .page-hd{margin-bottom:14px;}
+  .page-title{font-size:22px;letter-spacing:-0.025em;}
+  .page-sub{font-size:12px;margin-top:3px;}
+  /* Form layout */
+  .frow{gap:10px;margin-bottom:10px;}
   .frow.c3{grid-template-columns:1fr 1fr;}
   .frow.c2{grid-template-columns:1fr;}
-  .main{padding:0.75rem;}
-  .page-title{font-size:17px;}
-  .page-hd{margin-bottom:10px;}
-  .card{border-radius:14px;margin-bottom:0.75rem;}
-  .card-hd{padding:10px 12px;flex-wrap:wrap;gap:6px;}
-  .card-title{font-size:13px;}
-  .card-body{padding:12px;}
-  .stats-grid{gap:8px;margin-bottom:0.9rem;}
-  .stat-card{padding:10px 12px;border-radius:13px;}
-  .stat-num{font-size:22px;}
-  .stat-lbl{font-size:10px;}
-  .stat-sub{font-size:10px;}
-  /* Filters: stack ໃຫ້ເຫມາະ */
-  [id$="-search"]{font-size:14px;padding:9px 12px;}
-  select[id*="-f-"],input[type="date"][id*="-f-"]{min-width:0!important;flex:1 1 calc(50% - 4px)!important;font-size:12px!important;padding:7px 8px!important;}
+  /* Cards */
+  .card{border-radius:var(--radius-lg);margin-bottom:12px;}
+  .card-hd{padding:13px 16px;flex-wrap:wrap;gap:8px;}
+  .card-title{font-size:13.5px;}
+  .card-body{padding:16px;}
+  /* Stats — ສົມສ່ວນດີຂຶ້ນ */
+  .stats-grid{gap:10px;margin-bottom:1.1rem;grid-template-columns:1fr 1fr;}
+  .stat-card{padding:14px 16px;border-radius:var(--radius-lg);}
+  .stat-card::before{height:3px;}
+  .stat-num{font-size:24px;}
+  .stat-lbl{font-size:10.5px;margin-bottom:7px;}
+  .stat-sub{font-size:10.5px;margin-top:5px;}
+  /* Filters — stack ສະຫງ່າງາມ */
+  [id$="-search"]{font-size:14.5px!important;padding:11px 14px!important;border-radius:var(--radius)!important;}
+  select[id*="-f-"],input[type="date"][id*="-f-"]{min-width:0!important;flex:1 1 calc(50% - 4px)!important;font-size:13px!important;padding:9px 11px!important;border-radius:var(--radius-sm)!important;}
   /* Buttons */
-  .btn{padding:10px 14px;font-size:13px;min-height:42px;}
-  .btn-sm{padding:7px 10px;font-size:12px;min-height:34px;}
-  .btn-row{flex-wrap:wrap;}
+  .btn{padding:11px 16px;font-size:13.5px;min-height:42px;border-radius:var(--radius);}
+  .btn-sm{padding:7px 12px;font-size:12.5px;min-height:34px;border-radius:var(--radius-sm);}
+  .btn-row{flex-wrap:wrap;gap:8px;}
   /* Form fields */
-  .field input,.field select,.field textarea{font-size:16px;padding:10px 12px;}/* 16px ກັນ iOS zoom */
-  .field label{font-size:11px;}
-  /* Modal */
-  .modal-overlay{padding:0.5rem;}
-  .modal-box{max-height:94vh;border-radius:16px;}
-  .modal-hd{padding:12px 14px;}
-  .modal-title{font-size:14px;}
-  .modal-body{padding:14px;}
-  .detail-row{flex-direction:column;gap:2px;padding:8px 0;}
+  .field input,.field select,.field textarea{font-size:16px;padding:12px 14px;border-radius:var(--radius);} /* 16px ກັນ iOS zoom */
+  .field label{font-size:11.5px;margin-bottom:6px;}
+  /* Modal — bottom sheet style ໃນໂທລະສັບ */
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal-box{max-height:92vh;border-radius:var(--radius-2xl) var(--radius-2xl) 0 0;animation:modalSlideUp 0.35s cubic-bezier(0.16,1,0.3,1);margin-bottom:env(safe-area-inset-bottom);}
+  .modal-hd{padding:14px 18px;border-radius:var(--radius-2xl) var(--radius-2xl) 0 0;}
+  .modal-hd::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:99px;background:var(--border2);}
+  .modal-hd{padding-top:20px;}
+  .modal-title{font-size:15px;}
+  .modal-body{padding:18px;}
+  .detail-row{flex-direction:column;gap:3px;padding:10px 0;}
   .detail-lbl{width:auto;font-size:11px;}
-  .detail-val{font-size:13px;}
+  .detail-val{font-size:13.5px;}
   /* Table */
-  table{font-size:12px;}
-  th{padding:7px 8px;font-size:9px;}
-  td{padding:7px 8px;}
-  /* Header */
-  .brand-name{font-size:13px;}
-  .brand-sub{font-size:10px;}
-  .date-chip{font-size:9px;padding:3px 6px;}
-  /* Bottom nav */
-  .bn-icon{font-size:16px;}
-  .bn-item{font-size:9px;}
+  table{font-size:12.5px;}
+  th{padding:9px 10px;font-size:10px;}
+  td{padding:9px 10px;}
+  /* Bottom nav — modern + safe area */
+  .bn-icon{font-size:18px;}
+  .bn-item{font-size:9.5px;padding:7px 2px;}
+  .bn-item.active::after{width:22px;}
+  /* Login — fit ໂທລະສັບ */
+  #login-screen{padding:1.25rem;}
 }
+@keyframes modalSlideUp{from{opacity:0;transform:translateY(60px);}to{opacity:1;transform:translateY(0);}}
 /* === VIEWER MODE: ບລັອກປຸ່ມແກ້ໄຂ === */
 body.viewer-mode .modal-body .btn-grad,
 body.viewer-mode .modal-body .btn-green,
@@ -272,11 +298,25 @@ body.viewer-mode .viewer-badge{display:inline-flex!important;}
 .viewer-badge{display:none;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;background:rgba(33,118,217,0.1);color:#2176d9;font-size:10px;font-weight:700;border:1px solid rgba(33,118,217,0.3);margin-left:8px;}
 
 @media(max-width:380px){
+  .main{padding:12px 12px 16px;}
   .frow.c3{grid-template-columns:1fr;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .stat-num{font-size:20px;}
+  .stat-num{font-size:21px;}
+  .stat-card{padding:12px 14px;}
   select[id*="-f-"],input[type="date"][id*="-f-"]{flex:1 1 100%!important;}
-  .page-title{font-size:16px;}
+  .page-title{font-size:20px;}
+  .card-hd{padding:11px 14px;}
+  .card-body{padding:14px;}
+  .brand-name{font-size:12.5px;}
+  .brand-sub{font-size:10px;}
+  .logo{width:30px;height:30px;font-size:9.5px;}
+  .topbar-btn{width:28px;height:28px;font-size:13px;}
+  .modal-body{padding:16px;}
+  .bn-icon{font-size:17px;}
+}
+/* Landscape phone — pad sides */
+@media(max-width:899px) and (orientation:landscape){
+  .main{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));}
+  .topbar{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));}
 }
 </style>
 <script>
