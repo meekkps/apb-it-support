@@ -1736,6 +1736,60 @@ function updStats(){
   if(g('s-rpt'))g('s-rpt').textContent=DB.rpt.length;
   if(g('s-done'))g('s-done').textContent=done;
 }
+/* === Dashboard helpers === */
+function timeAgo(dt,tm){
+  if(!dt)return '';
+  try{
+    const t=new Date(dt+'T'+(tm||'00:00')).getTime();
+    if(!t)return fmtDate(dt);
+    const diff=Date.now()-t;
+    if(diff<0)return fmtDate(dt);
+    const mins=Math.floor(diff/60000);
+    if(mins<1)return 'ດຽວນີ້';
+    if(mins<60)return mins+' ນທ ກ່ອນ';
+    const hrs=Math.floor(mins/60);
+    if(hrs<24)return hrs+' ຊມ ກ່ອນ';
+    const days=Math.floor(hrs/24);
+    if(days<30)return days+' ມື້ກ່ອນ';
+    const mos=Math.floor(days/30);
+    if(mos<12)return mos+' ເດືອນກ່ອນ';
+    return Math.floor(mos/12)+' ປີກ່ອນ';
+  }catch(e){return fmtDate(dt);}
+}
+function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderDashItem(r,kind,critical){
+  const isATM=kind==='atm';
+  const handler=isATM?'showATMDetail':'showRepDetail';
+  const icon=critical?'🚨':(isATM?'◫':'⚙');
+  const iconColor=critical?'var(--red)':(isATM?'var(--p)':'var(--cyan)');
+  const iconBg=critical?'rgba(239,68,68,0.1)':(isATM?'rgba(59,130,246,0.1)':'rgba(6,182,212,0.1)');
+  const title=isATM?(r.atmId||'—'):(r.dv||'—');
+  const branch=r.br||'—';
+  const type=isATM?(r.tp||''):'';
+  const desc=isATM?(r.ds||r.ac||''):(r.is||r.rs||'');
+  const requester=isATM?(r.rq||''):(r.tc||'');
+  const requesterLbl=isATM?'ຜູ້ຮ້ອງ':'ຊ່າງ';
+  const ago=timeAgo(r.dt,r.tm);
+  const dateStr=fmtDate(r.dt)+(r.tm?' '+fmtTime(r.tm):'');
+  const titleColor=critical?'var(--red)':'var(--text)';
+  return `<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='var(--bg1)'" onmouseout="this.style.background='transparent'" onclick="${handler}(${r.id})">
+    <div style="width:38px;height:38px;border-radius:10px;background:${iconBg};color:${iconColor};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:700;">${icon}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+        <div style="font-weight:600;color:${titleColor};font-size:14px;letter-spacing:-0.01em;">${escHtml(title)} · ${escHtml(branch)}</div>
+        ${sbadge(r.st)}
+      </div>
+      ${type?`<div style="display:inline-block;font-size:11px;font-weight:500;color:var(--p2);background:rgba(59,130,246,0.08);padding:2px 8px;border-radius:6px;margin-bottom:6px;">${escHtml(type)}</div>`:''}
+      ${desc?`<div style="font-size:12.5px;color:var(--text);margin-bottom:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escHtml(desc)}</div>`:''}
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--text2);">
+        ${requester?`<span>👤 ${escHtml(requester)}</span>`:''}
+        <span title="${dateStr}">⏱ ${ago}</span>
+        <span style="color:var(--text3);">${dateStr}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderDash(){
   // Apply global filter
   const q=(v('dash-search')||'').toLowerCase();
@@ -1772,11 +1826,18 @@ function renderDash(){
   // Critical
   const crits=atms.filter(x=>x.st==='critical');
   const cc=g('critical-card');if(cc){cc.style.display=crits.length?'block':'none';if(g('critical-cnt'))g('critical-cnt').textContent=crits.length;}
-  if(g('critical-list'))g('critical-list').innerHTML=crits.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="showATMDetail(${r.id})"><div style="font-size:20px;">🚨</div><div style="flex:1;"><div style="font-weight:600;color:var(--red);">${r.atmId} · ${r.br||'—'}</div><div style="font-size:12px;color:var(--text2);">${r.tp||'—'} · ${fmtDate(r.dt)}</div></div>${sbadge(r.st)}</div>`).join('');
+  if(g('critical-list'))g('critical-list').innerHTML=crits.map(r=>renderDashItem(r,'atm',true)).join('');
   // Pending
-  const pend=[...atms.filter(x=>x.st!=='done').map(x=>({id:x.id,type:'atm',icon:'◫',title:x.atmId+' · '+x.br,sub:x.tp+' · '+fmtDate(x.dt),st:x.st,c:'var(--p2)'})),...reps.filter(x=>x.st!=='done').map(x=>({id:x.id,type:'rep',icon:'⚙',title:x.dv+(x.br?' · '+x.br:''),sub:fmtDate(x.dt),st:x.st,c:'var(--cyan)'}))];
+  const pend=[
+    ...atms.filter(x=>x.st!=='done').map(x=>({_kind:'atm',...x})),
+    ...reps.filter(x=>x.st!=='done').map(x=>({_kind:'rep',...x}))
+  ].sort((a,b)=>{
+    const at=new Date((a.dt||'')+'T'+(a.tm||'00:00')).getTime()||0;
+    const bt=new Date((b.dt||'')+'T'+(b.tm||'00:00')).getTime()||0;
+    return bt-at;
+  });
   if(g('pending-cnt'))g('pending-cnt').textContent=pend.length;
-  if(g('pending-list'))g('pending-list').innerHTML=pend.length?pend.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="${r.type==='atm'?'showATMDetail':'showRepDetail'}(${r.id})"><div style="font-size:18px;color:${r.c};">${r.icon}</div><div style="flex:1;"><div style="font-weight:600;color:var(--text);">${r.title}</div><div style="font-size:12px;color:var(--text2);">${r.sub}</div></div>${sbadge(r.st)}</div>`).join(''):'<div style="text-align:center;padding:1.5rem;color:var(--green);">✅ ບໍ່ມີລາຍການຄ້າງ</div>';
+  if(g('pending-list'))g('pending-list').innerHTML=pend.length?pend.map(r=>renderDashItem(r,r._kind,false)).join(''):'<div style="text-align:center;padding:1.5rem;color:var(--green);">✅ ບໍ່ມີລາຍການຄ້າງ</div>';
   // Branch chart with expandable details
   const bm={};
   [...atms,...reps].forEach(x=>{const b=x.br||'ບໍ່ລະບຸ';bm[b]=(bm[b]||0)+1;});
@@ -2369,12 +2430,13 @@ function renderIP(){
   const c=g('ip-list');
   if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີ IP</div>';return;}
   c.innerHTML=`<div class="tbl-wrap"><table>
-    <thead><tr><th>#</th><th>ຊື່ຄອມ</th><th>IP Address</th><th>ໜ່ວຍ</th><th>OS</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>
+    <thead><tr><th>#</th><th>ຊື່ຄອມ</th><th>IP Address</th><th>ໜ່ວຍ</th><th>👤 ຜູ້ໃຊ້</th><th>OS</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>
     <tbody>${list.map((r,i)=>`<tr>
       <td style="color:var(--text2);">${i+1}</td>
       <td style="font-weight:700;color:var(--p2);">${r.name}</td>
       <td style="font-family:'Space Mono',monospace;font-size:12px;color:var(--cyan);">${r.addr||'—'}</td>
       <td style="color:var(--text2);">${r.br||'—'}</td>
+      <td style="color:var(--text);font-weight:500;">${r.user?escHtml(r.user):'<span style="color:var(--text3);">—</span>'}</td>
       <td style="font-size:12px;color:var(--text2);">${r.os||'—'}</td>
       <td>${ipBadge(r.st)}</td>
       <td style="text-align:center;"><div style="display:inline-flex;gap:4px;">
