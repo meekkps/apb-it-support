@@ -282,6 +282,90 @@ body.dark .toast{background:#f1f5f9;color:#0f172a;}
   #login-screen{padding:1.25rem;}
 }
 @keyframes modalSlideUp{from{opacity:0;transform:translateY(60px);}to{opacity:1;transform:translateY(0);}}
+/* === STAT CARDS — Effects ສຳລັບທຸກ card === */
+.stat-card{cursor:default;}
+.stat-card::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(255,255,255,0.4),transparent 60%);opacity:0;transition:opacity 0.4s ease;pointer-events:none;}
+.stat-card:hover{transform:translateY(-4px) scale(1.02);}
+.stat-card:hover::after{opacity:0.6;}
+.stat-card:hover .stat-num{transform:scale(1.08);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.stat-card .stat-num{display:inline-block;transition:transform 0.3s ease;}
+
+
+/* Card 1 — ATM (Blue/Cyan) */
+.stat-card:nth-child(1):hover{box-shadow:0 12px 28px rgba(59,130,246,0.25),0 0 40px rgba(6,182,212,0.15)!important;border-color:rgba(59,130,246,0.3)!important;}
+.stat-card:nth-child(1)::before{box-shadow:0 0 12px rgba(59,130,246,0.5);}
+
+/* Card 2 — Repair (Pink/Purple) */
+.stat-card:nth-child(2):hover{box-shadow:0 12px 28px rgba(236,72,153,0.25),0 0 40px rgba(139,92,246,0.15)!important;border-color:rgba(236,72,153,0.3)!important;}
+.stat-card:nth-child(2)::before{box-shadow:0 0 12px rgba(236,72,153,0.5);}
+
+/* Card 4 — Done (Green) */
+.stat-card:nth-child(4):hover{box-shadow:0 12px 28px rgba(245,158,11,0.25),0 0 40px rgba(236,72,153,0.15)!important;border-color:rgba(245,158,11,0.3)!important;}
+.stat-card:nth-child(4)::before{box-shadow:0 0 12px rgba(245,158,11,0.5);}
+
+/* Floating number animation when has count */
+.stat-num{position:relative;}
+.stat-card:hover .stat-num::before{content:'';position:absolute;inset:-8px;background:currentColor;opacity:0.1;filter:blur(20px);z-index:-1;border-radius:50%;animation:numberPulse 1.5s ease-in-out infinite;}
+@keyframes numberPulse{0%,100%{opacity:0.1;transform:scale(1);}50%{opacity:0.25;transform:scale(1.2);}}
+
+/* Sparkle on hover */
+.stat-card:hover::before{animation:topBarShine 1.5s ease-in-out infinite;}
+@keyframes topBarShine{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4) saturate(1.3);}}
+
+/* Subtle floating animation when idle */
+@keyframes statFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-2px);}}
+.stat-card:nth-child(1){animation:statFloat 4s ease-in-out infinite;}
+.stat-card:nth-child(2){animation:statFloat 4s ease-in-out infinite 0.5s;}
+.stat-card:nth-child(3){animation:statFloat 4s ease-in-out infinite 1s;}
+.stat-card:nth-child(4){animation:statFloat 4s ease-in-out infinite 1.5s;}
+.stat-card:hover{animation:none;}
+
+/* === PENDING STAT CARD — ໂດດເດັ່ນ === */
+.stat-pending{position:relative;overflow:hidden;transition:all 0.3s ease;}
+.stat-pending::before{background:linear-gradient(135deg,#f59e0b,#ef4444)!important;height:3px!important;}
+.stat-pending.has-pending{background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(239,68,68,0.04))!important;border-color:rgba(245,158,11,0.25)!important;animation:pendingPulse 2.5s ease-in-out infinite;}
+.stat-pending.has-pending::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 50%,rgba(245,158,11,0.15),transparent 40%);animation:pendingGlow 4s ease-in-out infinite;pointer-events:none;}
+.stat-pending.has-pending .stat-num{background:linear-gradient(135deg,#f59e0b,#ef4444)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;animation:numberBounce 2s ease-in-out infinite;display:inline-block;}
+.stat-pending.has-pending .stat-lbl::before{content:'⚠ ';color:#f59e0b;animation:warnBlink 1.2s ease-in-out infinite;}
+.stat-pending:hover{transform:translateY(-3px) scale(1.02)!important;box-shadow:0 12px 28px rgba(245,158,11,0.25),0 4px 10px rgba(239,68,68,0.15)!important;}
+.stat-pending.has-pending:hover{box-shadow:0 0 0 1px rgba(245,158,11,0.3),0 12px 32px rgba(245,158,11,0.35),0 0 50px rgba(239,68,68,0.2)!important;}
+@keyframes pendingPulse{
+  0%,100%{box-shadow:0 1px 3px rgba(245,158,11,0.15),0 0 0 0 rgba(245,158,11,0.3);}
+  50%{box-shadow:0 4px 14px rgba(245,158,11,0.25),0 0 0 6px rgba(245,158,11,0);}
+}
+@keyframes pendingGlow{0%,100%{transform:translate(0,0) rotate(0deg);opacity:0.6;}50%{transform:translate(10%,5%) rotate(180deg);opacity:1;}}
+@keyframes numberBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+@keyframes warnBlink{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* === DASH ITEMS === */
+.dash-item{display:flex;gap:12px;padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.25s ease;border-radius:var(--radius);position:relative;overflow:hidden;}
+.dash-item:hover{background:var(--bg1);transform:translateX(2px);}
+.dash-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:700;transition:all 0.3s ease;position:relative;}
+.dash-item:hover .dash-icon{transform:scale(1.08);}
+
+/* === FIRE GLOW for CRITICAL items === */
+.dash-item-critical{position:relative;}
+.dash-item-critical::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(239,68,68,0),rgba(251,146,60,0),rgba(239,68,68,0));opacity:0;transition:opacity 0.3s ease;pointer-events:none;z-index:0;}
+.dash-item-critical:hover{background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(251,146,60,0.05))!important;box-shadow:0 0 0 1px rgba(239,68,68,0.15),0 8px 24px rgba(239,68,68,0.2),0 0 40px rgba(239,68,68,0.15);transform:translateX(2px) translateY(-1px);}
+.dash-item-critical:hover .dash-icon[data-critical]{background:radial-gradient(circle at center,#fbbf24,#ef4444)!important;color:#fff!important;box-shadow:0 0 0 4px rgba(239,68,68,0.15),0 0 20px rgba(239,68,68,0.6),0 0 40px rgba(251,146,60,0.4);animation:fireFlicker 0.6s ease-in-out infinite alternate;transform:scale(1.15);}
+.dash-item-critical:hover .dash-icon-inner{animation:fireShake 0.4s ease-in-out infinite;display:inline-block;filter:drop-shadow(0 0 6px rgba(255,200,100,0.8));}
+@keyframes fireFlicker{
+  0%{box-shadow:0 0 0 4px rgba(239,68,68,0.15),0 0 20px rgba(239,68,68,0.6),0 0 40px rgba(251,146,60,0.4);}
+  50%{box-shadow:0 0 0 4px rgba(251,146,60,0.2),0 0 28px rgba(251,146,60,0.8),0 0 50px rgba(239,68,68,0.5);}
+  100%{box-shadow:0 0 0 4px rgba(239,68,68,0.2),0 0 22px rgba(239,68,68,0.7),0 0 45px rgba(251,146,60,0.5);}
+}
+@keyframes fireShake{0%,100%{transform:translateY(0) rotate(0);}25%{transform:translateY(-1px) rotate(-3deg);}75%{transform:translateY(-1px) rotate(3deg);}}
+
+/* Fire particles effect */
+.dash-item-critical:hover::after{content:'🔥🔥🔥';position:absolute;left:30px;top:50%;transform:translateY(-50%);font-size:18px;letter-spacing:-4px;opacity:0;animation:fireRise 0.8s ease-out forwards;pointer-events:none;z-index:0;filter:blur(0.3px);}
+@keyframes fireRise{0%{opacity:0;transform:translateY(-30%) scale(0.6);}30%{opacity:0.7;}100%{opacity:0;transform:translateY(-180%) scale(1.3);}}
+
+/* === BAR ANIMATIONS === */
+.bar-fill{animation:barGrow 0.8s cubic-bezier(0.16,1,0.3,1);transform-origin:left center;position:relative;}
+@keyframes barGrow{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+.bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);background-size:200% 100%;animation:barShine 3s infinite;border-radius:inherit;pointer-events:none;}
+@keyframes barShine{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
 /* === VIEWER MODE: ບລັອກປຸ່ມແກ້ໄຂ === */
 body.viewer-mode .modal-body .btn-grad,
 body.viewer-mode .modal-body .btn-green,
@@ -533,7 +617,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-lbl">ATM</div><div class="stat-num" id="s-atm">0</div><div class="stat-sub" id="s-atm2">Open: 0</div></div>
     <div class="stat-card"><div class="stat-lbl">ສ້ອມແປງ</div><div class="stat-num" id="s-rep">0</div><div class="stat-sub" id="s-rep2">ຄ້າງ: 0</div></div>
-    <div class="stat-card"><div class="stat-lbl">ລາຍງານ</div><div class="stat-num" id="s-rpt">0</div><div class="stat-sub">ສ່ງໜ່ວຍໜ້າ</div></div>
+    <div class="stat-card stat-pending" id="card-pending"><div class="stat-lbl">ການທີ່ຄ້າງ</div><div class="stat-num" id="s-pending">0</div><div class="stat-sub" id="s-pending-sub">ATM 0 · ສ້ອມ 0</div></div>
     <div class="stat-card"><div class="stat-lbl">ສຳເລັດ</div><div class="stat-num" id="s-done">0</div><div class="stat-sub">ທັງໝົດ</div></div>
   </div>
   <!-- Today -->
@@ -567,16 +651,22 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
   <div class="card">
     <div class="card-hd"><span class="card-title"><span class="cdot"></span>⏱ ເວລາແກ້ໄຂສະເລ່ຍ (SLA)</span><span style="font-size:11px;color:var(--text2);" id="sla-info">—</span></div>
     <div class="card-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;">
-        <div style="padding:14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg1);">
-          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="sla-atm">—</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px;">◫ ATM</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;" id="sla-atm-n">0 cases</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(6,182,212,0.04));position:relative;overflow:hidden;transition:transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 10px rgba(59,130,246,0.3);">◫</div>
+            <div style="font-size:10px;font-weight:600;color:var(--text3);" id="sla-atm-n">0 cases</div>
+          </div>
+          <div style="font-size:26px;font-weight:700;background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.025em;line-height:1.1;" id="sla-atm">—</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;font-weight:500;">ATM · ສະເລ່ຍ</div>
         </div>
-        <div style="padding:14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg1);">
-          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="sla-rep">—</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px;">⚙ ສ້ອມແປງ</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px;" id="sla-rep-n">0 cases</div>
+        <div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(6,182,212,0.04));position:relative;overflow:hidden;transition:transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 10px rgba(16,185,129,0.3);">⚙</div>
+            <div style="font-size:10px;font-weight:600;color:var(--text3);" id="sla-rep-n">0 cases</div>
+          </div>
+          <div style="font-size:26px;font-weight:700;background:linear-gradient(135deg,#10b981,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.025em;line-height:1.1;" id="sla-rep">—</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;font-weight:500;">ສ້ອມແປງ · ສະເລ່ຍ</div>
         </div>
       </div>
     </div>
@@ -1729,12 +1819,17 @@ function updStats(){
   const aOpen=DB.atm.filter(x=>x.st!=='done').length;
   const rOpen=DB.rep.filter(x=>x.st!=='done').length;
   const done=DB.atm.filter(x=>x.st==='done').length+DB.rep.filter(x=>x.st==='done').length;
+  const pending=aOpen+rOpen;
   if(g('s-atm'))g('s-atm').textContent=DB.atm.length;
   if(g('s-atm2'))g('s-atm2').textContent='Open: '+aOpen;
   if(g('s-rep'))g('s-rep').textContent=DB.rep.length;
   if(g('s-rep2'))g('s-rep2').textContent='ຄ້າງ: '+rOpen;
-  if(g('s-rpt'))g('s-rpt').textContent=DB.rpt.length;
+  if(g('s-pending'))g('s-pending').textContent=pending;
+  if(g('s-pending-sub'))g('s-pending-sub').textContent='ATM '+aOpen+' · ສ້ອມ '+rOpen;
   if(g('s-done'))g('s-done').textContent=done;
+  // Toggle "alert" class if has pending
+  const cp=g('card-pending');
+  if(cp)cp.classList.toggle('has-pending',pending>0);
 }
 /* === Dashboard helpers === */
 function timeAgo(dt,tm){
@@ -1768,12 +1863,14 @@ function renderDashItem(r,kind,critical){
   const type=isATM?(r.tp||''):'';
   const desc=isATM?(r.ds||r.ac||''):(r.is||r.rs||'');
   const requester=isATM?(r.rq||''):(r.tc||'');
-  const requesterLbl=isATM?'ຜູ້ຮ້ອງ':'ຊ່າງ';
   const ago=timeAgo(r.dt,r.tm);
   const dateStr=fmtDate(r.dt)+(r.tm?' '+fmtTime(r.tm):'');
   const titleColor=critical?'var(--red)':'var(--text)';
-  return `<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='var(--bg1)'" onmouseout="this.style.background='transparent'" onclick="${handler}(${r.id})">
-    <div style="width:38px;height:38px;border-radius:10px;background:${iconBg};color:${iconColor};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:700;">${icon}</div>
+  const itemClass=critical?'dash-item dash-item-critical':'dash-item';
+  return `<div class="${itemClass}" onclick="${handler}(${r.id})">
+    <div class="dash-icon"${critical?' data-critical="1"':''} style="background:${iconBg};color:${iconColor};">
+      <span class="dash-icon-inner">${icon}</span>
+    </div>
     <div style="flex:1;min-width:0;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
         <div style="font-weight:600;color:${titleColor};font-size:14px;letter-spacing:-0.01em;">${escHtml(title)} · ${escHtml(branch)}</div>
@@ -1843,7 +1940,7 @@ function renderDash(){
   [...atms,...reps].forEach(x=>{const b=x.br||'ບໍ່ລະບຸ';bm[b]=(bm[b]||0)+1;});
   const branches=Object.entries(bm).sort((a,b)=>b[1]-a[1]);
   const maxV=branches.length?branches[0][1]:1;
-  if(g('branch-chart'))g('branch-chart').innerHTML=branches.length?'<div style="display:flex;flex-direction:column;gap:6px;">'+branches.map((entry,i)=>{
+  if(g('branch-chart'))g('branch-chart').innerHTML=branches.length?'<div style="display:flex;flex-direction:column;gap:4px;">'+branches.map((entry,i)=>{
     const br=entry[0],cnt=entry[1];
     const brAtms=atms.filter(x=>(x.br||'ບໍ່ລະບຸ')===br);
     const brReps=reps.filter(x=>(x.br||'ບໍ່ລະບຸ')===br);
@@ -1852,25 +1949,25 @@ function renderDash(){
     const detailId='br-detail-'+i;
     const aPct=Math.round(brAtms.length/maxV*100);
     const rPct=Math.round(brReps.length/maxV*100);
-    return '<div style="border-bottom:1px solid var(--border);padding-bottom:8px;">'
-      +'<div onclick="toggleBranchDetail(\''+detailId+'\',this)" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0;">'
-      +'<span style="font-size:12px;color:var(--text2);width:14px;flex-shrink:0;transition:transform 0.2s;">▶</span>'
-      +'<div style="font-size:13px;color:var(--text);width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;">'+br+'</div>'
-      +'<div style="flex:1;display:flex;flex-direction:column;gap:3px;">'
-        +'<div style="display:flex;align-items:center;gap:8px;">'
-          +'<span style="font-size:10px;color:var(--p);width:36px;font-weight:600;">◫ATM</span>'
-          +'<div style="flex:1;background:var(--bg2);border-radius:5px;height:16px;overflow:hidden;">'
-            +(brAtms.length?'<div style="height:100%;width:'+aPct+'%;background:var(--grad1);border-radius:5px;display:flex;align-items:center;padding-left:6px;min-width:24px;"><span style="font-size:10px;font-weight:700;color:#fff;">'+brAtms.length+'</span></div>':'')
+    return '<div style="border-radius:var(--radius);padding:4px;transition:background 0.2s;" onmouseover="this.style.background=\'var(--bg1)\'" onmouseout="this.style.background=\'transparent\'">'
+      +'<div onclick="toggleBranchDetail(\''+detailId+'\',this)" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:8px 8px;">'
+      +'<span style="font-size:10px;color:var(--text3);width:12px;flex-shrink:0;transition:transform 0.25s ease;">▶</span>'
+      +'<div style="font-size:13px;color:var(--text);width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;letter-spacing:-0.01em;">'+br+'</div>'
+      +'<div style="flex:1;display:flex;flex-direction:column;gap:4px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;">'
+          +'<span style="font-size:10px;color:var(--p);width:40px;font-weight:600;">◫ ATM</span>'
+          +'<div style="flex:1;background:var(--bg2);border-radius:99px;height:14px;overflow:hidden;position:relative;">'
+            +(brAtms.length?'<div class="bar-fill" style="height:100%;width:'+aPct+'%;background:linear-gradient(90deg,#3b82f6,#06b6d4);border-radius:99px;display:flex;align-items:center;padding:0 8px;min-width:28px;box-shadow:0 1px 3px rgba(59,130,246,0.3);position:relative;overflow:hidden;"><span style="font-size:10px;font-weight:700;color:#fff;position:relative;z-index:1;">'+brAtms.length+'</span></div>':'')
           +'</div>'
         +'</div>'
-        +'<div style="display:flex;align-items:center;gap:8px;">'
-          +'<span style="font-size:10px;color:var(--cyan);width:36px;font-weight:600;">⚙ສ້ອມ</span>'
-          +'<div style="flex:1;background:var(--bg2);border-radius:5px;height:16px;overflow:hidden;">'
-            +(brReps.length?'<div style="height:100%;width:'+rPct+'%;background:var(--grad3);border-radius:5px;display:flex;align-items:center;padding-left:6px;min-width:24px;"><span style="font-size:10px;font-weight:700;color:#fff;">'+brReps.length+'</span></div>':'')
+        +'<div style="display:flex;align-items:center;gap:10px;">'
+          +'<span style="font-size:10px;color:var(--cyan);width:40px;font-weight:600;">⚙ ສ້ອມ</span>'
+          +'<div style="flex:1;background:var(--bg2);border-radius:99px;height:14px;overflow:hidden;position:relative;">'
+            +(brReps.length?'<div class="bar-fill" style="height:100%;width:'+rPct+'%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:99px;display:flex;align-items:center;padding:0 8px;min-width:28px;box-shadow:0 1px 3px rgba(16,185,129,0.3);position:relative;overflow:hidden;"><span style="font-size:10px;font-weight:700;color:#fff;position:relative;z-index:1;">'+brReps.length+'</span></div>':'')
           +'</div>'
         +'</div>'
       +'</div>'
-      +'<div style="font-size:11px;color:var(--text2);width:80px;text-align:right;">ລວມ:'+cnt+'</div>'
+      +'<div style="font-size:11px;color:var(--text2);width:70px;text-align:right;font-weight:600;">ລວມ <span style="color:var(--text);font-size:13px;">'+cnt+'</span></div>'
       +'</div>'
       +'<div id="'+detailId+'" style="display:none;padding:8px 0 4px 30px;">'
       +(brAtms.length?'<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:4px;">◫ ATM ('+brAtms.length+') · ✅'+aDone+'/'+brAtms.length+'</div>'+brAtms.slice().reverse().slice(0,10).map(r=>'<div onclick="event.stopPropagation();showATMDetail('+r.id+')" style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;" onmouseover="this.style.background=\'var(--bg1)\'" onmouseout="this.style.background=\'\'"><span style="color:var(--p2);font-weight:600;min-width:90px;">'+r.atmId+'</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.tp||'—')+'</span>'+sbadge(r.st)+'</div>').join(''):'')
@@ -1942,23 +2039,43 @@ function renderTrend(atmsArg,repsArg){
   loadChartThen(()=>{
     const ctx=g('trend-chart');if(!ctx)return;
     const isDark=document.body.classList.contains('dark');
-    const grid=isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)';
-    const text=isDark?'#c0bedd':'#4a6080';
+    const grid=isDark?'rgba(255,255,255,0.06)':'rgba(15,23,42,0.05)';
+    const text=isDark?'#94a3b8':'#64748b';
+    const bg=isDark?'#16161f':'#ffffff';
     if(_trendChart)_trendChart.destroy();
+    // Create gradient fills
+    const c2d=ctx.getContext('2d');
+    const gradATM=c2d.createLinearGradient(0,0,0,240);
+    gradATM.addColorStop(0,'rgba(59,130,246,0.35)');gradATM.addColorStop(1,'rgba(59,130,246,0)');
+    const gradRep=c2d.createLinearGradient(0,0,0,240);
+    gradRep.addColorStop(0,'rgba(6,182,212,0.35)');gradRep.addColorStop(1,'rgba(6,182,212,0)');
     _trendChart=new Chart(ctx,{
       type:'line',
       data:{labels:labels,datasets:[
-        {label:'ATM',data:aCnt,borderColor:'#4199ec',backgroundColor:'rgba(65,153,236,0.12)',tension:0.35,fill:true,borderWidth:2,pointRadius:2},
-        {label:'ສ້ອມແປງ',data:rCnt,borderColor:'#0abfcc',backgroundColor:'rgba(10,191,204,0.12)',tension:0.35,fill:true,borderWidth:2,pointRadius:2},
-        {label:'ສຳເລັດ',data:dCnt,borderColor:'#0fa968',backgroundColor:'rgba(15,169,104,0.10)',tension:0.35,fill:false,borderWidth:2,pointRadius:2,borderDash:[5,4]}
+        {label:'ATM',data:aCnt,borderColor:'#3b82f6',backgroundColor:gradATM,tension:0.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:6,pointHoverBackgroundColor:'#3b82f6',pointHoverBorderColor:'#fff',pointHoverBorderWidth:2.5},
+        {label:'ສ້ອມແປງ',data:rCnt,borderColor:'#06b6d4',backgroundColor:gradRep,tension:0.4,fill:true,borderWidth:2.5,pointRadius:0,pointHoverRadius:6,pointHoverBackgroundColor:'#06b6d4',pointHoverBorderColor:'#fff',pointHoverBorderWidth:2.5},
+        {label:'ສຳເລັດ',data:dCnt,borderColor:'#10b981',backgroundColor:'transparent',tension:0.4,fill:false,borderWidth:2,borderDash:[6,4],pointRadius:0,pointHoverRadius:6,pointHoverBackgroundColor:'#10b981',pointHoverBorderColor:'#fff',pointHoverBorderWidth:2.5}
       ]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:text,font:{family:'Noto Sans Lao',size:11}}}},
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{labels:{color:text,font:{family:'Noto Sans Lao',size:12,weight:'500'},usePointStyle:true,pointStyle:'circle',padding:14,boxWidth:8,boxHeight:8}},
+          tooltip:{
+            backgroundColor:isDark?'rgba(15,23,42,0.95)':'rgba(255,255,255,0.98)',
+            titleColor:isDark?'#f1f5f9':'#0f172a',bodyColor:isDark?'#cbd5e1':'#475569',
+            borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(15,23,42,0.08)',borderWidth:1,
+            padding:12,cornerRadius:10,displayColors:true,boxPadding:6,
+            titleFont:{family:'Noto Sans Lao',size:12,weight:'600'},
+            bodyFont:{family:'Noto Sans Lao',size:12},
+            usePointStyle:true,boxWidth:8,boxHeight:8
+          }
+        },
         scales:{
-          x:{grid:{color:grid},ticks:{color:text,font:{size:10}}},
-          y:{grid:{color:grid},ticks:{color:text,font:{size:10},stepSize:1},beginAtZero:true}
-        }
+          x:{grid:{color:grid,display:false},ticks:{color:text,font:{size:10},maxRotation:0},border:{display:false}},
+          y:{grid:{color:grid},ticks:{color:text,font:{size:10},stepSize:1,padding:8},beginAtZero:true,border:{display:false}}
+        },
+        animation:{duration:800,easing:'easeOutQuart'}
       }
     });
   });
@@ -1974,20 +2091,26 @@ function renderTopIssues(atms,reps){
   const tpMax=tpTop.length?tpTop[0][1]:1;
   const dvMax=dvTop.length?dvTop[0][1]:1;
   const c=g('top-issues');if(!c)return;
-  const renderBars=(list,max,color)=>list.map(([k,v])=>{
+  const renderBars=(list,max,color,shadow)=>list.map(([k,v],idx)=>{
     const pct=Math.round(v/max*100);
-    return `<div style="display:flex;align-items:center;gap:10px;padding:4px 0;font-size:13px;">
-      <div style="width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);">${k}</div>
-      <div style="flex:1;background:var(--bg2);border-radius:5px;height:14px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:${color};border-radius:5px;display:flex;align-items:center;padding-left:6px;min-width:24px;"><span style="font-size:10px;font-weight:700;color:#fff;">${v}</span></div>
+    return `<div style="display:flex;align-items:center;gap:12px;padding:7px 0;font-size:13px;">
+      <div style="width:32px;height:32px;border-radius:9px;background:${color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;box-shadow:${shadow};">${idx+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-weight:500;letter-spacing:-0.005em;font-size:13px;">${escHtml(k)}</div>
+          <div style="font-size:11px;font-weight:700;color:var(--text2);margin-left:8px;">${v} <span style="color:var(--text3);font-weight:500;">· ${pct}%</span></div>
+        </div>
+        <div style="background:var(--bg2);border-radius:99px;height:6px;overflow:hidden;">
+          <div class="bar-fill" style="height:100%;width:${pct}%;background:${color};border-radius:99px;"></div>
+        </div>
       </div>
     </div>`;
   }).join('');
   c.innerHTML=
-    `<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:6px;letter-spacing:0.05em;">◫ ATM — ປະເພດບັນຫາ</div>`
-    +(tpTop.length?renderBars(tpTop,tpMax,'var(--grad1)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>')
-    +`<div style="font-size:11px;font-weight:700;color:var(--cyan);margin:14px 0 6px;letter-spacing:0.05em;">⚙ ສ້ອມແປງ — ອຸປະກອນ</div>`
-    +(dvTop.length?renderBars(dvTop,dvMax,'var(--grad3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>');
+    `<div style="font-size:11px;font-weight:600;color:var(--p);margin-bottom:8px;letter-spacing:0.02em;text-transform:uppercase;">◫ ATM — ປະເພດບັນຫາ</div>`
+    +(tpTop.length?renderBars(tpTop,tpMax,'linear-gradient(135deg,#3b82f6,#06b6d4)','0 4px 10px rgba(59,130,246,0.3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>')
+    +`<div style="font-size:11px;font-weight:600;color:var(--cyan);margin:18px 0 8px;letter-spacing:0.02em;text-transform:uppercase;">⚙ ສ້ອມແປງ — ອຸປະກອນ</div>`
+    +(dvTop.length?renderBars(dvTop,dvMax,'linear-gradient(135deg,#10b981,#06b6d4)','0 4px 10px rgba(16,185,129,0.3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>');
 }
 
 /* ===== ACTIVITY FEED ===== */
