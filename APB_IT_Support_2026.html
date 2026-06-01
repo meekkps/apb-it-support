@@ -1387,6 +1387,29 @@ const AUDIT={
       return device+' · '+browser;
     }catch(e){return '';}
   },
+  _locCache:null,
+  async location(){
+    // Cache 1 ຊມ ເພື່ອປະຢັດ API call
+    try{
+      const cached=JSON.parse(sessionStorage.getItem('apb_loc')||'null');
+      if(cached&&(Date.now()-cached.t<3600000))return cached.d;
+    }catch(e){}
+    try{
+      const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});
+      if(!r.ok)return null;
+      const d=await r.json();
+      const loc={
+        ip:d.ip||'',
+        city:d.city||'',
+        region:d.region||'',
+        country:d.country_name||'',
+        countryCode:d.country_code||'',
+        org:d.org||''
+      };
+      try{sessionStorage.setItem('apb_loc',JSON.stringify({t:Date.now(),d:loc}));}catch(e){}
+      return loc;
+    }catch(e){return null;}
+  },
   log(action,entity,id,info){
     const e={
       ts:new Date().toISOString(),
@@ -1406,6 +1429,24 @@ const AUDIT={
     if(typeof renderAudit==='function')renderAudit();
     // Push ຂຶ້ນ Supabase (async, ບໍ່ block UI)
     if(navigator.onLine&&typeof sbPushAudit==='function')sbPushAudit();
+    // ດຶງ location ສະເພາະ login/logout (async)
+    if((action==='login'||action==='logout')&&navigator.onLine){
+      this.location().then(loc=>{
+        if(!loc)return;
+        // ຫາ event ຫລ້າສຸດ ແລະ ອັບເດດ
+        const idx=this.list.findIndex(x=>x.ts===e.ts&&x.userId===e.userId&&x.action===e.action);
+        if(idx>-1){
+          this.list[idx].ip=loc.ip;
+          this.list[idx].city=loc.city;
+          this.list[idx].country=loc.country;
+          this.list[idx].countryCode=loc.countryCode;
+          this.list[idx].org=loc.org;
+          localStorage.setItem('apb26_audit',JSON.stringify(this.list));
+          if(typeof renderAudit==='function')renderAudit();
+          if(typeof sbPushAudit==='function')sbPushAudit();
+        }
+      }).catch(()=>{});
+    }
   },
   clear(){
     if(!confirm('ລ້າງ Audit Log ທັງໝົດ?\n\n⚠️ ຈະລ້າງທັງ local + Supabase!'))return;
@@ -2855,11 +2896,21 @@ function renderLoginActivity(){
         const color=isLogin?'var(--green)':'var(--text3)';
         const bg=isLogin?'rgba(16,185,129,0.08)':'rgba(148,163,184,0.08)';
         const label=isLogin?'ເຂົ້າລະບົບ':'ອອກລະບົບ';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);margin-bottom:3px;transition:background 0.15s;" onmouseover="this.style.background='var(--bg1)'" onmouseout="this.style.background='transparent'">
-          <div style="width:28px;height:28px;border-radius:8px;background:${bg};color:${color};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">${icon}</div>
+        // ສ້າງ flag ປະເທດ
+        const flag=r.countryCode?String.fromCodePoint(...[...r.countryCode.toUpperCase()].map(c=>0x1F1E6+c.charCodeAt(0)-65)):'🌐';
+        const locStr=r.city?(flag+' '+escHtml(r.city)+(r.country?', '+escHtml(r.country):'')):'';
+        const ipStr=r.ip?'🌐 '+escHtml(r.ip):'';
+        const meta=[
+          r.device?'💻 '+escHtml(r.device):'',
+          ipStr,
+          locStr
+        ].filter(x=>x).join(' · ');
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:var(--radius-sm);margin-bottom:4px;transition:background 0.15s;border:1px solid transparent;" onmouseover="this.style.background='var(--bg1)';this.style.borderColor='var(--border)'" onmouseout="this.style.background='transparent';this.style.borderColor='transparent'">
+          <div style="width:30px;height:30px;border-radius:8px;background:${bg};color:${color};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">${icon}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;color:var(--text);"><span style="font-weight:600;">${escHtml(r.user||'—')}</span> <span style="color:var(--text2);">· ${label}</span></div>
-            <div style="font-size:11px;color:var(--text3);">${r.device?'💻 '+escHtml(r.device):''}${r.info?(r.device?' · ':'')+escHtml(r.info):''}</div>
+            <div style="font-size:13px;color:var(--text);margin-bottom:2px;"><span style="font-weight:600;">${escHtml(r.user||'—')}</span> <span style="color:var(--text2);">· ${label}</span></div>
+            ${meta?`<div style="font-size:11px;color:var(--text3);line-height:1.5;">${meta}</div>`:''}
+            ${r.org?`<div style="font-size:10.5px;color:var(--text3);margin-top:2px;">🏢 ${escHtml(r.org)}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;">
             <div style="font-size:11px;color:var(--text2);font-weight:500;">${timeAgoLog(r.ts)}</div>
