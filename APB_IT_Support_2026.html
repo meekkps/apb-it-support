@@ -1367,18 +1367,69 @@ function addATMTypeFromMgr(){
   toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
 }
 
-/* ===== AUDIT LOG ===== */
+/* ===== AUDIT LOG (with Supabase sync) ===== */
 const AUDIT={
   list:JSON.parse(localStorage.getItem('apb26_audit')||'[]'),
   who(){try{return JSON.parse(sessionStorage.getItem('apb_user')||'{}').display||'ບໍ່ຮູ້';}catch(e){return 'ບໍ່ຮູ້';}},
+  whoUser(){try{return JSON.parse(sessionStorage.getItem('apb_user')||'{}').user||'unknown';}catch(e){return 'unknown';}},
+  device(){
+    try{
+      const ua=navigator.userAgent;
+      let device='Desktop';
+      if(/Android/i.test(ua))device='Android';
+      else if(/iPhone|iPad|iPod/i.test(ua))device='iOS';
+      else if(/Mobile/i.test(ua))device='Mobile';
+      let browser='Browser';
+      if(/Edg\//i.test(ua))browser='Edge';
+      else if(/Chrome\//i.test(ua))browser='Chrome';
+      else if(/Firefox\//i.test(ua))browser='Firefox';
+      else if(/Safari\//i.test(ua))browser='Safari';
+      return device+' · '+browser;
+    }catch(e){return '';}
+  },
   log(action,entity,id,info){
-    const e={ts:new Date().toISOString(),user:this.who(),action:action,entity:entity,id:String(id||''),info:String(info||'')};
+    const e={
+      ts:new Date().toISOString(),
+      user:this.who(),
+      userId:this.whoUser(),
+      action:action,entity:entity,
+      id:String(id||''),
+      info:String(info||''),
+      device:this.device()
+    };
+    // ກວດ duplicate (ໃນ 2 ວິນາທີສຸດທ້າຍ)
+    const dup=this.list.find(x=>x.userId===e.userId&&x.action===e.action&&x.entity===e.entity&&x.id===e.id&&Math.abs(new Date(x.ts)-new Date(e.ts))<2000);
+    if(dup)return;
     this.list.unshift(e);
     if(this.list.length>1000)this.list=this.list.slice(0,1000);
     localStorage.setItem('apb26_audit',JSON.stringify(this.list));
     if(typeof renderAudit==='function')renderAudit();
+    // Push ຂຶ້ນ Supabase (async, ບໍ່ block UI)
+    if(navigator.onLine&&typeof sbPushAudit==='function')sbPushAudit();
   },
-  clear(){if(!confirm('ລ້າງ Audit Log ທັງໝົດ?'))return;this.list=[];localStorage.removeItem('apb26_audit');renderAudit();toast('🗑 ລ້າງ Log ແລ້ວ');}
+  clear(){
+    if(!confirm('ລ້າງ Audit Log ທັງໝົດ?\n\n⚠️ ຈະລ້າງທັງ local + Supabase!'))return;
+    this.list=[];
+    localStorage.removeItem('apb26_audit');
+    renderAudit();
+    // ລ້າງ Supabase ດ້ວຍ
+    if(navigator.onLine&&typeof sbPushAudit==='function')sbPushAudit();
+    toast('🗑 ລ້າງ Log ແລ້ວ');
+  },
+  mergeFromRemote(remoteList){
+    // ລວມ local + remote, ບໍ່ໃຫ້ duplicate, ຮຽງຕາມເວລາ
+    if(!Array.isArray(remoteList))return;
+    const seen=new Set();
+    const all=[...this.list,...remoteList];
+    const merged=[];
+    all.forEach(r=>{
+      const key=(r.ts||'')+'|'+(r.userId||r.user||'')+'|'+(r.action||'')+'|'+(r.entity||'')+'|'+(r.id||'');
+      if(!seen.has(key)){seen.add(key);merged.push(r);}
+    });
+    merged.sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+    this.list=merged.slice(0,1000);
+    localStorage.setItem('apb26_audit',JSON.stringify(this.list));
+  }
 };
 
 /* ===== DB ===== */
@@ -1429,6 +1480,30 @@ async function sbPullConfig(){
   }catch(e){console.error('sbPullConfig:',e);return false;}
 }
 
+/* === AUDIT SYNC === */
+let _auditPushDebounce=null;
+async function sbPushAudit(){
+  if(!navigator.onLine)return;
+  // Debounce ປ້ອງກັນ push ຫຼາຍຄັ້ງຕິດກັນ
+  if(_auditPushDebounce)clearTimeout(_auditPushDebounce);
+  _auditPushDebounce=setTimeout(async()=>{
+    try{
+      await sbUpsert('audit_data','main',AUDIT.list);
+    }catch(e){console.error('sbPushAudit:',e);}
+  },800);
+}
+async function sbPullAudit(){
+  try{
+    const rows=await sbGet('audit_data');
+    const r=rows.find(x=>x.id==='main');
+    if(r&&Array.isArray(r.data)){
+      AUDIT.mergeFromRemote(r.data);
+      if(typeof renderAudit==='function')renderAudit();
+    }
+    return true;
+  }catch(e){console.error('sbPullAudit:',e);return false;}
+}
+
 async function sbPull(){
   try{
     const [ra,rr,rp,ri]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data')]);
@@ -1444,6 +1519,7 @@ async function sbPull(){
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
     await sbPullConfig();
+    await sbPullAudit();
     return true;
   }catch(e){console.error('sbPull:',e);return false;}
 }
@@ -2783,7 +2859,7 @@ function renderLoginActivity(){
           <div style="width:28px;height:28px;border-radius:8px;background:${bg};color:${color};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">${icon}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;color:var(--text);"><span style="font-weight:600;">${escHtml(r.user||'—')}</span> <span style="color:var(--text2);">· ${label}</span></div>
-            ${r.info?`<div style="font-size:11px;color:var(--text3);">${escHtml(r.info)}</div>`:''}
+            <div style="font-size:11px;color:var(--text3);">${r.device?'💻 '+escHtml(r.device):''}${r.info?(r.device?' · ':'')+escHtml(r.info):''}</div>
           </div>
           <div style="text-align:right;flex-shrink:0;">
             <div style="font-size:11px;color:var(--text2);font-weight:500;">${timeAgoLog(r.ts)}</div>
