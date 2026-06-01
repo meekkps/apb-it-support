@@ -1013,6 +1013,36 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
       <div id="auto-backup-list"></div>
     </div>
   </div>
+  <!-- Login Activity (Back office) -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>🔐 ປະຫວັດການເຂົ້າ-ອອກລະບົບ</span>
+      <span class="nbadge" id="login-cnt">0</span>
+    </div>
+    <div class="card-body">
+      <!-- Login Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+        <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(6,182,212,0.04));">
+          <div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:4px;">🟢 ອອນລາຍປັດຈຸບັນ</div>
+          <div style="font-size:22px;font-weight:700;color:var(--green);letter-spacing:-0.025em;" id="online-cnt">0</div>
+        </div>
+        <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(6,182,212,0.04));">
+          <div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:4px;">📅 Login ມື້ນີ້</div>
+          <div style="font-size:22px;font-weight:700;color:var(--p);letter-spacing:-0.025em;" id="login-today">0</div>
+        </div>
+        <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(236,72,153,0.04));">
+          <div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:4px;">👥 ຜູ້ໃຊ້ທັງໝົດ</div>
+          <div style="font-size:22px;font-weight:700;background:linear-gradient(135deg,#8b5cf6,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.025em;" id="user-cnt">0</div>
+        </div>
+      </div>
+      <!-- Per-user breakdown -->
+      <div id="user-activity" style="margin-bottom:14px;"></div>
+      <!-- Recent login history -->
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;">⏱ ປະຫວັດການເຂົ້າ-ອອກ ລ່າສຸດ</div>
+      <div id="login-history" style="max-height:400px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-hd">
       <span class="card-title"><span class="cdot"></span>📋 Audit Log — ປະຫວັດການແກ້ໄຂ</span>
@@ -1026,7 +1056,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
       <input type="text" id="audit-search" placeholder="🔍 ຄົ້ນຫາ user, entity, id..." oninput="renderAudit()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         <select id="audit-f-act" onchange="renderAudit()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
-          <option value="">-- ປະເພດ --</option><option value="add">➕ Add</option><option value="edit">✏️ Edit</option><option value="delete">🗑 Delete</option><option value="done">✅ Done</option>
+          <option value="">-- ປະເພດ --</option><option value="add">➕ Add</option><option value="edit">✏️ Edit</option><option value="delete">🗑 Delete</option><option value="done">✅ Done</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option>
         </select>
         <select id="audit-f-ent" onchange="renderAudit()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
           <option value="">-- Entity --</option><option value="ATM">ATM</option><option value="Repair">Repair</option><option value="IP">IP</option><option value="Branch">Branch</option>
@@ -1852,6 +1882,32 @@ function timeAgo(dt,tm){
   }catch(e){return fmtDate(dt);}
 }
 function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderBranchItem(r,kind){
+  const isATM=kind==='atm';
+  const handler=isATM?'showATMDetail':'showRepDetail';
+  const icon=isATM?'◫':'⚙';
+  const iconColor=isATM?'var(--p)':'var(--cyan)';
+  const iconBg=isATM?'rgba(59,130,246,0.1)':'rgba(6,182,212,0.1)';
+  const title=isATM?(r.atmId||'—'):(r.dv||'—');
+  const branch=r.br||'—';
+  const type=isATM?(r.tp||''):'';
+  const desc=isATM?(r.ds||r.ac||''):(r.is||r.rs||'');
+  const ago=timeAgo(r.dt,r.tm);
+  const dateStr=fmtDate(r.dt)+(r.tm?' '+fmtTime(r.tm):'');
+  return `<div style="display:flex;gap:8px;padding:7px 9px;border:1px solid var(--border);border-radius:9px;cursor:pointer;margin-bottom:4px;transition:all 0.18s ease;background:var(--glass);" onmouseover="this.style.background='var(--bg1)';this.style.borderColor='var(--border2)'" onmouseout="this.style.background='var(--glass)';this.style.borderColor='var(--border)'" onclick="event.stopPropagation();${handler}(${r.id})">
+    <div style="width:24px;height:24px;border-radius:7px;background:${iconBg};color:${iconColor};display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700;">${icon}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap;">
+        <div style="font-weight:600;color:var(--text);font-size:12px;letter-spacing:-0.01em;">${escHtml(title)} · ${escHtml(branch)}</div>
+        ${sbadge(r.st)}
+        ${type?`<span style="font-size:9.5px;font-weight:500;color:var(--p2);background:rgba(59,130,246,0.08);padding:1px 6px;border-radius:4px;">${escHtml(type)}</span>`:''}
+      </div>
+      ${desc?`<div style="font-size:11px;color:var(--text2);margin-bottom:2px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(desc)}</div>`:''}
+      <div style="font-size:10px;color:var(--text3);">⏱ ${ago} · ${dateStr}</div>
+    </div>
+  </div>`;
+}
+
 function renderDashItem(r,kind,critical){
   const isATM=kind==='atm';
   const handler=isATM?'showATMDetail':'showRepDetail';
@@ -1970,8 +2026,8 @@ function renderDash(){
       +'<div style="font-size:11px;color:var(--text2);width:70px;text-align:right;font-weight:600;">ລວມ <span style="color:var(--text);font-size:13px;">'+cnt+'</span></div>'
       +'</div>'
       +'<div id="'+detailId+'" style="display:none;padding:8px 0 4px 30px;">'
-      +(brAtms.length?'<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:4px;">◫ ATM ('+brAtms.length+') · ✅'+aDone+'/'+brAtms.length+'</div>'+brAtms.slice().reverse().slice(0,10).map(r=>'<div onclick="event.stopPropagation();showATMDetail('+r.id+')" style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;" onmouseover="this.style.background=\'var(--bg1)\'" onmouseout="this.style.background=\'\'"><span style="color:var(--p2);font-weight:600;min-width:90px;">'+r.atmId+'</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.tp||'—')+'</span>'+sbadge(r.st)+'</div>').join(''):'')
-      +(brReps.length?'<div style="font-size:11px;font-weight:700;color:var(--cyan);margin:8px 0 4px;">⚙ ສ້ອມແປງ ('+brReps.length+') · ✅'+rDone+'/'+brReps.length+'</div>'+brReps.slice().reverse().slice(0,10).map(r=>'<div onclick="event.stopPropagation();showRepDetail('+r.id+')" style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;" onmouseover="this.style.background=\'var(--bg1)\'" onmouseout="this.style.background=\'\'"><span style="color:var(--cyan);font-weight:600;min-width:90px;">'+(r.dv||'—')+'</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.is||'—').slice(0,50)+'</span>'+sbadge(r.st)+'</div>').join(''):'')
+      +(brAtms.length?'<div style="font-size:11px;font-weight:700;color:var(--p);margin:6px 0 8px;">◫ ATM ('+brAtms.length+') · ✅'+aDone+'/'+brAtms.length+'</div>'+brAtms.slice().reverse().slice(0,10).map(r=>renderBranchItem(r,'atm')).join(''):'')
+      +(brReps.length?'<div style="font-size:11px;font-weight:700;color:var(--cyan);margin:14px 0 8px;">⚙ ສ້ອມແປງ ('+brReps.length+') · ✅'+rDone+'/'+brReps.length+'</div>'+brReps.slice().reverse().slice(0,10).map(r=>renderBranchItem(r,'rep')).join(''):'')
       +'</div>'
       +'</div>';
   }).join('')+'</div>':'<div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ມີຂໍ້ມູນ</div>';
@@ -2650,7 +2706,111 @@ function restoreBackup(idx){
   renderAll();toast('✅ Restore ສຳເລັດ!');
 }
 /* ===== AUDIT LOG RENDER ===== */
+function renderLoginActivity(){
+  if(!g('login-history'))return;
+  const all=AUDIT.list||[];
+  const logins=all.filter(r=>r.action==='login'||r.action==='logout');
+  // ນັບ Login ມື້ນີ້
+  const today=new Date().toISOString().slice(0,10);
+  const todayLogins=logins.filter(r=>r.action==='login'&&(r.ts||'').slice(0,10)===today).length;
+  // ນັບຜູ້ໃຊ້ທີ່ໂລງ
+  const usersSet=new Set(logins.map(r=>r.user).filter(x=>x));
+  // ກວດໃຜຍັງ online (login ໂດຍບໍ່ມີ logout ຫຼັງສຸດ)
+  const userState={};
+  logins.slice().reverse().forEach(r=>{
+    if(!r.user)return;
+    if(!userState[r.user])userState[r.user]={lastLogin:null,lastLogout:null,lastAction:null,lastTs:null,totalLogins:0};
+    if(r.action==='login'){userState[r.user].lastLogin=r.ts;userState[r.user].totalLogins++;}
+    if(r.action==='logout')userState[r.user].lastLogout=r.ts;
+    if(!userState[r.user].lastTs||r.ts>userState[r.user].lastTs){userState[r.user].lastAction=r.action;userState[r.user].lastTs=r.ts;}
+  });
+  // ນັບ online (lastAction = login ແລະ ໃນ 24 ຊມ ທີ່ຜ່ານມາ)
+  let onlineCnt=0;
+  Object.values(userState).forEach(s=>{
+    if(s.lastAction==='login'&&s.lastTs){
+      const hrs=(Date.now()-new Date(s.lastTs).getTime())/3600000;
+      if(hrs<24)onlineCnt++;
+    }
+  });
+  if(g('online-cnt'))g('online-cnt').textContent=onlineCnt;
+  if(g('login-today'))g('login-today').textContent=todayLogins;
+  if(g('user-cnt'))g('user-cnt').textContent=usersSet.size;
+  if(g('login-cnt'))g('login-cnt').textContent=logins.length;
+  // Per-user breakdown
+  const ua=g('user-activity');
+  if(ua){
+    const users=Object.entries(userState).sort((a,b)=>(b[1].lastTs||'').localeCompare(a[1].lastTs||''));
+    if(!users.length){ua.innerHTML='<div style="text-align:center;padding:14px;color:var(--text3);font-size:12px;">ຍັງບໍ່ມີຜູ້ໃຊ້</div>';}
+    else{
+      ua.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;">👥 ສະຖານະຜູ້ໃຊ້</div>'
+        +users.map(([user,s])=>{
+          const isOnline=s.lastAction==='login'&&s.lastTs&&((Date.now()-new Date(s.lastTs).getTime())/3600000<24);
+          const dotColor=isOnline?'#10b981':'#94a3b8';
+          const statusTxt=isOnline?'🟢 ອອນລາຍ':'⚫ ອອບລາຍ';
+          const statusColor=isOnline?'var(--green)':'var(--text3)';
+          const initial=(user||'?').charAt(0).toUpperCase();
+          const lastTs=s.lastTs?formatLogTime(s.lastTs):'—';
+          const lastAgo=s.lastTs?timeAgoLog(s.lastTs):'—';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;background:var(--glass);transition:all 0.18s;" onmouseover="this.style.background='var(--bg1)'" onmouseout="this.style.background='var(--glass)'">
+            <div style="position:relative;width:36px;height:36px;border-radius:10px;background:var(--grad1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">
+              ${escHtml(initial)}
+              <div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:${dotColor};border:2px solid var(--glass);"></div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:var(--text);font-size:13px;">${escHtml(user)}</div>
+              <div style="font-size:11px;color:var(--text2);">${s.lastAction==='login'?'🔓 Login':'🔒 Logout'} · ${lastAgo}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;font-weight:600;color:${statusColor};">${statusTxt}</div>
+              <div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;">${lastTs}</div>
+            </div>
+          </div>`;
+        }).join('');
+    }
+  }
+  // History
+  const lh=g('login-history');
+  if(lh){
+    if(!logins.length){lh.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px;">ຍັງບໍ່ມີປະຫວັດ</div>';}
+    else{
+      lh.innerHTML=logins.slice(0,50).map(r=>{
+        const isLogin=r.action==='login';
+        const icon=isLogin?'🔓':'🔒';
+        const color=isLogin?'var(--green)':'var(--text3)';
+        const bg=isLogin?'rgba(16,185,129,0.08)':'rgba(148,163,184,0.08)';
+        const label=isLogin?'ເຂົ້າລະບົບ':'ອອກລະບົບ';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);margin-bottom:3px;transition:background 0.15s;" onmouseover="this.style.background='var(--bg1)'" onmouseout="this.style.background='transparent'">
+          <div style="width:28px;height:28px;border-radius:8px;background:${bg};color:${color};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">${icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;color:var(--text);"><span style="font-weight:600;">${escHtml(r.user||'—')}</span> <span style="color:var(--text2);">· ${label}</span></div>
+            ${r.info?`<div style="font-size:11px;color:var(--text3);">${escHtml(r.info)}</div>`:''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:11px;color:var(--text2);font-weight:500;">${timeAgoLog(r.ts)}</div>
+            <div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;">${formatLogTime(r.ts)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+function formatLogTime(ts){
+  try{const d=new Date(ts);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){return '—';}
+}
+function timeAgoLog(ts){
+  try{
+    const diff=Date.now()-new Date(ts).getTime();
+    if(diff<60000)return 'ດຽວນີ້';
+    const mins=Math.floor(diff/60000);
+    if(mins<60)return mins+' ນທ ກ່ອນ';
+    const hrs=Math.floor(mins/60);
+    if(hrs<24)return hrs+' ຊມ ກ່ອນ';
+    return Math.floor(hrs/24)+' ມື້ກ່ອນ';
+  }catch(e){return '—';}
+}
+
 function renderAudit(){
+  renderLoginActivity();
   const c=g('audit-list');if(!c)return;
   const q=(v('audit-search')||'').toLowerCase();
   const fa=v('audit-f-act'),fe=v('audit-f-ent'),from=v('audit-f-from'),to=v('audit-f-to');
