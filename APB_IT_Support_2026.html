@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>APB IT Support 2026</title>
 <!-- PWA -->
@@ -3483,9 +3486,31 @@ window.addEventListener('load',function(){
 /* ===== PWA: Register Service Worker + Install Prompt ===== */
 let deferredInstallPrompt=null;
 if('serviceWorker' in navigator && location.protocol!=='file:'){
+  let _swReloaded=false;
+  // ຖ້າ controller ປ່ຽນ (SW ໃໝ່ active) → reload ໜ້າທັນທີ
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(_swReloaded)return;
+    _swReloaded=true;
+    location.reload();
+  });
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('service-worker.js')
-      .then(reg=>{console.log('✅ SW registered',reg.scope);})
+      .then(reg=>{
+        console.log('✅ SW registered',reg.scope);
+        // ກວດສະບັບໃໝ່ທຸກຄັ້ງເຂົ້າໜ້າ + ທຸກ 60 ວິ
+        reg.update();
+        setInterval(()=>reg.update(),60000);
+        reg.addEventListener('updatefound',()=>{
+          const nw=reg.installing;
+          if(!nw)return;
+          nw.addEventListener('statechange',()=>{
+            // ມີ SW ໃໝ່ພ້ອມ ແລະ ມີ SW ເກົ່າຄຸມຢູ່ → ສັ່ງ skipWaiting → reload ອັດຕະໂນມັດ
+            if(nw.state==='installed' && navigator.serviceWorker.controller){
+              nw.postMessage('SKIP_WAITING');
+            }
+          });
+        });
+      })
       .catch(err=>{console.warn('SW registration failed',err);});
   });
 }
