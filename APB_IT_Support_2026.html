@@ -163,6 +163,79 @@ body.dark .b-critical{color:#fca5a5;}
 @keyframes crp{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.25)}50%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}
 @keyframes pulseRed{0%,100%{box-shadow:0 3px 12px rgba(239,68,68,0.4)}50%{box-shadow:0 3px 18px rgba(239,68,68,0.7),0 0 0 6px rgba(239,68,68,0.15)}}
 
+/* ===== PERIOD REPORT — APB Brand (green + gold + cream) ===== */
+#tab-period{--apb-g900:#072a1d;--apb-g800:#0b3d2a;--apb-g700:#0f5f38;--apb-g600:#157a45;--apb-g500:#1e9e57;--apb-gold:#f4b62c;--apb-gold-soft:#ffd56b;--apb-cream:#f8f5ec;--apb-cream2:#fffdf7;--apb-ink:#0c241a;--apb-muted:#5f7268;--apb-line:rgba(12,36,26,0.10);--apb-shadow:0 24px 60px -20px rgba(7,42,29,0.35);--apb-shadow-sm:0 10px 30px -12px rgba(7,42,29,0.28);}
+body.dark #tab-period{--apb-cream:#0e1a14;--apb-cream2:#13241c;--apb-ink:#e8f3ec;--apb-muted:#9ab4a4;--apb-line:rgba(255,255,255,0.08);}
+
+/* hero */
+.lm-hero{position:relative;border-radius:30px;overflow:hidden;background:var(--apb-cream);border:1px solid var(--apb-line);box-shadow:var(--apb-shadow);display:grid;grid-template-columns:1.05fr 0.95fr;gap:32px;align-items:center;padding:36px 36px;margin-bottom:1.5rem;}
+.lm-hero::before,.lm-hero::after{content:"";position:absolute;border-radius:50%;filter:blur(60px);opacity:0.55;z-index:0;pointer-events:none;}
+.lm-hero::before{width:340px;height:340px;background:radial-gradient(circle,#bff0d0,transparent 70%);top:-120px;right:-90px;}
+.lm-hero::after{width:300px;height:300px;background:radial-gradient(circle,#ffe9b0,transparent 70%);bottom:-130px;left:-100px;}
+.lm-hero-txt{position:relative;z-index:1;min-width:0;}
+.lm-hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--apb-line);padding:7px 16px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:0.05em;color:var(--apb-g700);box-shadow:var(--apb-shadow-sm);text-transform:uppercase;}
+.lm-hero-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--apb-g500);box-shadow:0 0 0 4px rgba(30,158,87,0.18);}
+.lm-hero-title{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-0.025em;line-height:1.18;color:var(--apb-ink);margin:18px 0 14px;}
+.lm-hero-title .hi{position:relative;white-space:nowrap;color:var(--apb-g700);}
+.lm-hero-title .hi::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:10px;background:var(--apb-gold-soft);opacity:0.6;z-index:-1;border-radius:6px;}
+.lm-hero-sub{font-size:14px;color:var(--apb-muted);line-height:1.6;max-width:46ch;}
+.lm-hero-visual{position:relative;z-index:1;}
+.lm-hero-img{position:relative;display:flex;align-items:center;justify-content:center;}
+.lm-hero-img img{display:block;width:100%;max-width:340px;height:auto;filter:drop-shadow(0 24px 40px rgba(7,42,29,0.28));animation:lmFloat 6s ease-in-out infinite;}
+.lm-badge{position:absolute;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-radius:16px;padding:11px 14px;box-shadow:var(--apb-shadow-sm);display:flex;align-items:center;gap:10px;z-index:3;}
+.lm-badge .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px;box-shadow:0 4px 10px rgba(11,61,42,0.25);text-shadow:0 1px 2px rgba(0,0,0,0.15);}
+.lm-badge .t{font-size:11.5px;color:var(--apb-g800);line-height:1.2;font-weight:600;}
+.lm-badge .v{font-size:14.5px;font-weight:800;color:var(--apb-ink);line-height:1.3;}
+.lm-badge.top{top:18px;left:-22px;animation:lmFloat 5s ease-in-out infinite;}
+.lm-badge.bot{bottom:24px;right:-20px;animation:lmFloat 5.6s ease-in-out infinite 0.6s;}
+.lm-badge.top .ic{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
+.lm-badge.bot .ic{background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;}
+@keyframes lmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media(max-width:840px){.lm-hero{grid-template-columns:1fr;text-align:center;padding:28px 24px;gap:24px;}.lm-hero-sub{max-width:none;margin:0 auto;}.lm-badge.top{left:6px;}.lm-badge.bot{right:6px;}}
+
+/* presets */
+.lm-presets{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+@media(max-width:840px){.lm-presets{justify-content:center;}}
+.lm-chip{font-size:13px;font-weight:700;color:#1d4ed8;background:#eff6ff;border:1.5px solid #bfdbfe;padding:9px 18px;border-radius:999px;cursor:pointer;transition:all 0.2s ease;font-family:inherit;}
+.lm-chip:hover{transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(59,130,246,0.4);background:#dbeafe;border-color:#93c5fd;}
+.lm-chip.active{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff !important;border-color:transparent;box-shadow:0 12px 26px -10px rgba(29,78,216,0.7);text-shadow:0 1px 2px rgba(0,0,0,0.2);font-weight:800;}
+
+/* filter card */
+.lm-filter{background:var(--apb-cream2);border:1px solid var(--apb-line);border-radius:24px;padding:22px 24px;margin-bottom:1.5rem;box-shadow:var(--apb-shadow-sm);}
+.lm-filter-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+.lm-filter-row .field{flex:1;min-width:150px;margin:0;}
+.lm-filter-row label{display:block;font-size:11.5px;font-weight:700;color:var(--apb-g800);margin-bottom:6px;letter-spacing:0.02em;text-transform:uppercase;}
+.lm-filter-row input,.lm-filter-row select{width:100%;font-family:inherit;font-size:14px;padding:12px 14px;border:1.5px solid var(--apb-line);border-radius:14px;background:var(--apb-cream);outline:none;color:var(--apb-ink);transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;}
+.lm-filter-row input:focus,.lm-filter-row select:focus{border-color:var(--apb-g500);background:#fff;box-shadow:0 0 0 4px rgba(30,158,87,0.14);}
+.lm-btn-fetch{font-family:inherit;font-size:14px;font-weight:600;padding:13px 28px;border-radius:999px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--apb-g600),var(--apb-g800));color:#fff;box-shadow:0 12px 26px -10px rgba(11,61,42,0.7);transition:transform 0.2s,box-shadow 0.25s;}
+.lm-btn-fetch:hover{transform:translateY(-2px);box-shadow:0 18px 34px -10px rgba(11,61,42,0.85);}
+.lm-range-label{font-size:12.5px;color:var(--apb-muted);margin-top:14px;font-weight:500;}
+
+/* stat cards */
+.lm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-bottom:1.5rem;}
+@media(min-width:760px){.lm-grid{grid-template-columns:repeat(4,1fr);}}
+.lm-card{background:var(--apb-cream2);border:1px solid var(--apb-line);border-radius:24px;padding:26px 22px;transition:transform 0.3s,box-shadow 0.3s,border-color 0.3s;}
+.lm-card:hover{transform:translateY(-6px);box-shadow:var(--apb-shadow);border-color:transparent;}
+.lm-card-icon{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;margin-bottom:16px;font-size:18px;font-weight:700;background:linear-gradient(145deg,#e8f7ee,#d2efdc);color:var(--apb-g700);}
+.lm-card.lm-c3 .lm-card-icon{background:linear-gradient(145deg,#fff4d6,#ffe6a8);color:#a06c00;}
+.lm-card.lm-c4 .lm-card-icon{background:linear-gradient(145deg,var(--apb-g600),var(--apb-g800));color:#fff;}
+.lm-card-num{font-size:30px;font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--apb-ink);}
+.lm-card-lbl{font-size:12px;font-weight:600;color:var(--apb-muted);margin-top:8px;}
+
+/* breakdown card */
+.lm-bcard{background:var(--apb-cream2);border:1px solid var(--apb-line);border-radius:24px;margin-bottom:1.25rem;overflow:hidden;box-shadow:var(--apb-shadow-sm);}
+.lm-bcard-hd{padding:20px 24px;border-bottom:1px solid var(--apb-line);display:flex;align-items:center;justify-content:space-between;}
+.lm-bcard-title{font-size:13px;font-weight:700;color:var(--apb-g800);letter-spacing:0.02em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+.lm-bcard-title::before{content:"";width:6px;height:18px;border-radius:3px;background:var(--apb-gold);}
+.lm-bcard-body{padding:14px 24px 20px;}
+
+/* bars */
+.lm-bar-row{display:flex;align-items:center;gap:14px;padding:10px 0;}
+.lm-bar-lbl{font-size:13px;font-weight:600;color:var(--apb-ink);width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lm-bar-track{flex:1;height:12px;border-radius:99px;background:rgba(12,36,26,0.06);overflow:hidden;}
+.lm-bar-fill{height:100%;border-radius:99px;transition:width 0.4s ease;}
+.lm-bar-val{font-size:13px;font-weight:700;color:var(--apb-g800);width:36px;text-align:right;flex-shrink:0;}
+
 /* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:var(--radius);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -505,7 +578,7 @@ function toggleTheme(){
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen" style="position:fixed;inset:0;z-index:99999;background:var(--bg0);display:flex;align-items:center;justify-content:center;padding:1rem;overflow:hidden;">
+<div id="login-screen" style="position:fixed;inset:0;z-index:99999;background:var(--bg0) url('hero-bg.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;padding:1rem;overflow:hidden;">
   <!-- Animated background blobs -->
   <div class="login-blob blob-1"></div>
   <div class="login-blob blob-2"></div>
@@ -527,6 +600,7 @@ function toggleTheme(){
   </div>
 </div>
 <style>
+#login-screen::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(7,42,29,0.25),rgba(11,61,42,0.35));z-index:0;pointer-events:none;}
 .login-blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.5;pointer-events:none;}
 .blob-1{width:400px;height:400px;background:#3b82f6;top:-100px;left:-100px;animation:blob1 18s ease-in-out infinite;}
 .blob-2{width:340px;height:340px;background:#06b6d4;bottom:-80px;right:-80px;animation:blob2 22s ease-in-out infinite;}
@@ -565,6 +639,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <button class="nb-d active" onclick="goTab('dashboard',this)"><span class="ni">⬡</span>Dashboard</button>
     <button class="nb-d" onclick="goTab('atm',this)"><span class="ni">◫</span>ATM</button>
     <button class="nb-d" onclick="goTab('repair',this)"><span class="ni">⚙</span>ສ້ອມແປງ</button>
+    <button class="nb-d" onclick="goTab('password',this)"><span class="ni">🔑</span>Password</button>
     <button class="nb-d" onclick="goTab('report',this)"><span class="ni">◈</span>ລາຍງານ</button>
     <button class="nb-d" onclick="goTab('atmlist',this)"><span class="ni">📍</span>ATM ຂໍ້ມູນຕູ້</button>
     <button class="nb-d" onclick="goTab('ip',this)"><span class="ni">⊞</span>IP Manager</button>
@@ -593,6 +668,27 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
 <div id="tab-dashboard" class="tab-pane active">
   <div class="page-hd"><div class="page-title">Dashboard</div><div class="page-sub" id="dash-sub">ສະຫຼຸບພາບລວມ</div></div>
 
+  <!-- Hero (APB brand) -->
+  <div class="lm-hero">
+    <div class="lm-hero-txt">
+      <span class="lm-hero-eyebrow"><span class="dot"></span>ສະຫຼຸບຊ່ວງເວລາ</span>
+      <div class="lm-hero-title">ດຶງລາຍງານ <span class="hi">ຕາມຊ່ວງວັນທີ</span><br>ໄດ້ທັນທີ ໃນຄຣິກດຽວ</div>
+      <div class="lm-hero-sub">ເບິ່ງພາບລວມ ATM ແລະ ການສ້ອມແປງ ໃນຊ່ວງເວລາທີ່ກຳນົດ — ປຽບທຽບສະຖານະ, ໜ່ວຍງານ ແລະ ອັດຕາສຳເລັດວຽກ ໄດ້ຢ່າງວ່ອງໄວ.</div>
+      <div class="lm-presets" id="lm-presets">
+        <button class="lm-chip" data-range="today" onclick="lmSetPreset('today',this)">ມື້ນີ້</button>
+        <button class="lm-chip" data-range="7" onclick="lmSetPreset('7',this)">7 ມື້</button>
+        <button class="lm-chip" data-range="30" onclick="lmSetPreset('30',this)">30 ມື້</button>
+        <button class="lm-chip" data-range="month" onclick="lmSetPreset('month',this)">ເດືອນນີ້</button>
+        <button class="lm-chip active" data-range="all" onclick="lmSetPreset('all',this)">ທັງໝົດ</button>
+      </div>
+    </div>
+    <div class="lm-hero-visual">
+      <div class="lm-hero-img"><img src="atm-hero.png" alt="ATM illustration"></div>
+      <div class="lm-badge top"><div class="ic">✓</div><div><div class="t">ສຳເລັດແລ້ວ</div><div class="v" id="lm-bdg-done">0 ລາຍການ</div></div></div>
+      <div class="lm-badge bot"><div class="ic">%</div><div><div class="t">ອັດຕາສຳເລັດ</div><div class="v" id="lm-bdg-rate">0%</div></div></div>
+    </div>
+  </div>
+
   <!-- Global Filter -->
   <div class="card">
     <div class="card-hd"><span class="card-title"><span class="cdot"></span>🔍 ກອງຂໍ້ມູນ Dashboard</span><button class="btn btn-sm" onclick="['dash-search','dash-f-br','dash-f-st','dash-f-from','dash-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderDash();">✕ ລ້າງ</button></div>
@@ -618,7 +714,8 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <div class="stat-card"><div class="stat-lbl">ATM</div><div class="stat-num" id="s-atm">0</div><div class="stat-sub" id="s-atm2">Open: 0</div></div>
     <div class="stat-card"><div class="stat-lbl">ສ້ອມແປງ</div><div class="stat-num" id="s-rep">0</div><div class="stat-sub" id="s-rep2">ຄ້າງ: 0</div></div>
     <div class="stat-card stat-pending" id="card-pending"><div class="stat-lbl">ການທີ່ຄ້າງ</div><div class="stat-num" id="s-pending">0</div><div class="stat-sub" id="s-pending-sub">ATM 0 · ສ້ອມ 0</div></div>
-    <div class="stat-card"><div class="stat-lbl">ສຳເລັດ</div><div class="stat-num" id="s-done">0</div><div class="stat-sub">ທັງໝົດ</div></div>
+    <div class="stat-card"><div class="stat-lbl">ສຳເລັດ</div><div class="stat-num" id="s-done">0</div><div class="stat-sub">ATM + ສ້ອມ</div></div>
+    <div class="stat-card"><div class="stat-lbl">Reset PW</div><div class="stat-num" id="s-pw-done">0</div><div class="stat-sub" id="s-pw-sub">ສຳເລັດ 0 / 0</div></div>
   </div>
   <!-- Today -->
   <div class="card">
@@ -818,6 +915,59 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
       </div>
     </div>
     <div style="padding:0 16px 16px;" id="rep-list"></div>
+  </div>
+</div>
+
+<!-- PASSWORD CASES -->
+<div id="tab-password" class="tab-pane">
+  <div class="page-hd"><div class="page-title">Password Cases</div><div class="page-sub">ບັນທຶກເຄສ reset / unlock password</div></div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title" id="pw-form-title"><span class="cdot"></span>+ ເພີ່ມເຄສ</span></div>
+    <div class="card-body">
+      <input type="hidden" id="pw-edit-id" value="">
+      <div class="frow c2">
+        <div class="field"><label>ຜູ້ຮ້ອງ *</label><input id="pw-user" type="text" placeholder="ຊື່ user / ພະນັກງານ"></div>
+        <div class="field"><label>ໜ່ວຍ *</label>
+          <select id="pw-br" onchange="onBranchChange(this)"><option value="">-- ເລືອກໜ່ວຍ --</option><option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option></select>
+        </div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ລະບົບ *</label>
+          <select id="pw-sys" onchange="onPWSysChange(this)"></select>
+        </div>
+        <div class="field"><label>ປະເພດ</label>
+          <select id="pw-tp"><option value="reset">🔁 Reset</option><option value="unlock">🔓 Unlock</option><option value="new">🆕 ສ້າງໃໝ່</option><option value="change">✏️ ປ່ຽນ</option></select>
+        </div>
+      </div>
+      <div class="frow c3">
+        <div class="field"><label>ວັນທີ</label><input type="date" id="pw-dt"></div>
+        <div class="field"><label>ເວລາ</label><input type="time" id="pw-tm"></div>
+        <div class="field"><label>ສະຖານະ</label>
+          <select id="pw-st"><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="done">✅ ສຳເລັດ</option></select>
+        </div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ເຫດຜົນ / ບັນຫາ *</label><textarea id="pw-rs" placeholder="ເຊັ່ນ: ລືມລະຫັດ, ບັນຊີຖືກລ໋ອກ, ໝົດອາຍຸ..."></textarea></div></div>
+      <div class="frow c1"><div class="field"><label>ວິທີແກ້ໄຂ / ໝາຍເຫດ</label><textarea id="pw-nt" placeholder="ວິທີການແກ້ໄຂ ຫຼື ໝາຍເຫດເພີ່ມເຕີມ..."></textarea></div></div>
+      <div class="btn-row"><button class="btn" onclick="clrPW()">ລ້າງ</button><button class="btn btn-grad" id="pw-save-btn" onclick="svPW()">💾 ບັນທຶກ</button></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການເຄສ</span><span class="nbadge" id="pw-cnt">0</span></div>
+    <div class="card-body" style="padding:12px 16px;">
+      <input type="text" id="pw-search" placeholder="🔍 ຄົ້ນຫາ ຜູ້ຮ້ອງ, ໜ່ວຍ, ລະບົບ, ເຫດຜົນ..." oninput="renderPW()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="pw-f-br" onchange="renderPW()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📍 ທຸກໜ່ວຍ</option>
+          <option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option>
+        </select>
+        <select id="pw-f-sys" onchange="renderPW()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;"></select>
+        <select id="pw-f-st" onchange="renderPW()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📊 ທຸກສະຖານະ</option><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="done">✅ ສຳເລັດ</option>
+        </select>
+        <button class="btn btn-sm" onclick="['pw-search','pw-f-br','pw-f-sys','pw-f-st'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderPW();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="pw-list"></div>
   </div>
 </div>
 
@@ -1078,6 +1228,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
   <button class="bn-item active" onclick="goTab('dashboard',this)" data-tab="dashboard"><span class="bn-icon">⬡</span><span>ຫຼັກ</span></button>
   <button class="bn-item" onclick="goTab('atm',this)" data-tab="atm"><span class="bn-icon">◫</span><span>ATM</span></button>
   <button class="bn-item" onclick="goTab('repair',this)" data-tab="repair"><span class="bn-icon">⚙</span><span>ສ້ອມ</span></button>
+  <button class="bn-item" onclick="goTab('password',this)" data-tab="password"><span class="bn-icon">🔑</span><span>PW</span></button>
   <button class="bn-item" onclick="goTab('atmlist',this)" data-tab="atmlist"><span class="bn-icon">📍</span><span>ຕູ້</span></button>
   <button class="bn-item" onclick="goTab('ip',this)" data-tab="ip"><span class="bn-icon">⊞</span><span>IP</span></button>
   <button class="bn-item" onclick="goTab('report',this)" data-tab="report"><span class="bn-icon">◈</span><span>ລາຍງານ</span></button>
@@ -1100,6 +1251,21 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
         <button class="btn btn-grad" onclick="addATMTypeFromMgr()" style="white-space:nowrap;">➕ ເພີ່ມ</button>
       </div>
       <div id="atm-type-list"></div>
+    </div>
+  </div>
+</div>
+<div id="pw-sys-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-hd">
+      <div class="modal-title">🔑 ຈັດການລະບົບ Password</div>
+      <button class="modal-close" onclick="document.getElementById('pw-sys-modal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="pw-sys-new-inp" placeholder="ຊື່ລະບົບໃໝ່..." style="flex:1;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--text);outline:none;" onkeydown="if(event.key==='Enter')addPWSysFromMgr()">
+        <button class="btn btn-grad" onclick="addPWSysFromMgr()" style="white-space:nowrap;">➕ ເພີ່ມ</button>
+      </div>
+      <div id="pw-sys-list"></div>
     </div>
   </div>
 </div>
@@ -1168,14 +1334,17 @@ function fmtTime(val){
 
 /* ===== CONFIG (custom branches + ATM IDs + ATM Types) ===== */
 const ATM_TYPES_DEFAULT=['ເງິນໝົດ/ເຕີມ','ບັດຄ້າງ','ເຄື່ອງບໍ່ເຮັດວຽກ','ໜ້າຈໍຜິດ','ເຄືອຂ່າຍຂາດ','Printer','CCTV','ອື່ນໆ'];
+const PW_SYSTEMS_DEFAULT=['Email','Core Banking','AD / Domain','ATM','Internet Banking','Mobile Banking','Windows','VPN','ອື່ນໆ'];
 const CFG={
   branches:JSON.parse(localStorage.getItem('apb26_branches')||'null')||BRANCHES.slice(),
   atmIds:JSON.parse(localStorage.getItem('apb26_atmids')||'[]'),
   atmTypes:JSON.parse(localStorage.getItem('apb26_atmtypes')||'null')||ATM_TYPES_DEFAULT.slice(),
+  pwSystems:JSON.parse(localStorage.getItem('apb26_pwsystems')||'null')||PW_SYSTEMS_DEFAULT.slice(),
   save(){
     localStorage.setItem('apb26_branches',JSON.stringify(this.branches));
     localStorage.setItem('apb26_atmids',JSON.stringify(this.atmIds));
     localStorage.setItem('apb26_atmtypes',JSON.stringify(this.atmTypes));
+    localStorage.setItem('apb26_pwsystems',JSON.stringify(this.pwSystems));
     if(navigator.onLine)sbPushConfig();
   }
 };
@@ -1367,6 +1536,100 @@ function addATMTypeFromMgr(){
   toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
 }
 
+/* ===== PASSWORD SYSTEM MANAGER ===== */
+function populatePWSysDropdown(){
+  const el=g('pw-sys');
+  if(el){
+    const cur=el.value;
+    let html='<option value="">-- ເລືອກລະບົບ --</option>';
+    CFG.pwSystems.forEach(s=>{html+='<option value="'+s+'">'+s+'</option>';});
+    html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມລະບົບໃໝ່...</option>';
+    html+='<option value="__MANAGE__" style="color:#1a4fa0;font-weight:600;background:#e8f0fe;">✏️ ຈັດການລະບົບ...</option>';
+    el.innerHTML=html;
+    if(cur&&CFG.pwSystems.includes(cur))el.value=cur;
+  }
+  const fel=g('pw-f-sys');
+  if(fel){
+    const cur=fel.value;
+    let html='<option value="">💻 ທຸກລະບົບ</option>';
+    CFG.pwSystems.forEach(s=>{html+='<option value="'+s+'">'+s+'</option>';});
+    fel.innerHTML=html;
+    if(cur)fel.value=cur;
+  }
+}
+function onPWSysChange(el){
+  if(isViewer()){populatePWSysDropdown();return;}
+  if(el.value==='__ADD__'){
+    el.value='';
+    const name=prompt('➕ ເພີ່ມລະບົບໃໝ່\n\nຊື່ລະບົບ:');
+    if(!name||!name.trim()){populatePWSysDropdown();return;}
+    const n=name.trim();
+    if(CFG.pwSystems.includes(n)){toast('⚠️ ມີລະບົບນີ້ແລ້ວ');populatePWSysDropdown();return;}
+    CFG.pwSystems.push(n);CFG.save();
+    populatePWSysDropdown();
+    el.value=n;
+    toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
+    return;
+  }
+  if(el.value==='__MANAGE__'){
+    el.value=CFG.pwSystems[0]||'';
+    openPWSysMgr();
+    return;
+  }
+}
+function openPWSysMgr(){renderPWSysMgr();g('pw-sys-modal').style.display='flex';}
+function renderPWSysMgr(){
+  const list=g('pw-sys-list');if(!list)return;
+  if(!CFG.pwSystems.length){list.innerHTML='<div style="text-align:center;color:var(--text2);padding:1rem;">ບໍ່ມີລະບົບ</div>';return;}
+  list.innerHTML=CFG.pwSystems.map((t,i)=>
+    '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);">'
+    +'<span style="flex:1;font-size:14px;color:var(--text);">'+escHtml(t)+'</span>'
+    +'<button class="btn btn-sm" onclick="editPWSys('+i+')" title="ແກ້ໄຂ" style="padding:4px 10px;">✏️</button>'
+    +'<button class="btn btn-sm" onclick="deletePWSys('+i+')" title="ລຶບ" style="padding:4px 10px;color:#e53935;">🗑</button>'
+    +(i>0?'<button class="btn btn-sm" onclick="movePWSys('+i+',-1)" style="padding:4px 8px;">▲</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +(i<CFG.pwSystems.length-1?'<button class="btn btn-sm" onclick="movePWSys('+i+',1)" style="padding:4px 8px;">▼</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +'</div>'
+  ).join('');
+}
+function editPWSys(i){
+  if(!requireAdmin())return;
+  const old=CFG.pwSystems[i];
+  const name=prompt('✏️ ແກ້ໄຂລະບົບ\n\nຊື່ໃໝ່:',old);
+  if(!name||!name.trim()||name.trim()===old)return;
+  const n=name.trim();
+  if(CFG.pwSystems.includes(n)){toast('⚠️ ມີລະບົບນີ້ແລ້ວ');return;}
+  DB.pw.forEach(r=>{if(r.sys===old)r.sys=n;});
+  DB.save();
+  CFG.pwSystems[i]=n;CFG.save();
+  populatePWSysDropdown();renderPWSysMgr();renderPW();
+  toast('✅ ແກ້ໄຂເປັນ "'+n+'" ແລ້ວ!');
+}
+function deletePWSys(i){
+  if(!requireAdmin())return;
+  const t=CFG.pwSystems[i];
+  if(!confirm('🗑 ລຶບລະບົບ "'+t+'"?\n\n(ເຄສທີ່ໃຊ້ລະບົບນີ້ຈະຍັງຄົງຢູ່)'))return;
+  CFG.pwSystems.splice(i,1);CFG.save();
+  populatePWSysDropdown();renderPWSysMgr();
+  toast('🗑 ລຶບ "'+t+'" ແລ້ວ');
+}
+function movePWSys(i,dir){
+  const j=i+dir;
+  if(j<0||j>=CFG.pwSystems.length)return;
+  const tmp=CFG.pwSystems[i];CFG.pwSystems[i]=CFG.pwSystems[j];CFG.pwSystems[j]=tmp;
+  CFG.save();populatePWSysDropdown();renderPWSysMgr();
+}
+function addPWSysFromMgr(){
+  if(!requireAdmin())return;
+  const inp=g('pw-sys-new-inp');if(!inp)return;
+  const n=inp.value.trim();
+  if(!n){toast('⚠️ ກະລຸນາໃສ່ຊື່ລະບົບ');return;}
+  if(CFG.pwSystems.includes(n)){toast('⚠️ ມີລະບົບນີ້ແລ້ວ');return;}
+  CFG.pwSystems.push(n);CFG.save();
+  inp.value='';
+  populatePWSysDropdown();renderPWSysMgr();
+  toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
+}
+
 /* ===== AUDIT LOG (with Supabase sync) ===== */
 const AUDIT={
   list:JSON.parse(localStorage.getItem('apb26_audit')||'[]'),
@@ -1479,11 +1742,13 @@ const DB={
   rep:JSON.parse(localStorage.getItem('apb26_rep')||'[]'),
   rpt:JSON.parse(localStorage.getItem('apb26_rpt')||'[]'),
   ip:JSON.parse(localStorage.getItem('apb26_ip')||'[]'),
+  pw:JSON.parse(localStorage.getItem('apb26_pw')||'[]'),
   save(){
     localStorage.setItem('apb26_atm',JSON.stringify(this.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(this.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(this.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(this.ip));
+    localStorage.setItem('apb26_pw',JSON.stringify(this.pw));
     autoBackup();
     if(navigator.onLine)sbPush().then(ok=>showSyncStatus(ok?'ok':'error'));
   }
@@ -1707,17 +1972,19 @@ async function pullFromSheets(){
   if(!navigator.onLine){toast('📴 Offline');return;}
   showSyncStatus('syncing');toast('⏳ ດຶງຈາກ Sheets...');
   try{
-    const [ra,rr,rp,ri]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP')]);
+    const [ra,rr,rp,ri,rw]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP'),sheetsGet('Password')]);
     const dedup=arr=>{const m=new Map();(arr||[]).forEach(r=>{if(r.id)m.set(String(r.id),r);});return[...m.values()];};
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
     if(ra.ok)DB.atm=dedup(ra.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     if(rr.ok)DB.rep=dedup(rr.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     if(rp.ok)DB.rpt=dedup(rp.data.map(r=>({...r,dt:fmtDate(r.dt)})));
     if(ri.ok)DB.ip=dedup(ri.data.map(r=>({...r,bought:fmtDate(r.bought)})));
+    if(rw&&rw.ok)DB.pw=dedup(rw.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
+    localStorage.setItem('apb26_pw',JSON.stringify(DB.pw));
     renderAll();showSyncStatus('ok');toast('✅ ດຶງ Sheets ສຳເລັດ!');
   }catch(e){showSyncStatus('error');toast('⚠️ ດຶງ Sheets ບໍ່ໄດ້');}
 }
@@ -1728,6 +1995,7 @@ async function forceSyncAll(){
   try{
     await syncToSheets('ATM',DB.atm);await syncToSheets('Repair',DB.rep);
     await syncToSheets('Report',DB.rpt);await syncToSheets('IP',DB.ip);
+    await syncToSheets('Password',DB.pw);
     showSyncStatus('ok');toast('✅ Force Sync ສຳເລັດ!');
   }catch(e){showSyncStatus('error');toast('⚠️ Sync ຜິດ');}
 }
@@ -1788,6 +2056,84 @@ function editRep(id){
   g('tab-repair').scrollIntoView({behavior:'smooth'});
 }
 function delRep(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.rep.find(x=>x.id===id);DB.rep=DB.rep.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Repair',r.dv,r.br);DB.save();renderRep();updStats();syncToSheets('Repair',DB.rep);toast('🗑 ລຶບ');}
+
+/* ===== PASSWORD CRUD ===== */
+function svPW(){
+  if(!requireAdmin())return;
+  if(!v('pw-user'))return toast('⚠️ ໃສ່ຊື່ຜູ້ຮ້ອງ');
+  if(!v('pw-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
+  if(!v('pw-sys'))return toast('⚠️ ເລືອກລະບົບ');
+  if(!v('pw-rs'))return toast('⚠️ ໃສ່ເຫດຜົນ');
+  const eid=v('pw-edit-id');
+  const old=eid?DB.pw.find(x=>x.id===parseInt(eid)):null;
+  const rec={id:eid?parseInt(eid):Date.now(),user:v('pw-user'),br:v('pw-br'),sys:v('pw-sys'),tp:v('pw-tp')||'reset',dt:v('pw-dt'),tm:v('pw-tm'),st:v('pw-st'),rs:v('pw-rs'),nt:v('pw-nt'),doneAt:old?old.doneAt||'':''};
+  if(eid){const i=DB.pw.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.pw[i]=rec;else DB.pw.push(rec);AUDIT.log('edit','Password',rec.user,rec.br+' · '+rec.sys);toast('✅ ອັບເດດ!');}
+  else{DB.pw.push(rec);AUDIT.log('add','Password',rec.user,rec.br+' · '+rec.sys);toast('✅ ບັນທຶກ!');}
+  DB.save();renderPW();updStats();clrPW();syncToSheets('Password',DB.pw);
+}
+function clrPW(){['pw-user','pw-rs','pw-nt'].forEach(id=>{const e=g(id);if(e)e.value='';});g('pw-br').value='';g('pw-sys').value='';g('pw-tp').value='reset';g('pw-st').value='open';g('pw-edit-id').value='';const b=g('pw-save-btn');if(b)b.textContent='💾 ບັນທຶກ';const t=g('pw-form-title');if(t)t.innerHTML='<span class="cdot"></span>+ ເພີ່ມເຄສ';}
+function editPW(id){
+  if(!requireAdmin())return;
+  const r=DB.pw.find(x=>x.id===id);if(!r)return;
+  g('pw-edit-id').value=id;g('pw-user').value=r.user||'';g('pw-br').value=r.br||'';
+  g('pw-sys').value=r.sys||'';g('pw-tp').value=r.tp||'reset';
+  g('pw-dt').value=fmtDate(r.dt)||'';g('pw-tm').value=fmtTime(r.tm)||'';
+  g('pw-st').value=r.st||'open';g('pw-rs').value=r.rs||'';g('pw-nt').value=r.nt||'';
+  const b=g('pw-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
+  const t=g('pw-form-title');if(t)t.innerHTML='<span class="cdot"></span>✏️ ແກ້ໄຂ: '+escHtml(r.user||'');
+  g('tab-password').scrollIntoView({behavior:'smooth'});
+}
+function delPW(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.pw.find(x=>x.id===id);DB.pw=DB.pw.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Password',r.user,r.br+' · '+r.sys);DB.save();renderPW();updStats();syncToSheets('Password',DB.pw);toast('🗑 ລຶບ');}
+function markPWDone(id){
+  if(!requireAdmin())return;
+  const r=DB.pw.find(x=>x.id===id);if(!r)return;
+  r.st='done';r.doneAt=new Date().toISOString().slice(0,16).replace('T',' ');
+  AUDIT.log('done','Password',r.user,r.br+' · '+r.sys);
+  DB.save();renderPW();updStats();syncToSheets('Password',DB.pw);toast('✅ ສຳເລັດ');
+}
+function showPWDetail(id){
+  const r=DB.pw.find(x=>x.id===id);if(!r)return;
+  const tpLbl={reset:'🔁 Reset',unlock:'🔓 Unlock',new:'🆕 ສ້າງໃໝ່',change:'✏️ ປ່ຽນ'};
+  const stLbl={open:'⏳ ລໍຖ້າ',pending:'🔄 ດຳເນີນ',done:'✅ ສຳເລັດ'};
+  const row=(l,v)=>v?`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:11.5px;font-weight:700;color:var(--text2);width:90px;text-transform:uppercase;letter-spacing:0.04em;flex-shrink:0;">${l}</div><div style="flex:1;font-size:13.5px;color:var(--text);">${escHtml(v)}</div></div>`:'';
+  const html=row('ຜູ້ຮ້ອງ',r.user)+row('ໜ່ວຍ',r.br)+row('ລະບົບ',r.sys)+row('ປະເພດ',tpLbl[r.tp]||r.tp)+row('ວັນທີ',fmtDate(r.dt)+(r.tm?' '+fmtTime(r.tm):''))+row('ສະຖານະ',stLbl[r.st]||r.st)+row('ເຫດຜົນ',r.rs)+row('ໝາຍເຫດ',r.nt)+(r.doneAt?row('ສຳເລັດເມື່ອ',r.doneAt):'');
+  g('modal-title').textContent='🔑 '+(r.user||'')+' · '+(r.sys||'');
+  g('modal-body').innerHTML=html;
+  g('detail-modal').style.display='flex';
+}
+function renderPW(){
+  const q=(v('pw-search')||'').toLowerCase();
+  const fbr=v('pw-f-br'),fsys=v('pw-f-sys'),fst=v('pw-f-st');
+  let list=DB.pw.slice().reverse();
+  if(q)list=list.filter(r=>((r.user||'')+(r.br||'')+(r.sys||'')+(r.rs||'')+(r.nt||'')).toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>r.br===fbr);
+  if(fsys)list=list.filter(r=>r.sys===fsys);
+  if(fst)list=list.filter(r=>r.st===fst);
+  const hasFilter=q||fbr||fsys||fst;
+  const cnt=g('pw-cnt');if(cnt)cnt.textContent=list.length+(hasFilter?'/'+DB.pw.length:'');
+  const c=g('pw-list');if(!c)return;
+  if(!list.length){c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text2);">${hasFilter?'ບໍ່ພົບ':'ຍັງບໍ່ມີເຄສ'}</div>`;return;}
+  const tpLbl={reset:'🔁 Reset',unlock:'🔓 Unlock',new:'🆕 ສ້າງໃໝ່',change:'✏️ ປ່ຽນ'};
+  c.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>ຜູ້ຮ້ອງ</th><th>ໜ່ວຍ</th><th>ລະບົບ</th><th>ປະເພດ</th><th>⏱ ເລີ່ມ</th><th>✅ ສຳເລັດ</th><th>📝 ວິທີແກ້</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead>
+    <tbody>${list.map((r,i)=>`<tr>
+      <td style="color:var(--text2);font-family:'Space Mono',monospace;">${i+1}</td>
+      <td style="font-weight:700;color:#1d4ed8;">${escHtml(r.user)||'—'}</td>
+      <td>${escHtml(r.br)||'—'}</td>
+      <td style="color:var(--text2);">${escHtml(r.sys)||'—'}</td>
+      <td style="color:var(--text2);font-size:12px;">${tpLbl[r.tp]||escHtml(r.tp)||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;">${fmtDate(r.dt)}<br>${fmtTime(r.tm)||''}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap;">${r.doneAt?`<span style="color:var(--green);">${escHtml(r.doneAt)}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td style="font-size:12px;max-width:140px;">${r.nt?`<span title="${escHtml(r.nt)}">${r.nt.length>30?escHtml(r.nt.slice(0,30))+'…':escHtml(r.nt)}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td>${sbadge(r.st)}</td>
+      <td style="text-align:center;"><div style="display:inline-flex;gap:4px;">
+        <button title="ເບິ່ງ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.08);color:#1d4ed8;cursor:pointer;" onclick="showPWDetail(${r.id})">👁</button>
+        ${r.st!=='done'?`<button title="ສຳເລັດ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markPWDone(${r.id})">✅</button>`:''}
+        <button title="ແກ້ໄຂ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editPW(${r.id})">✏️</button>
+        <button title="ລຶບ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delPW(${r.id})">🗑</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
 
 /* ===== MARK DONE ===== */
 let _doneType='',_doneId=0;
@@ -1965,6 +2311,8 @@ function renderRep(){
 function updStats(){
   const aOpen=DB.atm.filter(x=>x.st!=='done').length;
   const rOpen=DB.rep.filter(x=>x.st!=='done').length;
+  const pDone=(DB.pw||[]).filter(x=>x.st==='done').length;
+  const pTotal=(DB.pw||[]).length;
   const done=DB.atm.filter(x=>x.st==='done').length+DB.rep.filter(x=>x.st==='done').length;
   const pending=aOpen+rOpen;
   if(g('s-atm'))g('s-atm').textContent=DB.atm.length;
@@ -1974,6 +2322,8 @@ function updStats(){
   if(g('s-pending'))g('s-pending').textContent=pending;
   if(g('s-pending-sub'))g('s-pending-sub').textContent='ATM '+aOpen+' · ສ້ອມ '+rOpen;
   if(g('s-done'))g('s-done').textContent=done;
+  if(g('s-pw-done'))g('s-pw-done').textContent=pDone;
+  if(g('s-pw-sub'))g('s-pw-sub').textContent='ສຳເລັດ '+pDone+' / '+pTotal;
   // Toggle "alert" class if has pending
   const cp=g('card-pending');
   if(cp)cp.classList.toggle('has-pending',pending>0);
@@ -2078,6 +2428,13 @@ function renderDash(){
   // Stats
   const aOpen=atms.filter(x=>x.st!=='done').length;
   const rOpen=reps.filter(x=>x.st!=='done').length;
+  // Password (apply same branch/date filter)
+  let pws=(DB.pw||[]).slice();
+  if(fbr)pws=pws.filter(r=>r.br===fbr);
+  if(from)pws=pws.filter(r=>r.dt>=from);
+  if(to)pws=pws.filter(r=>r.dt<=to);
+  const pDone=pws.filter(x=>x.st==='done').length;
+  const pTotal=pws.length;
   const done=atms.filter(x=>x.st==='done').length+reps.filter(x=>x.st==='done').length;
   if(g('s-atm'))g('s-atm').textContent=atms.length+(hasFilter?'/'+DB.atm.length:'');
   if(g('s-atm2'))g('s-atm2').textContent='Open: '+aOpen;
@@ -2085,12 +2442,18 @@ function renderDash(){
   if(g('s-rep2'))g('s-rep2').textContent='ຄ້າງ: '+rOpen;
   if(g('s-rpt'))g('s-rpt').textContent=DB.rpt.length;
   if(g('s-done'))g('s-done').textContent=done;
+  if(g('s-pw-done'))g('s-pw-done').textContent=pDone;
+  if(g('s-pw-sub'))g('s-pw-sub').textContent='ສຳເລັດ '+pDone+' / '+pTotal;
+  const _total=atms.length+reps.length;
+  const _rate=_total?Math.round(done/_total*100):0;
+  if(g('lm-bdg-done'))g('lm-bdg-done').textContent=done+' ລາຍການ';
+  if(g('lm-bdg-rate'))g('lm-bdg-rate').textContent=_rate+'%';
   const dsub=g('dash-sub');if(dsub)dsub.textContent=hasFilter?`🔍 ກອງຂໍ້ມູນ: ATM ${atms.length}, ສ້ອມ ${reps.length}`:'ສະຫຼຸບພາບລວມ';
   
   const today=new Date().toISOString().split('T')[0];
   if(g('td-atm'))g('td-atm').textContent=atms.filter(x=>x.dt===today).length;
   if(g('td-rep'))g('td-rep').textContent=reps.filter(x=>x.dt===today).length;
-  if(g('td-done'))g('td-done').textContent=atms.filter(x=>x.dt===today&&x.st==='done').length+reps.filter(x=>x.dt===today&&x.st==='done').length;
+  if(g('td-done'))g('td-done').textContent=atms.filter(x=>x.dt===today&&x.st==='done').length+reps.filter(x=>x.dt===today&&x.st==='done').length+pws.filter(x=>x.dt===today&&x.st==='done').length;
   const now=new Date();const months=['ມັງ','ກຸມ','ມີ','ເມ','ພ','ມິ','ກ','ສ','ກັ','ຕ','ພ','ທ'];
   if(g('today-label'))g('today-label').textContent=`${now.getDate()} ${months[now.getMonth()]}. ${now.getFullYear()}`;
   // Critical
@@ -2151,10 +2514,26 @@ function renderDash(){
   // SLA / Trend / Top issues / Activity
   renderSLA(atms,reps);
   renderTrend(atms,reps);
-  renderTopIssues(atms,reps);
+  renderTopIssues(atms,reps,pws);
   renderActivityFeed();
   // Render dashboard map
   renderDashMap(atms);
+}
+
+/* ===== HERO PRESETS (Dashboard) ===== */
+function lmDateStr(d){return d.toISOString().split('T')[0];}
+function lmSetPreset(range,btn){
+  document.querySelectorAll('#lm-presets .lm-chip').forEach(c=>c.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const today=new Date();let from='',to=lmDateStr(today);
+  if(range==='today'){from=lmDateStr(today);}
+  else if(range==='7'){const d=new Date(today);d.setDate(d.getDate()-6);from=lmDateStr(d);}
+  else if(range==='30'){const d=new Date(today);d.setDate(d.getDate()-29);from=lmDateStr(d);}
+  else if(range==='month'){from=lmDateStr(new Date(today.getFullYear(),today.getMonth(),1));}
+  else if(range==='all'){from='';to='';}
+  if(g('dash-f-from'))g('dash-f-from').value=from;
+  if(g('dash-f-to'))g('dash-f-to').value=to;
+  if(typeof renderDash==='function')renderDash();
 }
 
 /* ===== SLA ===== */
@@ -2255,14 +2634,17 @@ function renderTrend(atmsArg,repsArg){
 }
 
 /* ===== TOP ISSUES ===== */
-function renderTopIssues(atms,reps){
-  const tpMap={},dvMap={};
+function renderTopIssues(atms,reps,pws){
+  const tpMap={},dvMap={},sysMap={};
   atms.forEach(r=>{const k=(r.tp||'ບໍ່ລະບຸ').trim();if(k)tpMap[k]=(tpMap[k]||0)+1;});
   reps.forEach(r=>{const k=(r.dv||'ບໍ່ລະບຸ').trim();if(k)dvMap[k]=(dvMap[k]||0)+1;});
+  (pws||[]).forEach(r=>{const k=(r.sys||'ບໍ່ລະບຸ').trim();if(k)sysMap[k]=(sysMap[k]||0)+1;});
   const tpTop=Object.entries(tpMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const dvTop=Object.entries(dvMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const sysTop=Object.entries(sysMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const tpMax=tpTop.length?tpTop[0][1]:1;
   const dvMax=dvTop.length?dvTop[0][1]:1;
+  const sysMax=sysTop.length?sysTop[0][1]:1;
   const c=g('top-issues');if(!c)return;
   const renderBars=(list,max,color,shadow)=>list.map(([k,v],idx)=>{
     const pct=Math.round(v/max*100);
@@ -2283,7 +2665,9 @@ function renderTopIssues(atms,reps){
     `<div style="font-size:11px;font-weight:600;color:var(--p);margin-bottom:8px;letter-spacing:0.02em;text-transform:uppercase;">◫ ATM — ປະເພດບັນຫາ</div>`
     +(tpTop.length?renderBars(tpTop,tpMax,'linear-gradient(135deg,#3b82f6,#06b6d4)','0 4px 10px rgba(59,130,246,0.3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>')
     +`<div style="font-size:11px;font-weight:600;color:var(--cyan);margin:18px 0 8px;letter-spacing:0.02em;text-transform:uppercase;">⚙ ສ້ອມແປງ — ອຸປະກອນ</div>`
-    +(dvTop.length?renderBars(dvTop,dvMax,'linear-gradient(135deg,#10b981,#06b6d4)','0 4px 10px rgba(16,185,129,0.3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>');
+    +(dvTop.length?renderBars(dvTop,dvMax,'linear-gradient(135deg,#10b981,#06b6d4)','0 4px 10px rgba(16,185,129,0.3)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>')
+    +`<div style="font-size:11px;font-weight:600;color:#1d4ed8;margin:18px 0 8px;letter-spacing:0.02em;text-transform:uppercase;">🔑 Password — ລະບົບ</div>`
+    +(sysTop.length?renderBars(sysTop,sysMax,'linear-gradient(135deg,#3b82f6,#1d4ed8)','0 4px 10px rgba(29,78,216,0.35)'):'<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີຂໍ້ມູນ</div>');
 }
 
 /* ===== ACTIVITY FEED ===== */
@@ -3064,7 +3448,7 @@ function goTab(name,btn){
 }
 
 /* ===== RENDER ALL ===== */
-function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();renderATM();renderRep();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('audit-list'))renderAudit();updStats();}
+function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('audit-list'))renderAudit();updStats();}
 
 /* ===== INIT ===== */
 function initDates(){
