@@ -859,11 +859,14 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
         <select id="atm-f-st" onchange="renderATM()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
           <option value="">📊 ທຸກສະຖານະ</option><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="critical">🚨 ດ່ວນ</option><option value="done">✅ ສຳເລັດ</option>
         </select>
+        <select id="atm-f-tp" onchange="renderATM()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">🏷 ທຸກປະເພດ</option>
+        </select>
         <span style="font-size:13px;color:var(--text2);">ຈາກ</span>
         <input type="date" id="atm-f-from" onchange="renderATM()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
         <span style="font-size:13px;color:var(--text2);">ຫາ</span>
         <input type="date" id="atm-f-to" onchange="renderATM()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
-        <button class="btn btn-sm" onclick="['atm-search','atm-f-br','atm-f-st','atm-f-from','atm-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderATM();">✕ ລ້າງ</button>
+        <button class="btn btn-sm" onclick="['atm-search','atm-f-br','atm-f-st','atm-f-tp','atm-f-from','atm-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderATM();">✕ ລ້າງ</button>
       </div>
     </div>
     <div style="padding:0 16px 16px;" id="atm-list"><div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີ ATM</div></div>
@@ -1445,14 +1448,24 @@ function onATMIDChange(el){
 
 /* ===== ATM TYPE MANAGEMENT ===== */
 function populateATMTypeDropdown(){
-  const el=g('a-tp');if(!el)return;
-  const cur=el.value;
-  let html='';
-  CFG.atmTypes.forEach(t=>{html+='<option value="'+t+'">'+t+'</option>';});
-  html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມປະເພດໃໝ່...</option>';
-  html+='<option value="__MANAGE__" style="color:#1a4fa0;font-weight:600;background:#e8f0fe;">✏️ ຈັດການປະເພດ...</option>';
-  el.innerHTML=html;
-  if(cur&&CFG.atmTypes.includes(cur))el.value=cur;
+  const el=g('a-tp');
+  if(el){
+    const cur=el.value;
+    let html='';
+    CFG.atmTypes.forEach(t=>{html+='<option value="'+t+'">'+t+'</option>';});
+    html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມປະເພດໃໝ່...</option>';
+    html+='<option value="__MANAGE__" style="color:#1a4fa0;font-weight:600;background:#e8f0fe;">✏️ ຈັດການປະເພດ...</option>';
+    el.innerHTML=html;
+    if(cur&&CFG.atmTypes.includes(cur))el.value=cur;
+  }
+  const fel=g('atm-f-tp');
+  if(fel){
+    const cur=fel.value;
+    let html='<option value="">🏷 ທຸກປະເພດ</option>';
+    CFG.atmTypes.forEach(t=>{html+='<option value="'+t+'">'+t+'</option>';});
+    fel.innerHTML=html;
+    if(cur)fel.value=cur;
+  }
 }
 
 function onATMTypeChange(el){
@@ -2247,14 +2260,15 @@ function showIPDetail(id){
 /* ===== RENDER ATM ===== */
 function renderATM(){
   const q=(v('atm-search')||'').toLowerCase();
-  const fbr=v('atm-f-br'),fst=v('atm-f-st'),from=v('atm-f-from'),to=v('atm-f-to');
+  const fbr=v('atm-f-br'),fst=v('atm-f-st'),ftp=v('atm-f-tp'),from=v('atm-f-from'),to=v('atm-f-to');
   let list=DB.atm.slice().reverse();
   if(q)list=list.filter(r=>((r.atmId||'')+(r.br||'')+(r.tp||'')+(r.rq||'')+(r.ds||'')+(r.ac||'')).toLowerCase().includes(q));
   if(fbr)list=list.filter(r=>r.br===fbr);
+  if(ftp)list=list.filter(r=>r.tp===ftp);
   if(fst)list=list.filter(r=>r.st===fst);
   if(from)list=list.filter(r=>r.dt>=from);
   if(to)list=list.filter(r=>r.dt<=to);
-  const hasFilter=q||fbr||fst||from||to;
+  const hasFilter=q||fbr||fst||ftp||from||to;
   g('atm-cnt').textContent=list.length+(hasFilter?'/'+DB.atm.length:'');
   const c=g('atm-list');
   if(!list.length){c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text2);">${from||to?'ບໍ່ພົບ':'ຍັງບໍ່ມີ ATM'}</div>`;return;}
