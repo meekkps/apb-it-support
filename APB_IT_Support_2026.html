@@ -3500,34 +3500,14 @@ window.addEventListener('load',function(){
 
 /* ===== PWA: Register Service Worker + Install Prompt ===== */
 let deferredInstallPrompt=null;
+// Unregister ທຸກ SW ເກົ່າ + ລົບ cache → user ໄດ້ສະບັບໃໝ່ສະເໝີ
 if('serviceWorker' in navigator && location.protocol!=='file:'){
-  let _swReloaded=false;
-  // ຖ້າ controller ປ່ຽນ (SW ໃໝ່ active) → reload ໜ້າທັນທີ
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if(_swReloaded)return;
-    _swReloaded=true;
-    location.reload();
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(r=>r.unregister());
   });
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('service-worker.js')
-      .then(reg=>{
-        console.log('✅ SW registered',reg.scope);
-        // ກວດສະບັບໃໝ່ທຸກຄັ້ງເຂົ້າໜ້າ + ທຸກ 60 ວິ
-        reg.update();
-        setInterval(()=>reg.update(),60000);
-        reg.addEventListener('updatefound',()=>{
-          const nw=reg.installing;
-          if(!nw)return;
-          nw.addEventListener('statechange',()=>{
-            // ມີ SW ໃໝ່ພ້ອມ ແລະ ມີ SW ເກົ່າຄຸມຢູ່ → ສັ່ງ skipWaiting → reload ອັດຕະໂນມັດ
-            if(nw.state==='installed' && navigator.serviceWorker.controller){
-              nw.postMessage('SKIP_WAITING');
-            }
-          });
-        });
-      })
-      .catch(err=>{console.warn('SW registration failed',err);});
-  });
+  if(window.caches){
+    caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+  }
 }
 
 // ຮັບ event ສຳລັບປຸ່ມ Install
