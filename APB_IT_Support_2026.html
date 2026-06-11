@@ -482,10 +482,16 @@ body.viewer-mode .viewer-badge{display:inline-flex!important;}
 </style>
 <script>
 /* ===== AUTH ===== */
+/* ລະຫັດຜ່ານເກັບເປັນ SHA-256 hash (salt ດ້ວຍ username) — ບໍ່ມີ plaintext ໃນ source */
 const USERS=[
-  {user:'Mee',pass:'95407675',role:'admin',display:'ຫມີ'},
-  {user:'user1',pass:'123456',role:'viewer',display:'ຜູ້ໃຊ້ 1'}
+  {user:'Mee',hash:'6e0cdcd288fb4f392bf76df3dde2c99bcdb1095ffe1096aa8502e692cb60804d',role:'admin',display:'ຫມີ'},
+  {user:'user1',hash:'ca5195f3047f563a86ec247459cfdd4327227855a56374a89c0330da9e95a870',role:'viewer',display:'ຜູ້ໃຊ້ 1'}
 ];
+async function pwHash(user,pass){
+  const data=new TextEncoder().encode(user.toLowerCase()+':'+pass+':apb-salt-2026');
+  const buf=await crypto.subtle.digest('SHA-256',data);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 /* role: 'admin' = ເຫັນທຸກໜ້າ, 'viewer' = ເຫັນສະເພາະ Dashboard (ອ່ານຢ່າງດຽວ) */
 function isViewer(){
   try{return (JSON.parse(sessionStorage.getItem('apb_user')||'{}').role)==='viewer';}catch(e){return false;}
@@ -526,12 +532,33 @@ function applyRole(){
     }
   }
 }
-function doLogin(){
+let _loginBusy=false,_loginFails=0,_loginLockUntil=0;
+async function doLogin(){
+  if(_loginBusy)return;
+  if(Date.now()<_loginLockUntil){
+    const e=document.getElementById('login-err');
+    if(e){e.textContent='🔒 ລອງຫຼາຍເກີນໄປ — ລໍຖ້າ '+Math.ceil((_loginLockUntil-Date.now())/1000)+' ວິ';e.style.display='block';}
+    return;
+  }
   const u=(document.getElementById('login-user').value||'').trim();
   const p=(document.getElementById('login-pass').value||'').trim();
-  const found=USERS.find(x=>x.user.toLowerCase()===u.toLowerCase()&&x.pass===p);
-  if(!found){const e=document.getElementById('login-err');if(e)e.style.display='block';document.getElementById('login-pass').value='';return;}
-  sessionStorage.setItem('apb_user',JSON.stringify(found));
+  if(!u||!p)return;
+  _loginBusy=true;
+  let found=null;
+  try{
+    const h=await pwHash(u,p);
+    found=USERS.find(x=>x.user.toLowerCase()===u.toLowerCase()&&x.hash===h);
+  }catch(err){console.error(err);}
+  _loginBusy=false;
+  if(!found){
+    _loginFails++;
+    if(_loginFails>=5){_loginLockUntil=Date.now()+30000;_loginFails=0;}
+    const e=document.getElementById('login-err');
+    if(e){e.textContent='⚠️ ຊື່ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ';e.style.display='block';}
+    document.getElementById('login-pass').value='';return;
+  }
+  _loginFails=0;
+  sessionStorage.setItem('apb_user',JSON.stringify({user:found.user,role:found.role,display:found.display}));
   document.getElementById('login-screen').style.display='none';
   const hu=document.getElementById('hdr-user');if(hu){hu.textContent='👤 '+found.display;hu.style.display='inline';}
   const unm=document.querySelector('.unm');if(unm)unm.textContent=found.display;
@@ -788,6 +815,32 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     </div>
   </div>
 
+  <!-- Monthly Compare (style D) -->
+  <div class="card">
+    <div class="card-hd" style="flex-wrap:wrap;gap:8px;">
+      <span class="card-title"><span class="cdot"></span>📊 ປຽບທຽບແຕ່ລະເດືອນ</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-sm cmp-btn" id="cmp-6m" onclick="setCmpMode('6m')">6 ເດືອນ</button>
+        <button class="btn btn-sm cmp-btn" id="cmp-12m" onclick="setCmpMode('12m')">12 ເດືອນ</button>
+        <button class="btn btn-sm cmp-btn" id="cmp-custom" onclick="setCmpMode('custom')">📅 ເລືອກວັນ</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="cmp-range" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <span style="font-size:12px;color:var(--text2);">ຈາກ</span>
+        <input type="date" id="cmp-from" onchange="renderCompare()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+        <span style="font-size:12px;color:var(--text2);">ຫາ</span>
+        <input type="date" id="cmp-to" onchange="renderCompare()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:8px;font-size:12px;color:var(--text2);">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#3b82f6,#06b6d4);"></span>ATM</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#10b981,#06b6d4);"></span>ສ້ອມແປງ</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);"></span>Password</span>
+      </div>
+      <div style="position:relative;height:280px;"><canvas id="cmp-chart"></canvas></div>
+    </div>
+  </div>
+
   <!-- Top Issues -->
   <div class="card">
     <div class="card-hd"><span class="card-title"><span class="cdot"></span>🔥 ບັນຫາທີ່ພົບຫຼາຍສຸດ</span></div>
@@ -1032,6 +1085,22 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <div class="stat-card"><div class="stat-lbl">ATM ທັງໝົດ</div><div class="stat-num" id="atmlist-total">0</div></div>
     <div class="stat-card"><div class="stat-lbl">📍 ມີສະຖານທີ່</div><div class="stat-num" id="atmlist-located" style="background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
     <div class="stat-card"><div class="stat-lbl">⚠️ ບໍ່ມີ</div><div class="stat-num" id="atmlist-nolocation" style="background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">0</div></div>
+  </div>
+
+  <!-- ATM Health -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title"><span class="cdot"></span>🏥 ສຸຂະພາບຕູ້ ATM</span>
+      <span style="font-size:11px;color:var(--text2);">ຄຳນວນຈາກເຄສ 90 ມື້ຫຼ້າສຸດ</span>
+    </div>
+    <div class="card-body" style="padding:12px 16px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;text-align:center;">
+        <div style="padding:10px;border-radius:12px;background:rgba(239,68,68,0.08);"><div style="font-size:22px;font-weight:800;color:var(--red);" id="ah-red">0</div><div style="font-size:11px;color:var(--text2);">🔴 ສ່ຽງສູງ</div></div>
+        <div style="padding:10px;border-radius:12px;background:rgba(245,158,11,0.08);"><div style="font-size:22px;font-weight:800;color:var(--amber);" id="ah-amber">0</div><div style="font-size:11px;color:var(--text2);">🟡 ເລີ່ມມີບັນຫາ</div></div>
+        <div style="padding:10px;border-radius:12px;background:rgba(16,185,129,0.08);"><div style="font-size:22px;font-weight:800;color:var(--green);" id="ah-green">0</div><div style="font-size:11px;color:var(--text2);">🟢 ປົກກະຕິ</div></div>
+      </div>
+      <div id="atm-health-list"><div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ມີຂໍ້ມູນ</div></div>
+    </div>
   </div>
 
   <!-- Form -->
@@ -1760,12 +1829,14 @@ const DB={
   rpt:JSON.parse(localStorage.getItem('apb26_rpt')||'[]'),
   ip:JSON.parse(localStorage.getItem('apb26_ip')||'[]'),
   pw:JSON.parse(localStorage.getItem('apb26_pw')||'[]'),
+  parts:JSON.parse(localStorage.getItem('apb26_parts')||'[]'),
   save(){
     localStorage.setItem('apb26_atm',JSON.stringify(this.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(this.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(this.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(this.ip));
     localStorage.setItem('apb26_pw',JSON.stringify(this.pw));
+    localStorage.setItem('apb26_parts',JSON.stringify(this.parts));
     autoBackup();
     if(navigator.onLine)sbPush().then(ok=>showSyncStatus(ok?'ok':'error'));
   }
@@ -2532,6 +2603,7 @@ function renderDash(){
   // SLA / Trend / Top issues / Activity
   renderSLA(atms,reps);
   renderTrend(atms,reps);
+  renderCompare();
   renderTopIssues(atms,reps,pws);
   renderActivityFeed();
   // Render dashboard map
@@ -2619,6 +2691,35 @@ function renderTrend(atmsArg,repsArg){
     gradATM.addColorStop(0,'rgba(59,130,246,0.35)');gradATM.addColorStop(1,'rgba(59,130,246,0)');
     const gradRep=c2d.createLinearGradient(0,0,0,240);
     gradRep.addColorStop(0,'rgba(6,182,212,0.35)');gradRep.addColorStop(1,'rgba(6,182,212,0)');
+    // ===== Flow FX: ເສັ້ນປະໄຫຼ + ຈຸດແສງແລ່ນຕາມເສັ້ນ (ແນວສາຍນ້ຳ) =====
+    let _flowT=0;
+    const flowFx={
+      id:'flowFx',
+      afterDatasetsDraw(chart){
+        const c=chart.ctx;
+        chart.data.datasets.forEach((ds,di)=>{
+          const meta=chart.getDatasetMeta(di);
+          if(!meta||meta.hidden||!meta.data||meta.data.length<2)return;
+          const pts=meta.data;
+          const speed=0.00018,gap=1/2.5;
+          for(let kk=0;kk<2;kk++){
+            let prog=((_flowT*speed)+di*0.13+kk*gap)%1;
+            const fpos=prog*(pts.length-1);
+            const i0=Math.floor(fpos),i1=Math.min(i0+1,pts.length-1);
+            const tt=fpos-i0;
+            const x=pts[i0].x+(pts[i1].x-pts[i0].x)*tt;
+            const y=pts[i0].y+(pts[i1].y-pts[i0].y)*tt;
+            const col=ds.borderColor;
+            c.save();
+            c.globalAlpha=0.85;
+            c.beginPath();c.arc(x,y,3.2,0,Math.PI*2);c.fillStyle=col;c.fill();
+            c.globalAlpha=0.25;
+            c.beginPath();c.arc(x,y,7,0,Math.PI*2);c.fillStyle=col;c.fill();
+            c.restore();
+          }
+        });
+      }
+    };
     _trendChart=new Chart(ctx,{
       type:'line',
       data:{labels:labels,datasets:[
@@ -2645,9 +2746,126 @@ function renderTrend(atmsArg,repsArg){
           x:{grid:{color:grid,display:false},ticks:{color:text,font:{size:10},maxRotation:0},border:{display:false}},
           y:{grid:{color:grid},ticks:{color:text,font:{size:10},stepSize:1,padding:8},beginAtZero:true,border:{display:false}}
         },
-        animation:{duration:800,easing:'easeOutQuart'}
-      }
+        animation:{
+          duration:1400,easing:'easeOutQuart',
+          delay(c){return c.type==='data'&&c.mode==='default'?c.dataIndex*(900/Math.max(1,days)):0;}
+        }
+      },
+      plugins:[flowFx]
     });
+    // rAF loop: ເລື່ອນເສັ້ນປະ + ຍ້າຍຈຸດແສງ (ເລີ່ມຫຼັງ animation ທຳອິດຈົບ)
+    if(window._trendFlowRAF)cancelAnimationFrame(window._trendFlowRAF);
+    const chartRef=_trendChart;
+    let _lastTs=0;
+    function flowLoop(ts){
+      if(_trendChart!==chartRef)return;
+      window._trendFlowRAF=requestAnimationFrame(flowLoop);
+      if(ts-_lastTs<33)return;
+      _lastTs=ts;
+      _flowT=ts;
+      const ds3=chartRef.data.datasets[2];
+      if(ds3)ds3.borderDashOffset=-(ts*0.012)%10;
+      chartRef.update('none');
+    }
+    setTimeout(()=>{if(_trendChart===chartRef)window._trendFlowRAF=requestAnimationFrame(flowLoop);},1700);
+  });
+}
+
+/* ===== MONTHLY COMPARE (style D — rounded animated bars) ===== */
+let _cmpChart=null,_cmpMode='6m';
+function setCmpMode(m){
+  _cmpMode=m;
+  const rg=g('cmp-range');if(rg)rg.style.display=m==='custom'?'flex':'none';
+  if(m==='custom'&&!v('cmp-from')&&!v('cmp-to')){
+    const t=new Date(),f=new Date();f.setDate(f.getDate()-29);
+    if(g('cmp-from'))g('cmp-from').value=f.toISOString().slice(0,10);
+    if(g('cmp-to'))g('cmp-to').value=t.toISOString().slice(0,10);
+  }
+  renderCompare();
+}
+function renderCompare(){
+  const ctx=g('cmp-chart');if(!ctx)return;
+  // highlight active button
+  ['6m','12m','custom'].forEach(m=>{
+    const b=g('cmp-'+m);if(!b)return;
+    if(m===_cmpMode){b.style.background='linear-gradient(135deg,#157a45,#0b3d2a)';b.style.color='#fff';b.style.borderColor='transparent';}
+    else{b.style.background='';b.style.color='';b.style.borderColor='';}
+  });
+  const atms=DB.atm,reps=DB.rep,pws=DB.pw||[];
+  const moNames=['ມ.ກ','ກ.ພ','ມີ.ນ','ເມ.ສ','ພ.ພ','ມິ.ຖ','ກ.ລ','ສ.ຫ','ກ.ຍ','ຕ.ລ','ພ.ຈ','ທ.ວ'];
+  let labels=[],keys=[],byDay=false;
+  if(_cmpMode==='custom'){
+    const from=v('cmp-from'),to=v('cmp-to');
+    if(!from||!to)return;
+    const f=new Date(from),t=new Date(to);
+    const days=Math.round((t-f)/86400000)+1;
+    if(days<=0)return;
+    if(days<=62){
+      byDay=true;
+      for(let i=0;i<days;i++){const d=new Date(f);d.setDate(d.getDate()+i);const k=d.toISOString().slice(0,10);keys.push(k);labels.push(d.getDate()+'/'+(d.getMonth()+1));}
+    }else{
+      const cur=new Date(f.getFullYear(),f.getMonth(),1);
+      while(cur<=t){const k=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');keys.push(k);labels.push(moNames[cur.getMonth()]+' '+String(cur.getFullYear()).slice(2));cur.setMonth(cur.getMonth()+1);}
+    }
+  }else{
+    const n=_cmpMode==='12m'?12:6;
+    const now=new Date();
+    for(let i=n-1;i>=0;i--){
+      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+      const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      keys.push(k);labels.push(moNames[d.getMonth()]+(n>6?'':' '+String(d.getFullYear()).slice(2)));
+    }
+  }
+  const cnt=(arr,k)=>byDay?arr.filter(x=>x.dt===k).length:arr.filter(x=>(x.dt||'').slice(0,7)===k).length;
+  const aD=keys.map(k=>cnt(atms,k)),rD=keys.map(k=>cnt(reps,k)),pD=keys.map(k=>cnt(pws,k));
+  loadChartThen(()=>{
+    const isDark=document.body.classList.contains('dark');
+    const grid=isDark?'rgba(255,255,255,0.06)':'rgba(15,23,42,0.05)';
+    const text=isDark?'#94a3b8':'#64748b';
+    const c2d=ctx.getContext('2d');
+    const mkGrad=(c1,c2)=>{const gr=c2d.createLinearGradient(0,0,0,280);gr.addColorStop(0,c1);gr.addColorStop(1,c2);return gr;};
+    const gA=mkGrad('#3b82f6','#06b6d4');
+    const gR=mkGrad('#10b981','#06b6d4');
+    const gP=mkGrad('#3b82f6','#1d4ed8');
+    const mkDs=(lbl,data,color)=>({label:lbl,data:data,backgroundColor:color,borderRadius:8,borderSkipped:false,barPercentage:0.62,categoryPercentage:0.78});
+    const dss=[mkDs('ATM',aD,gA),mkDs('ສ້ອມແປງ',rD,gR),mkDs('Password',pD,gP)];
+    if(_cmpChart){
+      _cmpChart.data.labels=labels;
+      _cmpChart.data.datasets.forEach((ds,i)=>{ds.data=dss[i].data;});
+      _cmpChart.update();
+      return;
+    }
+    const barGlow={
+      id:'barGlow',
+      beforeDatasetDraw(chart,args){
+        const c=chart.ctx;c.save();
+        const col=chart.data.datasets[args.index].backgroundColor;
+        c.shadowColor=col+'AA';
+        c.shadowBlur=14;c.shadowOffsetX=0;c.shadowOffsetY=5;
+      },
+      afterDatasetDraw(chart){chart.ctx.restore();}
+    };
+    _cmpChart=new Chart(ctx,{type:'bar',plugins:[barGlow],data:{labels:labels,datasets:dss},options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:isDark?'rgba(15,23,42,0.95)':'rgba(255,255,255,0.98)',
+          titleColor:isDark?'#f1f5f9':'#0f172a',bodyColor:isDark?'#cbd5e1':'#475569',
+          borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(15,23,42,0.08)',borderWidth:1,
+          padding:12,cornerRadius:10,displayColors:true,boxPadding:6,
+          titleFont:{family:'Noto Sans Lao',size:12,weight:'600'},
+          bodyFont:{family:'Noto Sans Lao',size:12},
+          usePointStyle:true,boxWidth:8,boxHeight:8
+        }
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:text,font:{size:10},maxRotation:45,autoSkip:labels.length>16},border:{display:false}},
+        y:{grid:{color:grid},ticks:{color:text,font:{size:10},stepSize:1,padding:8},beginAtZero:true,border:{display:false}}
+      },
+      animation:{duration:900,easing:'easeOutElastic'},
+      animations:{y:{from:(c)=>c.chart.scales&&c.chart.scales.y?c.chart.scales.y.getPixelForValue(0):undefined}}
+    }});
   });
 }
 
@@ -3038,6 +3256,127 @@ function delATMList(id){
   renderATMList();populateATMIDDropdown();renderATM();renderDash();
   if(_alMap)refreshALMarkers();
   toast('🗑 ລຶບ '+trimId+(atmCases.length?' + '+atmCases.length+' cases':''));
+}
+
+/* ===== ATM HEALTH SCORE ===== */
+function calcATMHealth(){
+  const now=new Date();now.setHours(0,0,0,0);
+  const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-89);
+  const cutStr=cutoff.toISOString().slice(0,10);
+  const todayStr=now.toISOString().slice(0,10);
+  // ລວມຕູ້ຈາກທະບຽນ + ຕູ້ທີ່ມີເຄສ
+  const ids=new Map();
+  getATMIds().forEach(a=>{ids.set(String(a.id),a.br||'');});
+  DB.atm.forEach(r=>{const k=String(r.atmId||'').trim();if(k&&!ids.has(k))ids.set(k,r.br||'');});
+  const out=[];
+  ids.forEach((br,atmId)=>{
+    const parts=(DB.parts||[]).filter(p=>String(p.atmId)===atmId).sort((x,y)=>(y.dt||'').localeCompare(x.dt||''));
+    const lastPart=parts[0]||null;
+    const from=(lastPart&&lastPart.dt>cutStr)?lastPart.dt:cutStr;
+    const cases=DB.atm.filter(r=>String(r.atmId||'').trim()===atmId&&(r.dt||'')>=from)
+      .sort((x,y)=>(x.dt||'').localeCompare(y.dt||''));
+    const n=cases.length;
+    const item={atmId,br,n,lastPart,score:null,tags:[],meta:[],pred:null};
+    if(lastPart)item.meta.push('🔧 ປ່ຽນ '+lastPart.part+' '+fmtDate(lastPart.dt));
+    if(n<2){
+      item.tags.push(n===0?'ບໍ່ມີເຄສ':'ຂໍ້ມູນບໍ່ພໍ');
+      if(n===1)item.meta.push('1 ເຄສ — ຕ້ອງມີ ≥2 ເຄສຈຶ່ງຄຳນວນໄດ້');
+      out.push(item);return;
+    }
+    let score=100;
+    score-=n*5;
+    const openCrit=cases.filter(x=>x.st==='critical').length;
+    if(openCrit){score-=openCrit*15;item.tags.push('🚨 ມີ critical ຄ້າງ');}
+    const openOther=cases.filter(x=>x.st!=='done'&&x.st!=='critical').length;
+    score-=openOther*4;
+    // ບັນຫາຊ້ຳປະເພດດຽວກັນ + ອາການທີ່ໜ້າຈະເພຄັ້ງຕໍ່ໄປ
+    const tpMap={};cases.forEach(x=>{const t=(x.tp||'').trim();if(t)tpMap[t]=(tpMap[t]||0)+1;});
+    const tpSorted=Object.entries(tpMap).sort((a,b)=>b[1]-a[1]);
+    const rep=tpSorted[0];
+    if(rep&&rep[1]>=3){score-=12;item.tags.push('ຊ້ຳ: '+rep[0]+' ×'+rep[1]);}
+    if(rep&&rep[1]>=2){
+      const pct=Math.round(rep[1]/n*100);
+      item.likely=rep[0]+' ('+rep[1]+'/'+n+' ເຄສ ≈'+pct+'%)';
+    }else if(rep){
+      item.likely=null; // ບັນຫາກະຈາຍ ບໍ່ມີແບບແຜນຊັດ
+    }
+    // ແນວໂນ້ມ 30 ມື້ຫຼ້າສຸດ vs 30 ມື້ກ່ອນໜ້າ
+    const d30=new Date(now);d30.setDate(d30.getDate()-29);const s30=d30.toISOString().slice(0,10);
+    const d60=new Date(now);d60.setDate(d60.getDate()-59);const s60=d60.toISOString().slice(0,10);
+    const c30=cases.filter(x=>x.dt>=s30).length;
+    const cPrev=cases.filter(x=>x.dt>=s60&&x.dt<s30).length;
+    if(c30>cPrev&&c30>=2){score-=10;item.tags.push('ເພຖີ່ຂຶ້ນ');}
+    // MTBF + ຄາດການ
+    const gaps=[];
+    for(let i=1;i<n;i++){
+      const a=new Date(cases[i-1].dt),b=new Date(cases[i].dt);
+      const gd=Math.round((b-a)/86400000);
+      if(gd>=0)gaps.push(gd);
+    }
+    if(gaps.length){
+      const mtbf=Math.max(1,Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length));
+      const last=new Date(cases[n-1].dt);
+      const since=Math.round((now-last)/86400000);
+      const left=mtbf-since;
+      item.meta.push('ສະເລ່ຍເພທຸກ ~'+mtbf+' ມື້');
+      if(left<=0){item.pred='ອາດເພໄດ້ທຸກເມື່ອ';score-=5;}
+      else item.pred='ຄາດເພອີກໃນ ~'+left+' ມື້';
+    }
+    item.meta.unshift(n+' ເຄສໃນຊ່ວງຄິດໄລ່');
+    item.score=Math.max(5,Math.min(100,Math.round(score)));
+    out.push(item);
+  });
+  // ຮຽງ: ຄະແນນຕ່ຳສຸດກ່ອນ, ຂໍ້ມູນບໍ່ພໍຢູ່ທ້າຍ
+  out.sort((a,b)=>{
+    if(a.score===null&&b.score===null)return b.n-a.n;
+    if(a.score===null)return 1;
+    if(b.score===null)return -1;
+    return a.score-b.score;
+  });
+  return out;
+}
+function renderATMHealth(){
+  const c=g('atm-health-list');if(!c)return;
+  const list=calcATMHealth();
+  const red=list.filter(x=>x.score!==null&&x.score<50).length;
+  const amber=list.filter(x=>x.score!==null&&x.score>=50&&x.score<80).length;
+  const green=list.filter(x=>x.score!==null&&x.score>=80).length;
+  if(g('ah-red'))g('ah-red').textContent=red;
+  if(g('ah-amber'))g('ah-amber').textContent=amber;
+  if(g('ah-green'))g('ah-green').textContent=green;
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ມີຂໍ້ມູນ</div>';return;}
+  const adm=!isViewer();
+  c.innerHTML=list.map(it=>{
+    const col=it.score===null?'var(--text3)':it.score<50?'var(--red)':it.score<80?'var(--amber)':'var(--green)';
+    const barCol=it.score===null?'rgba(128,128,128,0.3)':it.score<50?'#ef4444':it.score<80?'#f59e0b':'#10b981';
+    const w=it.score===null?100:it.score;
+    const tags=it.tags.map(t=>'<span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--bg1);border:1px solid var(--border);color:var(--text2);white-space:nowrap;">'+escHtml(t)+'</span>').join(' ');
+    return '<div style="padding:12px 4px;border-bottom:1px solid var(--border);'+(it.score===null?'opacity:0.6;':'')+'">'
+      +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'
+        +'<span style="font-weight:700;font-size:14px;color:'+col+';min-width:60px;">'+escHtml(it.atmId)+'</span>'
+        +'<span style="font-size:11.5px;color:var(--text2);min-width:110px;">'+escHtml(it.br||'—')+'</span>'
+        +'<div style="flex:1;min-width:110px;height:8px;border-radius:99px;background:var(--bg2);overflow:hidden;"><div style="height:100%;width:'+w+'%;border-radius:99px;background:'+barCol+';transition:width 0.8s ease;"></div></div>'
+        +'<span style="font-size:15px;font-weight:800;color:'+col+';min-width:34px;text-align:right;">'+(it.score===null?'—':it.score)+'</span>'
+        +tags
+        +(adm?'<button class="btn btn-sm" onclick="addPartReplace(\''+escHtml(it.atmId)+'\')" style="white-space:nowrap;">🔧 ປ່ຽນອາໄຫຼ່</button>':'')
+      +'</div>'
+      +(it.meta.length||it.pred||it.likely?'<div style="font-size:11px;color:var(--text3);margin-top:5px;padding-left:2px;">'+escHtml(it.meta.join(' · '))+(it.pred?' · <b style="color:'+col+';">'+escHtml(it.pred)+'</b>':'')+(it.likely?' · ໜ້າຈະເພ: <b style="color:'+col+';">'+escHtml(it.likely)+'</b>':'')+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+function addPartReplace(atmId){
+  if(!requireAdmin())return;
+  const part=prompt('🔧 ປ່ຽນອາໄຫຼ່ — ຕູ້ '+atmId+'\n\nຊື່ອາໄຫຼ່ທີ່ປ່ຽນ (ເຊັ່ນ: card reader, ແບັດ UPS, EPP...):');
+  if(!part||!part.trim())return;
+  const dt=prompt('ວັນທີປ່ຽນ (YYYY-MM-DD):',new Date().toISOString().slice(0,10));
+  if(!dt)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dt.trim())){toast('⚠️ ຮູບແບບວັນທີບໍ່ຖືກ (YYYY-MM-DD)');return;}
+  let by='';try{by=JSON.parse(sessionStorage.getItem('apb_user')||'{}').display||'';}catch(e){}
+  DB.parts.push({id:Date.now(),atmId:String(atmId),part:part.trim(),dt:dt.trim(),by});
+  DB.save();
+  AUDIT.log('add','Parts',atmId,part.trim()+' · '+dt.trim());
+  renderATMHealth();
+  toast('✅ ບັນທຶກປ່ຽນ '+part.trim()+' — ຄະແນນຕູ້ '+atmId+' ນັບໃໝ່ຕັ້ງແຕ່ '+dt.trim());
 }
 
 function renderATMList(){
@@ -3462,11 +3801,11 @@ function goTab(name,btn){
   if(btn){btn.classList.add('active');document.querySelectorAll('[data-tab="'+name+'"]').forEach(b=>b.classList.add('active'));}
   if(name==='dashboard')renderDash();
   if(name==='report')updPrev();
-  if(name==='atmlist'){renderBranchMgr();populateBranchDropdowns();renderATMList();setTimeout(()=>initALMap(),200);}
+  if(name==='atmlist'){renderBranchMgr();populateBranchDropdowns();renderATMList();renderATMHealth();setTimeout(()=>initALMap(),200);}
 }
 
 /* ===== RENDER ALL ===== */
-function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('audit-list'))renderAudit();updStats();}
+function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('atm-health-list'))renderATMHealth();if(g('audit-list'))renderAudit();updStats();}
 
 /* ===== INIT ===== */
 function initDates(){
