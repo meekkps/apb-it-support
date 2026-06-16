@@ -2216,11 +2216,11 @@ function renderPWTopUsers(){
   const all=DB.pw||[];
   const m={};
   all.forEach(r=>{
-    const u=(r.user||'ບໍ່ລະບຸ').trim();
+    const u=String(r.user||'ບໍ່ລະບຸ').trim()||'ບໍ່ລະບຸ';
     if(!m[u])m[u]={n:0,sys:{},last:''};
     m[u].n++;
-    const s=(r.sys||'').trim();if(s)m[u].sys[s]=(m[u].sys[s]||0)+1;
-    const d=(r.dt||'');if(d>m[u].last)m[u].last=d;
+    const s=String(r.sys||'').trim();if(s)m[u].sys[s]=(m[u].sys[s]||0)+1;
+    const d=String(r.dt||'');if(d>m[u].last)m[u].last=d;
   });
   const top=Object.entries(m).sort((a,b)=>b[1].n-a[1].n).slice(0,8);
   const info=g('pw-top-info');if(info)info.textContent='ຈາກ '+all.length+' ເຄສ · '+Object.keys(m).length+' ຜູ້ຮ້ອງ';
@@ -2893,9 +2893,9 @@ function renderCompare(){
 /* ===== TOP ISSUES ===== */
 function renderTopIssues(atms,reps,pws){
   const tpMap={},dvMap={},sysMap={};
-  atms.forEach(r=>{const k=(r.tp||'ບໍ່ລະບຸ').trim();if(k)tpMap[k]=(tpMap[k]||0)+1;});
-  reps.forEach(r=>{const k=(r.dv||'ບໍ່ລະບຸ').trim();if(k)dvMap[k]=(dvMap[k]||0)+1;});
-  (pws||[]).forEach(r=>{const k=(r.sys||'ບໍ່ລະບຸ').trim();if(k)sysMap[k]=(sysMap[k]||0)+1;});
+  atms.forEach(r=>{const k=String(r.tp||'ບໍ່ລະບຸ').trim();if(k)tpMap[k]=(tpMap[k]||0)+1;});
+  reps.forEach(r=>{const k=String(r.dv||'ບໍ່ລະບຸ').trim();if(k)dvMap[k]=(dvMap[k]||0)+1;});
+  (pws||[]).forEach(r=>{const k=String(r.sys||'ບໍ່ລະບຸ').trim();if(k)sysMap[k]=(sysMap[k]||0)+1;});
   const tpTop=Object.entries(tpMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const dvTop=Object.entries(dvMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const sysTop=Object.entries(sysMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
