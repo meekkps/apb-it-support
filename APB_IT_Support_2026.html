@@ -2010,18 +2010,24 @@ async function sbPull(){
   try{
     const [ra,rr,rp,ri]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data')]);
     const pr=rows=>{const r=rows.find(x=>x.id==='main');return r&&Array.isArray(r.data)?r.data:[];};
-    const dedup=arr=>{const m=new Map();let auto=0;(arr||[]).forEach(r=>{
-      const hasData=Object.keys(r||{}).some(k=>String(r[k]||'').trim()!=='');
-      if(!hasData)return;
-      let key=r.id!=null&&String(r.id).trim()!==''?String(r.id):('auto_'+(++auto));
-      if(!r.id||String(r.id).trim()===''){r.id=Date.now()+auto;}
-      m.set(key,r);
-    });return[...m.values()];};
+    const dedup=arr=>{const out=[];const seen=new Set();let auto=0;(arr||[]).forEach(r=>{
+      if(!r||typeof r!=='object')return;
+      const hasData=Object.keys(r).some(k=>String(r[k]||'').trim()!=='');
+      if(!hasData)return; // ຂ້າມສະເພາະແຖວຫວ່າງລ້ວນໆ
+      let id=(r.id!=null&&String(r.id).trim()!=='')?String(r.id):'';
+      if(!id||seen.has(id)){ // id ຫວ່າງ ຫຼື ຊ້ຳ → ສ້າງ id ໃໝ່ ບໍ່ຖິ້ມແຖວ
+        let nid; do{ nid=String(Date.now()+(++auto)); }while(seen.has(nid));
+        id=nid; r.id=Number(nid);
+      }
+      seen.add(id);
+      out.push(r);
+    });return out;};
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
-    DB.atm=dedup(pr(ra).map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
-    DB.rep=dedup(pr(rr).map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
-    DB.rpt=dedup(pr(rp).map(r=>({...r,dt:fmtDate(r.dt)})));
-    DB.ip=dedup(pr(ri).map(r=>({...r,bought:fmtDate(r.bought)})));
+    DB.atm=dedup(pr(ra).map(r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    DB.rep=dedup(pr(rr).map(r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    DB.rpt=dedup(pr(rp).map(r=>normRec({...r,dt:fmtDate(r.dt)})));
+    DB.ip=dedup(pr(ri).map(r=>normRec({...r,bought:fmtDate(r.bought)})));
+    sortByDate(DB.atm);sortByDate(DB.rep);sortByDate(DB.ip);
     localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
@@ -2164,30 +2170,68 @@ function showPullSummary(before,after){
 /* ===== SHEETS ===== */
 async function sheetsPost(b){try{const r=await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(b)});return await r.json();}catch(e){return{ok:false};}}
 async function sheetsGet(t){try{const r=await fetch(`${SHEETS_URL}?type=${t}`);return await r.json();}catch(e){return{ok:false,data:[]};}}
+// ຮຽງຕາມວັນທີ-ເວລາ (ເກົ່າ→ໃໝ່) ເພື່ອໃຫ້ Sheet ຮຽງລຳດັບ ບໍ່ສະຫຼັບ
+function sortByDate(rows){
+  if(!Array.isArray(rows))return rows;
+  rows.sort((a,b)=>{
+    const ka=(String(a.dt||a.bought||'')+' '+String(a.tm||'')).trim();
+    const kb=(String(b.dt||b.bought||'')+' '+String(b.tm||'')).trim();
+    if(ka===kb)return (Number(a.id)||0)-(Number(b.id)||0);
+    return ka<kb?-1:1;
+  });
+  return rows;
+}
 async function syncToSheets(type,rows){
   if(!navigator.onLine)return;
+  // ຮຽງກ່ອນ push + ບັນທຶກ local ໃຫ້ກົງ
+  try{
+    sortByDate(rows);
+    const km={ATM:'apb26_atm',Repair:'apb26_rep',Report:'apb26_rpt',IP:'apb26_ip',Password:'apb26_pw'};
+    if(km[type])localStorage.setItem(km[type],JSON.stringify(rows));
+  }catch(e){}
   showSyncStatus('syncing');
   const r=await sheetsPost({type,action:'overwrite',rows});
   showSyncStatus(r.ok?'ok':'error');
+}
+// Normalize: ບັງຄັບ field ຂໍ້ຄວາມເປັນ string (ກັນ number ຈາກ Sheets → filter/search/compare ບໍ່ກົງ)
+const NORM_TEXT_FIELDS=['atmId','br','tp','dv','sys','st','user','tc','rq','ds','ac','is','rs','nt','name','addr','mac','location','note','os','type','solution','dept','serial','vlan','cpu','ram','hr'];
+function normRec(r){
+  if(!r||typeof r!=='object')return r;
+  NORM_TEXT_FIELDS.forEach(k=>{ if(r[k]!=null&&typeof r[k]!=='string')r[k]=String(r[k]); });
+  return r;
 }
 async function pullFromSheets(silent){
   if(!navigator.onLine){if(!silent)toast('📴 Offline');return false;}
   showSyncStatus('syncing');if(!silent)toast('⏳ ດຶງຈາກ Sheets...');
   try{
     const [ra,rr,rp,ri,rw]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP'),sheetsGet('Password')]);
-    const dedup=arr=>{const m=new Map();let auto=0;(arr||[]).forEach(r=>{
-      const hasData=Object.keys(r||{}).some(k=>String(r[k]||'').trim()!=='');
-      if(!hasData)return;
-      let key=r.id!=null&&String(r.id).trim()!==''?String(r.id):('auto_'+(++auto));
-      if(!r.id||String(r.id).trim()===''){r.id=Date.now()+auto;}
-      m.set(key,r);
-    });return[...m.values()];};
+    const dedup=arr=>{const out=[];const seen=new Set();let auto=0;(arr||[]).forEach(r=>{
+      if(!r||typeof r!=='object')return;
+      const hasData=Object.keys(r).some(k=>String(r[k]||'').trim()!=='');
+      if(!hasData)return; // ຂ້າມສະເພາະແຖວຫວ່າງລ້ວນໆ
+      let id=(r.id!=null&&String(r.id).trim()!=='')?String(r.id):'';
+      if(!id||seen.has(id)){ // id ຫວ່າງ ຫຼື ຊ້ຳ → ສ້າງ id ໃໝ່ ບໍ່ຖິ້ມແຖວ
+        let nid; do{ nid=String(Date.now()+(++auto)); }while(seen.has(nid));
+        id=nid; r.id=Number(nid);
+      }
+      seen.add(id);
+      out.push(r);
+    });return out;};
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
-    if(ra.ok)DB.atm=dedup(ra.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
-    if(rr.ok)DB.rep=dedup(rr.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
-    if(rp.ok)DB.rpt=dedup(rp.data.map(r=>({...r,dt:fmtDate(r.dt)})));
-    if(ri.ok)DB.ip=dedup(ri.data.map(r=>({...r,bought:fmtDate(r.bought)})));
-    if(rw&&rw.ok)DB.pw=dedup(rw.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
+    // guard: ຖ້າ ok ແຕ່ data ຫວ່າງ ທັງໆທີ່ເຄີຍມີຂໍ້ມູນ → ບໍ່ລ້າງ (ກັນ glitch ຊົ່ວຄາວ ເຮັດຂໍ້ມູນຫາຍ)
+    const safe=(res,cur,map)=>{
+      if(!res||!res.ok)return cur; // ດຶງບໍ່ໄດ້ → ເກັບເກົ່າ
+      const arr=dedup((res.data||[]).map(map));
+      if(arr.length===0&&(cur||[]).length>3){console.warn('SW: empty pull ignored (kept existing)');return cur;}
+      return arr;
+    };
+    const mapDate=r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)});
+    DB.atm=safe(ra,DB.atm,mapDate);
+    DB.rep=safe(rr,DB.rep,mapDate);
+    DB.rpt=safe(rp,DB.rpt,r=>normRec({...r,dt:fmtDate(r.dt)}));
+    DB.ip=safe(ri,DB.ip,r=>normRec({...r,bought:fmtDate(r.bought)}));
+    DB.pw=safe(rw,DB.pw,mapDate);
+    sortByDate(DB.atm);sortByDate(DB.rep);sortByDate(DB.ip);sortByDate(DB.pw);
     localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
@@ -2207,8 +2251,8 @@ async function autoSync(){
   if(okSheets){
     renderAll();if(typeof updIPStats==='function')updIPStats();
     showSyncStatus('ok');
-    // mirror ຂໍ້ມູນ Sheets → Supabase ໃຫ້ສອງບ່ອນກົງກັນ (ບໍ່ block UI)
-    sbPush().catch(()=>{});
+    // mirror ໄປ Supabase ສະເພາະເມື່ອມີຂໍ້ມູນແທ້ (ກັນລ້າງ Supabase ດ້ວຍ pull ຫວ່າງ)
+    if((DB.atm.length+DB.rep.length+DB.ip.length)>0)sbPush().catch(()=>{});
   }else{
     // Sheets ລົ້ມ → ໃຊ້ Supabase ແທນ
     const ok=await sbPull();
@@ -2353,7 +2397,7 @@ function renderPW(){
       <td style="color:var(--text2);font-size:12px;">${tpLbl[r.tp]||escHtml(r.tp)||'—'}</td>
       <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;">${fmtDate(r.dt)}<br>${fmtTime(r.tm)||''}</td>
       <td style="font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap;">${r.doneAt?`<span style="color:var(--green);">${escHtml(r.doneAt)}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
-      <td style="font-size:12px;max-width:140px;">${r.nt?`<span title="${escHtml(r.nt)}">${r.nt.length>30?escHtml(r.nt.slice(0,30))+'…':escHtml(r.nt)}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td style="font-size:12px;max-width:140px;">${r.nt?(s=>`<span title="${escHtml(s)}">${s.length>30?escHtml(s.slice(0,30))+'…':escHtml(s)}</span>`)(String(r.nt)):'<span style="color:var(--text3);">—</span>'}</td>
       <td>${sbadge(r.st)}</td>
       <td style="text-align:center;"><div style="display:inline-flex;gap:4px;">
         <button title="ເບິ່ງ" style="width:30px;height:30px;border-radius:8px;border:1.5px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.08);color:#1d4ed8;cursor:pointer;" onclick="showPWDetail(${r.id})">👁</button>
@@ -3546,7 +3590,7 @@ function renderIP(){
   updIPStats();
   const q=(v('ip-search')||'').toLowerCase();
   const fbr=v('ip-f-br'),fst=v('ip-f-st');
-  let list=DB.ip.filter(r=>!q||(r.name||'').toLowerCase().includes(q)||(r.addr||'').includes(q)||(r.mac||'').toLowerCase().includes(q)||(r.br||'').includes(q)||(r.user||'').toLowerCase().includes(q));
+  let list=DB.ip.filter(r=>!q||(String(r.name||'')+String(r.addr||'')+String(r.mac||'')+String(r.br||'')+String(r.user||'')).toLowerCase().includes(q));
   if(fbr)list=list.filter(r=>r.br===fbr);
   if(fst)list=list.filter(r=>r.st===fst);
   g('ip-cnt').textContent=list.length+(q||fbr||fst?'/'+DB.ip.length:'');
