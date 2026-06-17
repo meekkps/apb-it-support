@@ -934,7 +934,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <div class="card-body">
       <input type="hidden" id="r-edit-id" value="">
       <div class="frow c2">
-        <div class="field"><label>ອຸປະກອນ *</label><input id="r-dv" type="text" placeholder="Printer, UPS, ATM..."></div>
+        <div class="field"><label>ອຸປະກອນ *</label><select id="r-dv" onchange="onRepDvChange(this)"></select></div>
         <div class="field"><label>ໜ່ວຍ *</label>
           <select id="r-br" onchange="onBranchChange(this)"><option value="">-- ເລືອກໜ່ວຍ --</option><option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option></select>
         </div>
@@ -964,6 +964,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
           <option value="">📍 ທຸກໜ່ວຍ</option>
           <option>ສາຂາຈຳປາສັກ</option><option>ປາກຊ່ອງ</option><option>ເມືອງໂຂງ</option><option>ຈຳປາສັກ</option><option>ເມືອງມຸນ</option><option>ສຸຂຸມາ</option><option>ປະທຸມພອນ</option><option>ໂພນທອງ</option>
         </select>
+        <select id="rep-f-dv" onchange="renderRep()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;"></select>
         <select id="rep-f-st" onchange="renderRep()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
           <option value="">📊 ທຸກສະຖານະ</option><option value="open">⏳ ລໍຖ້າ</option><option value="pending">🔄 ດຳເນີນ</option><option value="done">✅ ສຳເລັດ</option>
         </select>
@@ -971,7 +972,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
         <input type="date" id="rep-f-from" onchange="renderRep()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
         <span style="font-size:13px;color:var(--text2);">ຫາ</span>
         <input type="date" id="rep-f-to" onchange="renderRep()" style="flex:1;min-width:130px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;">
-        <button class="btn btn-sm" onclick="['rep-search','rep-f-br','rep-f-st','rep-f-from','rep-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderRep();">✕ ລ້າງ</button>
+        <button class="btn btn-sm" onclick="['rep-search','rep-f-br','rep-f-dv','rep-f-st','rep-f-from','rep-f-to'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderRep();">✕ ລ້າງ</button>
       </div>
     </div>
     <div style="padding:0 16px 16px;" id="rep-list"></div>
@@ -1335,6 +1336,21 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     </div>
   </div>
 </div>
+<div id="rep-dv-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-hd">
+      <div class="modal-title">🔧 ຈັດການອຸປະກອນ ສ້ອມແປງ</div>
+      <button class="modal-close" onclick="document.getElementById('rep-dv-modal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="rep-dv-new-inp" placeholder="ຊື່ອຸປະກອນໃໝ່..." style="flex:1;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--text);outline:none;" onkeydown="if(event.key==='Enter')addRepDvFromMgr()">
+        <button class="btn btn-grad" onclick="addRepDvFromMgr()" style="white-space:nowrap;">➕ ເພີ່ມ</button>
+      </div>
+      <div id="rep-dv-list"></div>
+    </div>
+  </div>
+</div>
 
 <div id="done-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-box" style="max-width:400px;">
@@ -1401,27 +1417,30 @@ function fmtTime(val){
 /* ===== CONFIG (custom branches + ATM IDs + ATM Types) ===== */
 const ATM_TYPES_DEFAULT=['ເງິນໝົດ/ເຕີມ','ບັດຄ້າງ','ເຄື່ອງບໍ່ເຮັດວຽກ','ໜ້າຈໍຜິດ','ເຄືອຂ່າຍຂາດ','Printer','CCTV','ອື່ນໆ'];
 const PW_SYSTEMS_DEFAULT=['Email','Core Banking','AD / Domain','ATM','Internet Banking','Mobile Banking','Windows','VPN','ອື່ນໆ'];
+const REPAIR_DEV_DEFAULT=['Printer','UPS','PC','Notebook','Server','Switch','Router','CCTV','Scanner','ໂທລະສັບ','ອື່ນໆ'];
 const CFG={
   branches:JSON.parse(localStorage.getItem('apb26_branches')||'null')||BRANCHES.slice(),
   atmIds:JSON.parse(localStorage.getItem('apb26_atmids')||'[]'),
   atmTypes:JSON.parse(localStorage.getItem('apb26_atmtypes')||'null')||ATM_TYPES_DEFAULT.slice(),
   pwSystems:JSON.parse(localStorage.getItem('apb26_pwsystems')||'null')||PW_SYSTEMS_DEFAULT.slice(),
+  repDevices:JSON.parse(localStorage.getItem('apb26_repdevices')||'null')||REPAIR_DEV_DEFAULT.slice(),
   save(){
     localStorage.setItem('apb26_branches',JSON.stringify(this.branches));
     localStorage.setItem('apb26_atmids',JSON.stringify(this.atmIds));
     localStorage.setItem('apb26_atmtypes',JSON.stringify(this.atmTypes));
     localStorage.setItem('apb26_pwsystems',JSON.stringify(this.pwSystems));
+    localStorage.setItem('apb26_repdevices',JSON.stringify(this.repDevices));
     if(navigator.onLine)sbPushConfig();
   }
 };
 
 function getBranches(){
-  // Merge: configured + auto-detected from existing records
-  const s=new Set(CFG.branches);
-  DB.atm.forEach(r=>{if(r.br)s.add(r.br);});
-  DB.rep.forEach(r=>{if(r.br)s.add(r.br);});
-  DB.ip.forEach(r=>{if(r.br)s.add(r.br);});
-  return [...s].filter(x=>x).sort();
+  // Merge: configured + auto-detected from existing records (ບັງຄັບເປັນ string)
+  const s=new Set((CFG.branches||[]).map(x=>String(x)));
+  DB.atm.forEach(r=>{if(r.br!=null&&r.br!=='')s.add(String(r.br));});
+  DB.rep.forEach(r=>{if(r.br!=null&&r.br!=='')s.add(String(r.br));});
+  DB.ip.forEach(r=>{if(r.br!=null&&r.br!=='')s.add(String(r.br));});
+  return [...s].filter(x=>x&&x.trim()).sort();
 }
 
 function getATMIds(){
@@ -1706,6 +1725,107 @@ function addPWSysFromMgr(){
   toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
 }
 
+/* ===== REPAIR DEVICE MANAGER (ຄືກັນກັບ Password system) ===== */
+function getRepDevices(){
+  // ລວມ: ທີ່ຕັ້ງໄວ້ + ທີ່ມີໃນຂໍ້ມູນເກົ່າ (free-text ເກົ່າ)
+  const s=new Set(CFG.repDevices);
+  DB.rep.forEach(r=>{if(r.dv&&String(r.dv).trim())s.add(String(r.dv).trim());});
+  return [...s];
+}
+function populateRepDvDropdown(){
+  const all=getRepDevices();
+  const el=g('r-dv');
+  if(el){
+    const cur=el.value;
+    let html='<option value="">-- ເລືອກອຸປະກອນ --</option>';
+    all.forEach(s=>{html+='<option value="'+escHtml(s)+'">'+escHtml(s)+'</option>';});
+    html+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມອຸປະກອນໃໝ່...</option>';
+    html+='<option value="__MANAGE__" style="color:#1a4fa0;font-weight:600;background:#e8f0fe;">✏️ ຈັດການອຸປະກອນ...</option>';
+    el.innerHTML=html;
+    if(cur&&all.includes(cur))el.value=cur;
+  }
+  const fel=g('rep-f-dv');
+  if(fel){
+    const cur=fel.value;
+    let html='<option value="">🔧 ທຸກອຸປະກອນ</option>';
+    all.forEach(s=>{html+='<option value="'+escHtml(s)+'">'+escHtml(s)+'</option>';});
+    fel.innerHTML=html;
+    if(cur)fel.value=cur;
+  }
+}
+function onRepDvChange(el){
+  if(isViewer()){populateRepDvDropdown();return;}
+  if(el.value==='__ADD__'){
+    el.value='';
+    const name=prompt('➕ ເພີ່ມອຸປະກອນໃໝ່\n\nຊື່ອຸປະກອນ:');
+    if(!name||!name.trim()){populateRepDvDropdown();return;}
+    const n=name.trim();
+    if(CFG.repDevices.includes(n)){toast('⚠️ ມີອຸປະກອນນີ້ແລ້ວ');populateRepDvDropdown();return;}
+    CFG.repDevices.push(n);CFG.save();
+    populateRepDvDropdown();
+    el.value=n;
+    toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
+    return;
+  }
+  if(el.value==='__MANAGE__'){
+    el.value=CFG.repDevices[0]||'';
+    openRepDvMgr();
+    return;
+  }
+}
+function openRepDvMgr(){renderRepDvMgr();g('rep-dv-modal').style.display='flex';}
+function renderRepDvMgr(){
+  const list=g('rep-dv-list');if(!list)return;
+  if(!CFG.repDevices.length){list.innerHTML='<div style="text-align:center;color:var(--text2);padding:1rem;">ບໍ່ມີອຸປະກອນ</div>';return;}
+  list.innerHTML=CFG.repDevices.map((t,i)=>
+    '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);">'
+    +'<span style="flex:1;font-size:14px;color:var(--text);">'+escHtml(t)+'</span>'
+    +'<button class="btn btn-sm" onclick="editRepDv('+i+')" title="ແກ້ໄຂ" style="padding:4px 10px;">✏️</button>'
+    +'<button class="btn btn-sm" onclick="deleteRepDv('+i+')" title="ລຶບ" style="padding:4px 10px;color:#e53935;">🗑</button>'
+    +(i>0?'<button class="btn btn-sm" onclick="moveRepDv('+i+',-1)" style="padding:4px 8px;">▲</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +(i<CFG.repDevices.length-1?'<button class="btn btn-sm" onclick="moveRepDv('+i+',1)" style="padding:4px 8px;">▼</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +'</div>'
+  ).join('');
+}
+function editRepDv(i){
+  if(!requireAdmin())return;
+  const old=CFG.repDevices[i];
+  const name=prompt('✏️ ແກ້ໄຂອຸປະກອນ\n\nຊື່ໃໝ່:',old);
+  if(!name||!name.trim()||name.trim()===old)return;
+  const n=name.trim();
+  if(CFG.repDevices.includes(n)){toast('⚠️ ມີອຸປະກອນນີ້ແລ້ວ');return;}
+  DB.rep.forEach(r=>{if(r.dv===old)r.dv=n;});
+  DB.save();
+  CFG.repDevices[i]=n;CFG.save();
+  populateRepDvDropdown();renderRepDvMgr();renderRep();
+  toast('✅ ແກ້ໄຂເປັນ "'+n+'" ແລ້ວ!');
+}
+function deleteRepDv(i){
+  if(!requireAdmin())return;
+  const t=CFG.repDevices[i];
+  if(!confirm('🗑 ລຶບອຸປະກອນ "'+t+'"?\n\n(ລາຍການສ້ອມແປງທີ່ໃຊ້ອັນນີ້ຈະຍັງຄົງຢູ່)'))return;
+  CFG.repDevices.splice(i,1);CFG.save();
+  populateRepDvDropdown();renderRepDvMgr();
+  toast('🗑 ລຶບ "'+t+'" ແລ້ວ');
+}
+function moveRepDv(i,dir){
+  const j=i+dir;
+  if(j<0||j>=CFG.repDevices.length)return;
+  const tmp=CFG.repDevices[i];CFG.repDevices[i]=CFG.repDevices[j];CFG.repDevices[j]=tmp;
+  CFG.save();populateRepDvDropdown();renderRepDvMgr();
+}
+function addRepDvFromMgr(){
+  if(!requireAdmin())return;
+  const inp=g('rep-dv-new-inp');if(!inp)return;
+  const n=inp.value.trim();
+  if(!n){toast('⚠️ ກະລຸນາໃສ່ຊື່ອຸປະກອນ');return;}
+  if(CFG.repDevices.includes(n)){toast('⚠️ ມີອຸປະກອນນີ້ແລ້ວ');return;}
+  CFG.repDevices.push(n);CFG.save();
+  inp.value='';
+  populateRepDvDropdown();renderRepDvMgr();
+  toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
+}
+
 /* ===== AUDIT LOG (with Supabase sync) ===== */
 const AUDIT={
   list:JSON.parse(localStorage.getItem('apb26_audit')||'[]'),
@@ -1890,7 +2010,13 @@ async function sbPull(){
   try{
     const [ra,rr,rp,ri]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data')]);
     const pr=rows=>{const r=rows.find(x=>x.id==='main');return r&&Array.isArray(r.data)?r.data:[];};
-    const dedup=arr=>{const m=new Map();(arr||[]).forEach(r=>{if(r.id)m.set(String(r.id),r);});return[...m.values()];};
+    const dedup=arr=>{const m=new Map();let auto=0;(arr||[]).forEach(r=>{
+      const hasData=Object.keys(r||{}).some(k=>String(r[k]||'').trim()!=='');
+      if(!hasData)return;
+      let key=r.id!=null&&String(r.id).trim()!==''?String(r.id):('auto_'+(++auto));
+      if(!r.id||String(r.id).trim()===''){r.id=Date.now()+auto;}
+      m.set(key,r);
+    });return[...m.values()];};
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
     DB.atm=dedup(pr(ra).map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     DB.rep=dedup(pr(rr).map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
@@ -2044,12 +2170,18 @@ async function syncToSheets(type,rows){
   const r=await sheetsPost({type,action:'overwrite',rows});
   showSyncStatus(r.ok?'ok':'error');
 }
-async function pullFromSheets(){
-  if(!navigator.onLine){toast('📴 Offline');return;}
-  showSyncStatus('syncing');toast('⏳ ດຶງຈາກ Sheets...');
+async function pullFromSheets(silent){
+  if(!navigator.onLine){if(!silent)toast('📴 Offline');return false;}
+  showSyncStatus('syncing');if(!silent)toast('⏳ ດຶງຈາກ Sheets...');
   try{
     const [ra,rr,rp,ri,rw]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP'),sheetsGet('Password')]);
-    const dedup=arr=>{const m=new Map();(arr||[]).forEach(r=>{if(r.id)m.set(String(r.id),r);});return[...m.values()];};
+    const dedup=arr=>{const m=new Map();let auto=0;(arr||[]).forEach(r=>{
+      const hasData=Object.keys(r||{}).some(k=>String(r[k]||'').trim()!=='');
+      if(!hasData)return;
+      let key=r.id!=null&&String(r.id).trim()!==''?String(r.id):('auto_'+(++auto));
+      if(!r.id||String(r.id).trim()===''){r.id=Date.now()+auto;}
+      m.set(key,r);
+    });return[...m.values()];};
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
     if(ra.ok)DB.atm=dedup(ra.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     if(rr.ok)DB.rep=dedup(rr.data.map(r=>({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
@@ -2061,8 +2193,28 @@ async function pullFromSheets(){
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
     localStorage.setItem('apb26_pw',JSON.stringify(DB.pw));
-    renderAll();showSyncStatus('ok');toast('✅ ດຶງ Sheets ສຳເລັດ!');
-  }catch(e){showSyncStatus('error');toast('⚠️ ດຶງ Sheets ບໍ່ໄດ້');}
+    renderAll();showSyncStatus('ok');if(!silent)toast('✅ ດຶງ Sheets ສຳເລັດ!');
+    return true;
+  }catch(e){showSyncStatus('error');if(!silent)toast('⚠️ ດຶງ Sheets ບໍ່ໄດ້');return false;}
+}
+// Auto-sync ຕອນເປີດແອັບ: ດຶງ Sheets (source of truth) → mirror ໄປ Supabase ໃຫ້ກົງກັນ
+async function autoSync(){
+  if(!navigator.onLine){showSyncStatus('error');return;}
+  showSyncStatus('syncing');
+  const okSheets=await pullFromSheets(true);
+  // ດຶງ config (ສາຂາ/ປະເພດ) ຈາກ Supabase
+  try{await sbPullConfig();}catch(e){}
+  if(okSheets){
+    renderAll();if(typeof updIPStats==='function')updIPStats();
+    showSyncStatus('ok');
+    // mirror ຂໍ້ມູນ Sheets → Supabase ໃຫ້ສອງບ່ອນກົງກັນ (ບໍ່ block UI)
+    sbPush().catch(()=>{});
+  }else{
+    // Sheets ລົ້ມ → ໃຊ້ Supabase ແທນ
+    const ok=await sbPull();
+    if(ok){renderAll();if(typeof updIPStats==='function')updIPStats();showSyncStatus('ok');}
+    else showSyncStatus('error');
+  }
 }
 async function forceSyncAll(){
   if(!navigator.onLine){toast('📴 Offline');return;}
@@ -2112,6 +2264,7 @@ function delATM(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;c
 /* ===== REPAIR CRUD ===== */
 function svRep(){
   if(!requireAdmin())return;
+  if(!v('r-dv'))return toast('⚠️ ເລືອກອຸປະກອນ');
   if(!v('r-is'))return toast('⚠️ ໃສ່ອາການ');
   if(!v('r-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
   const eid=v('r-edit-id');
@@ -2387,14 +2540,15 @@ function renderATM(){
 /* ===== RENDER REPAIR ===== */
 function renderRep(){
   const q=(v('rep-search')||'').toLowerCase();
-  const fbr=v('rep-f-br'),fst=v('rep-f-st'),from=v('rep-f-from'),to=v('rep-f-to');
+  const fbr=v('rep-f-br'),fst=v('rep-f-st'),fdv=v('rep-f-dv'),from=v('rep-f-from'),to=v('rep-f-to');
   let list=DB.rep.slice().reverse();
   if(q)list=list.filter(r=>((r.dv||'')+(r.br||'')+(r.tc||'')+(r.is||'')+(r.rs||'')).toLowerCase().includes(q));
   if(fbr)list=list.filter(r=>r.br===fbr);
+  if(fdv)list=list.filter(r=>r.dv===fdv);
   if(fst)list=list.filter(r=>r.st===fst);
   if(from)list=list.filter(r=>r.dt>=from);
   if(to)list=list.filter(r=>r.dt<=to);
-  const hasFilter=q||fbr||fst||from||to;
+  const hasFilter=q||fbr||fst||fdv||from||to;
   g('rep-cnt').textContent=list.length+(hasFilter?'/'+DB.rep.length:'');
   const c=g('rep-list');
   if(!list.length){c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text2);">${from||to?'ບໍ່ພົບ':'ຍັງບໍ່ມີ'}</div>`;return;}
@@ -3062,27 +3216,47 @@ function editBranch(oldName){
 }
 
 function delBranch(name){
-  // Count usage
-  const atmCnt=DB.atm.filter(r=>r.br===name).length;
-  const repCnt=DB.rep.filter(r=>r.br===name).length;
-  const ipCnt=DB.ip.filter(r=>r.br===name).length;
-  const atmIdCnt=CFG.atmIds.filter(r=>r.br===name).length;
-  const total=atmCnt+repCnt+ipCnt+atmIdCnt;
-  
+  name=String(name);
+  const eq=x=>String(x.br||'')===name;
+  const atmCnt=DB.atm.filter(eq).length;
+  const repCnt=DB.rep.filter(eq).length;
+  const ipCnt=DB.ip.filter(eq).length;
+  const pwCnt=(DB.pw||[]).filter(eq).length;
+  const atmIdCnt=CFG.atmIds.filter(eq).length;
+  const total=atmCnt+repCnt+ipCnt+pwCnt+atmIdCnt;
+
   let msg='ລຶບໜ່ວຍ "'+name+'"?';
   if(total>0){
     msg+='\n\n⚠️ ມີຂໍ້ມູນທີ່ໃຊ້ໜ່ວຍນີ້:';
     if(atmCnt)msg+='\n• ATM cases: '+atmCnt;
     if(repCnt)msg+='\n• ສ້ອມແປງ: '+repCnt;
     if(ipCnt)msg+='\n• IP: '+ipCnt;
+    if(pwCnt)msg+='\n• Password: '+pwCnt;
     if(atmIdCnt)msg+='\n• ATM IDs: '+atmIdCnt;
-    msg+='\n\nຂໍ້ມູນຈະຍັງຢູ່ ແຕ່ໜ່ວຍຈະຫາຍຈາກ dropdown';
   }
   if(!confirm(msg))return;
-  
-  CFG.branches=CFG.branches.filter(x=>x!==name);CFG.save();
+
+  CFG.branches=(CFG.branches||[]).filter(x=>String(x)!==name);CFG.save();
+
+  if(total>0){
+    // ຖ້າບໍ່ລ້າງ field ໜ່ວຍຈາກ records → ມັນຈະກັບມາໃນ dropdown ອີກ
+    if(confirm('⚠️ ໜ່ວຍນີ້ຍັງຖືກໃຊ້ໃນ '+total+' ລາຍການ.\n\nກົດ OK = ລ້າງ field ໜ່ວຍອອກຈາກລາຍການເຫຼົ່ານັ້ນ (ໜ່ວຍຫາຍຖາວອນ)\nກົດ Cancel = ເກັບໄວ້ (ໜ່ວຍຈະກັບມາ)')){
+      DB.atm.forEach(r=>{if(eq(r))r.br='';});
+      DB.rep.forEach(r=>{if(eq(r))r.br='';});
+      DB.ip.forEach(r=>{if(eq(r))r.br='';});
+      (DB.pw||[]).forEach(r=>{if(eq(r))r.br='';});
+      CFG.atmIds=CFG.atmIds.filter(r=>!eq(r));
+      DB.save();CFG.save();
+      if(navigator.onLine){
+        if(atmCnt)syncToSheets('ATM',DB.atm);
+        if(repCnt)syncToSheets('Repair',DB.rep);
+        if(ipCnt)syncToSheets('IP',DB.ip);
+        if(pwCnt)syncToSheets('Password',DB.pw);
+      }
+    }
+  }
   AUDIT.log('delete','Branch',name,'');
-  renderBranchMgr();populateBranchDropdowns();
+  renderBranchMgr();populateBranchDropdowns();renderAll();
   toast('🗑 ລຶບ "'+name+'"');
 }
 
@@ -3102,6 +3276,7 @@ function renderBranchMgr(){
   CFG.atmIds.forEach(r=>{if(usage[r.br])usage[r.br].atmId++;});
   
   c.innerHTML='<div style="display:flex;flex-direction:column;gap:8px;">'+list.map(b=>{
+    b=String(b);
     const u=usage[b]||{atm:0,rep:0,ip:0,atmId:0};
     const total=u.atm+u.rep+u.ip+u.atmId;
     const isCustom=!BRANCHES.includes(b);
@@ -3120,10 +3295,21 @@ function renderBranchMgr(){
 /* ===== ATM LIST MANAGE ===== */
 let _alMap=null, _alMarkers={}, _alSelectedMarker=null;
 
+let _leafletCbs=[],_leafletLoading=false;
 function loadLeafletThen(cb){
   if(typeof L!=='undefined'){cb();return;}
+  _leafletCbs.push(cb);
+  if(_leafletLoading)return;
+  _leafletLoading=true;
   if(!document.getElementById('leaflet-css')){const lc=document.createElement('link');lc.id='leaflet-css';lc.rel='stylesheet';lc.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(lc);}
-  const ls=document.createElement('script');ls.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';ls.onload=cb;document.body.appendChild(ls);
+  const fire=()=>{_leafletLoading=false;const cbs=_leafletCbs.slice();_leafletCbs=[];cbs.forEach(f=>{try{f();}catch(e){console.warn('leaflet cb',e);}});};
+  const tryLoad=(src,fallback)=>{
+    const ls=document.createElement('script');ls.src=src;
+    ls.onload=fire;
+    ls.onerror=()=>{if(fallback){const lc=document.getElementById('leaflet-css');if(lc)lc.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';tryLoad(fallback,null);}else{_leafletLoading=false;}};
+    document.body.appendChild(ls);
+  };
+  tryLoad('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js','https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js');
 }
 
 function initALMap(){
@@ -3134,7 +3320,7 @@ function initALMap(){
       _alMap.on('click',onALMapClick);
     }
     refreshALMarkers();
-    setTimeout(()=>_alMap.invalidateSize(),200);
+    [150,400,800].forEach(ms=>setTimeout(()=>{if(_alMap)_alMap.invalidateSize();},ms));
   });
 }
 
@@ -3705,7 +3891,7 @@ function goTab(name,btn){
 }
 
 /* ===== RENDER ALL ===== */
-function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('audit-list'))renderAudit();updStats();}
+function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();populateRepDvDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('audit-list'))renderAudit();updStats();}
 
 /* ===== INIT ===== */
 function initDates(){
@@ -3728,13 +3914,8 @@ window.addEventListener('load',function(){
   const theme=localStorage.getItem('apb26_theme');
   if(theme==='dark'){document.body.classList.add('dark');const btn=g('theme-btn');if(btn)btn.textContent='☀️';}
   initDates();renderAll();renderBackupList();checkOnline();checkAuth();
-  if(navigator.onLine){
-    showSyncStatus('syncing');
-    sbPull().then(ok=>{
-      if(ok){renderAll();updIPStats();showSyncStatus('ok');toast('✅ ໂຫລດຂໍ້ມູນ Supabase ສຳເລັດ!');}
-      else{showSyncStatus('error');toast('⚠️ ໃຊ້ຂໍ້ມູນ local');}
-    });
-  } else showSyncStatus('error');
+  // Auto-sync ຕອນເປີດ (ດຶງ Sheets → mirror Supabase) — ບໍ່ຕ້ອງກົດເອງ
+  autoSync();
 });
 
 /* ===== PWA: Register Service Worker + Install Prompt ===== */
