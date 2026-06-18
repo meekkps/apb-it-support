@@ -935,7 +935,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
   </div>
   <!-- Filter -->
   <div class="card">
-    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການທັງໝົດ</span><span class="nbadge" id="atm-cnt">0</span></div>
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການທັງໝົດ</span><div style="display:flex;align-items:center;gap:8px;"><button class="btn btn-sm btn-green" onclick="exportATMxlsx()">📊 Export Excel</button><span class="nbadge" id="atm-cnt">0</span></div></div>
     <div class="card-body" style="padding:12px 16px;">
       <input type="text" id="atm-search" placeholder="🔍 ຄົ້ນຫາ ID, ປະເພດ, ໜ່ວຍ, ຜູ້ຮ້ອງ..." oninput="renderATM()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -991,7 +991,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     </div>
   </div>
   <div class="card">
-    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການທັງໝົດ</span><span class="nbadge" id="rep-cnt">0</span></div>
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການທັງໝົດ</span><div style="display:flex;align-items:center;gap:8px;"><button class="btn btn-sm btn-green" onclick="exportRepXlsx()">📊 Export Excel</button><span class="nbadge" id="rep-cnt">0</span></div></div>
     <div class="card-body" style="padding:12px 16px;">
       <input type="text" id="rep-search" placeholder="🔍 ຄົ້ນຫາ ອຸປະກອນ, ໜ່ວຍ, ຊ່າງ, ອາການ..." oninput="renderRep()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1054,7 +1054,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
   </div>
 
   <div class="card">
-    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການເຄສ</span><span class="nbadge" id="pw-cnt">0</span></div>
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການເຄສ</span><div style="display:flex;align-items:center;gap:8px;"><button class="btn btn-sm btn-green" onclick="exportPWxlsx()">📊 Export Excel</button><span class="nbadge" id="pw-cnt">0</span></div></div>
     <div class="card-body" style="padding:12px 16px;">
       <input type="text" id="pw-search" placeholder="🔍 ຄົ້ນຫາ ຜູ້ຮ້ອງ, ໜ່ວຍ, ລະບົບ, ເຫດຜົນ..." oninput="renderPW()" style="width:100%;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;margin-bottom:10px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -3997,6 +3997,48 @@ function exportXlsx(){
     toast('📊 Export Excel ສຳເລັດ!');
   });
 }
+// ===== Export ແຍກແຕ່ລະ tab (ຕາມ filter ປະຈຸບັນ) =====
+function _dl(rows,sheetName,fileTag){
+  loadXlsxThen(()=>{
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{}]),sheetName);
+    XLSX.writeFile(wb,'APB_'+fileTag+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('📊 Export ສຳເລັດ! ('+rows.length+' ລາຍການ)');
+  });
+}
+function exportATMxlsx(){
+  const q=(v('atm-search')||'').toLowerCase();
+  const fid=v('atm-f-id'),fbr=v('atm-f-br'),fst=v('atm-f-st'),ftp=v('atm-f-tp'),from=v('atm-f-from'),to=v('atm-f-to');
+  let list=DB.atm.slice();
+  if(q)list=list.filter(r=>((r.atmId||'')+(r.br||'')+(r.tp||'')+(r.rq||'')+(r.ds||'')+(r.ac||'')).toLowerCase().includes(q));
+  if(fid)list=list.filter(r=>String(r.atmId||'')===fid);
+  if(fbr)list=list.filter(r=>r.br===fbr);if(ftp)list=list.filter(r=>r.tp===ftp);if(fst)list=list.filter(r=>r.st===fst);
+  if(from)list=list.filter(r=>r.dt>=from);if(to)list=list.filter(r=>r.dt<=to);
+  const stL={open:'ລໍຖ້າ',pending:'ດຳເນີນ',critical:'ດ່ວນ',done:'ສຳເລັດ'};
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  _dl(list.map((r,i)=>({'#':i+1,'ATM ID':r.atmId||'','ໜ່ວຍ':r.br||'','ປະເພດ':r.tp||'','ວັນທີ':r.dt||'','ເວລາ':r.tm||'','ສຳເລັດເມື່ອ':r.doneAt||'','ສະຖານະ':stL[r.st]||r.st||'','ຜູ້ຮ້ອງ':r.rq||'','ອາການ':r.ds||'','ການແກ້ໄຂ':r.solution||r.ac||''})),'ATM','ATM');
+}
+function exportRepXlsx(){
+  const q=(v('rep-search')||'').toLowerCase();
+  const fbr=v('rep-f-br'),fst=v('rep-f-st'),fdv=v('rep-f-dv'),from=v('rep-f-from'),to=v('rep-f-to');
+  let list=DB.rep.slice();
+  if(q)list=list.filter(r=>((r.dv||'')+(r.br||'')+(r.tc||'')+(r.is||'')+(r.rs||'')).toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>r.br===fbr);if(fdv)list=list.filter(r=>r.dv===fdv);if(fst)list=list.filter(r=>r.st===fst);
+  if(from)list=list.filter(r=>r.dt>=from);if(to)list=list.filter(r=>r.dt<=to);
+  const stL={open:'ລໍຖ້າ',pending:'ດຳເນີນ',done:'ສຳເລັດ'};
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  _dl(list.map((r,i)=>({'#':i+1,'ອຸປະກອນ':r.dv||'','ໜ່ວຍ':r.br||'','ວັນທີ':r.dt||'','ເວລາ':r.tm||'','ສຳເລັດເມື່ອ':r.doneAt||'','ສະຖານະ':stL[r.st]||r.st||'','ຊ່າງ':r.tc||'','ຊົ່ວໂມງ':r.hr||'','ອາການ':r.is||'','ຜົນການສ້ອມ':r.rs||''})),'Repair','ສ້ອມແປງ');
+}
+function exportPWxlsx(){
+  const q=(v('pw-search')||'').toLowerCase();
+  const fbr=v('pw-f-br'),fsys=v('pw-f-sys'),fst=v('pw-f-st');
+  let list=(DB.pw||[]).slice();
+  if(q)list=list.filter(r=>((r.user||'')+(r.br||'')+(r.sys||'')+(r.rs||'')+(r.nt||'')).toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>r.br===fbr);if(fsys)list=list.filter(r=>r.sys===fsys);if(fst)list=list.filter(r=>r.st===fst);
+  const tpL={reset:'Reset',unlock:'Unlock',new:'ສ້າງໃໝ່',change:'ປ່ຽນ'},stL={open:'ລໍຖ້າ',pending:'ດຳເນີນ',done:'ສຳເລັດ'};
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  _dl(list.map((r,i)=>({'#':i+1,'ຜູ້ຮ້ອງ':r.user||'','ໜ່ວຍ':r.br||'','ລະບົບ':r.sys||'','ປະເພດ':tpL[r.tp]||r.tp||'','ວັນທີ':r.dt||'','ເວລາ':r.tm||'','ສະຖານະ':stL[r.st]||r.st||'','ເຫດຜົນ':r.rs||'','ໝາຍເຫດ':r.nt||'','ສຳເລັດເມື່ອ':r.doneAt||''})),'Password','Password');
+}
 function exportPdf(){
   const el=g('rpt-prev');
   if(!el||!el.textContent.trim()){toast('⚠️ ບໍ່ມີລາຍງານ — ກົດ Preview ກ່ອນ');return;}
@@ -4036,6 +4078,9 @@ function importJSON(e){
 
 /* ===== GOTO TAB ===== */
 function goTab(name,btn){
+  // ກວດສິດ viewer (ເຂົ້າໄດ້ແຕ່ dashboard)
+  let u={};try{u=JSON.parse(sessionStorage.getItem('apb_user')||'{}');}catch(e){}
+  if(u.role==='viewer'&&name!=='dashboard'){toast('🔒 ບໍ່ມີສິດເຂົ້າໜ້ານີ້');return;}
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb-d,.bn-item').forEach(b=>b.classList.remove('active'));
   const t=document.getElementById('tab-'+name);if(t)t.classList.add('active');
