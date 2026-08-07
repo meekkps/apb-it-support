@@ -2893,8 +2893,17 @@ async function autoSync(){
   if(okSheets){
     renderAll();if(typeof updIPStats==='function')updIPStats();
     showSyncStatus('ok');
-    // mirror ໄປ Supabase ສະເພາະເມື່ອມີຂໍ້ມູນແທ້ (ກັນລ້າງ Supabase ດ້ວຍ pull ຫວ່າງ)
-    if((DB.atm.length+DB.rep.length+DB.ip.length)>0)sbPush().catch(()=>{});
+    // ລວມ Supabase ນຳ (ດຶງຂໍ້ມູນເກົ່າ) → sbPush/sbMerge union Supabase ເຂົ້າ DB
+    if((DB.atm.length+DB.rep.length+DB.ip.length)>0){
+      _sbGrew=false;
+      await sbPush().catch(()=>{}); // sbMerge: DB = Sheets ∪ Supabase (keep-all)
+      if(_sbGrew){
+        // Supabase ມີ record ທີ່ Sheets ບໍ່ມີ → push union ຄືນ Sheets ໃຫ້ຄົບ (upsert)
+        renderAll();
+        syncToSheets('ATM',DB.atm);syncToSheets('Repair',DB.rep);syncToSheets('Report',DB.rpt);
+        syncToSheets('IP',DB.ip);syncToSheets('Password',DB.pw);syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
+      }
+    }
   }else{
     // Sheets ລົ້ມ → ໃຊ້ Supabase ແທນ
     const ok=await sbPull();
