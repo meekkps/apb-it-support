@@ -2623,6 +2623,23 @@ async function sbPull(){
 // merge-push: ດຶງ Supabase ກ່ອນ → ລວມ local + remote (union by id) → ຈຶ່ງຂຽນ
 // ກັນເຄື່ອງເກົ່າ push ທັບຂໍ້ມູນໃໝ່ + ກູ້ຂໍ້ມູນທີ່ Supabase ມີ ແຕ່ local ບໍ່ມີ
 const SB_TOMB_KEY={atm_data:'ATM',repair_data:'Repair',report_data:'Report',ip_data:'IP',password_data:'Password',items_data:'Items',dispatch_data:'Dispatch'};
+// dedup ຕາມເນື້ອໃນ (ບໍ່ນັບ id) → ຕັດ content duplicate, ເກັບອັນທຳອິດ (id ເດີມ)
+function dedupContent(arr){
+  const out=[];const sigs=new Set();const ids=new Set();let auto=0;
+  (arr||[]).forEach(r=>{
+    if(!r||typeof r!=='object')return;
+    const hasData=Object.keys(r).some(k=>String(r[k]==null?'':r[k]).trim()!=='');
+    if(!hasData)return;
+    const sig=Object.keys(r).filter(k=>k!=='id').sort().map(k=>k+'='+String(r[k]==null?'':r[k]).trim()).join('|');
+    if(sigs.has(sig))return;
+    sigs.add(sig);
+    let id=(r.id!=null&&String(r.id).trim()!=='')?String(r.id):'';
+    if(!id||ids.has(id)){let nid;do{nid=String(Date.now()+(++auto));}while(ids.has(nid));id=nid;r.id=Number(nid);}
+    ids.add(id);
+    out.push(r);
+  });
+  return out;
+}
 let _sbGrew=false;
 async function sbMerge(table,dbKey,lsKey,arr){
   let merged=Array.isArray(arr)?arr.slice():[];
@@ -2640,7 +2657,7 @@ async function sbMerge(table,dbKey,lsKey,arr){
   }catch(e){}
   // ຕັດ record ທີ່ຖືກລົບ (tombstone) ອອກທັງໝົດ → ກັນ resurrection (ລວມ record ທີ່ເຄີຍ resurrect)
   merged=merged.filter(r=>!tomb[String(r&&r.id)]);
-  const seen=new Set();merged=merged.filter(r=>{const i=String(r&&r.id);if(seen.has(i))return false;seen.add(i);return true;});
+  merged=dedupContent(merged); // dedup ຕາມເນື້ອໃນ → ຕັດ content duplicate (id ຕ່າງ ແຕ່ຂໍ້ມູນຄືກັນ)
   if(typeof sortByDate==='function')sortByDate(merged);
   if(dbKey&&DB[dbKey]!==undefined)DB[dbKey]=merged;
   if(lsKey)localStorage.setItem(lsKey,JSON.stringify(merged));
