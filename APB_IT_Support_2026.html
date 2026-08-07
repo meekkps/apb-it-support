@@ -2622,19 +2622,24 @@ async function sbPull(){
 }
 // merge-push: ດຶງ Supabase ກ່ອນ → ລວມ local + remote (union by id) → ຈຶ່ງຂຽນ
 // ກັນເຄື່ອງເກົ່າ push ທັບຂໍ້ມູນໃໝ່ + ກູ້ຂໍ້ມູນທີ່ Supabase ມີ ແຕ່ local ບໍ່ມີ
+const SB_TOMB_KEY={atm_data:'ATM',repair_data:'Repair',report_data:'Report',ip_data:'IP',password_data:'Password',items_data:'Items',dispatch_data:'Dispatch'};
 let _sbGrew=false;
 async function sbMerge(table,dbKey,lsKey,arr){
   let merged=Array.isArray(arr)?arr.slice():[];
+  // tombstone key = ຊື່ Sheet type (ATM/Password...) → map ຈາກຊື່ table
+  const T=tombGet();
+  const tomb={...(T[table]||{}),...(T[SB_TOMB_KEY[table]]||{})};
   try{
     const rows=await sbGet(table);
     const cur=(rows||[]).find(x=>String(x.id)==='main');
     if(cur&&Array.isArray(cur.data)){
       const ids=new Set(merged.map(r=>String(r&&r.id)));
-      const tomb=(tombGet()[table]||{});
       const extra=cur.data.filter(r=>r&&r.id!=null&&!ids.has(String(r.id))&&!tomb[String(r.id)]);
       if(extra.length){merged=merged.concat(extra);_sbGrew=true;}
     }
   }catch(e){}
+  // ຕັດ record ທີ່ຖືກລົບ (tombstone) ອອກທັງໝົດ → ກັນ resurrection (ລວມ record ທີ່ເຄີຍ resurrect)
+  merged=merged.filter(r=>!tomb[String(r&&r.id)]);
   const seen=new Set();merged=merged.filter(r=>{const i=String(r&&r.id);if(seen.has(i))return false;seen.add(i);return true;});
   if(typeof sortByDate==='function')sortByDate(merged);
   if(dbKey&&DB[dbKey]!==undefined)DB[dbKey]=merged;
@@ -2855,12 +2860,14 @@ async function pullFromSheets(silent){
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
     // MERGE (ບໍ່ຂຽນທັບ): ລວມ Sheet + ແຖວທ້ອງຖິ່ນທີ່ຍັງບໍ່ທັນ sync ຂຶ້ນ → ກັນຂໍ້ມູນໃໝ່ຫາຍ
     const _needPush={};
+    const _tombAll=tombGet();
     const merge=(res,cur,map,sheetName)=>{
       if(!res||!res.ok)return cur; // ດຶງບໍ່ໄດ້ → ເກັບເກົ່າ
-      const fromSheet=dedup((res.data||[]).map(map));
+      const tomb=_tombAll[sheetName]||{};
+      const fromSheet=dedup((res.data||[]).map(map)).filter(r=>!tomb[String(r.id)]);
       const sheetIds=new Set(fromSheet.map(r=>String(r.id)));
-      // ແຖວທ້ອງຖິ່ນທີ່ Sheet ຍັງບໍ່ມີ = ຂໍ້ມູນທີ່ຫາກໍ່ເພີ່ມ ຍັງບໍ່ທັນ push
-      const localExtra=(cur||[]).filter(r=>r&&!sheetIds.has(String(r.id)));
+      // ແຖວທ້ອງຖິ່ນທີ່ Sheet ຍັງບໍ່ມີ ແລະ ບໍ່ຖືກລົບ = ຂໍ້ມູນທີ່ຫາກໍ່ເພີ່ມ ຍັງບໍ່ທັນ push
+      const localExtra=(cur||[]).filter(r=>r&&!sheetIds.has(String(r.id))&&!tomb[String(r.id)]);
       if(fromSheet.length===0&&(cur||[]).length>3){console.warn('empty pull ignored');return cur;}
       if(localExtra.length>0)_needPush[sheetName]=true; // ຕ້ອງ push ຄືນໃຫ້ Sheet ຕາມທັນ
       return dedup(fromSheet.concat(localExtra));
