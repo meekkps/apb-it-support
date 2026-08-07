@@ -259,6 +259,24 @@ body.dark #tab-period{--apb-cream:#0e1a14;--apb-cream2:#13241c;--apb-ink:#e8f3ec
 .apg-cnt{font-size:11px;font-weight:700;color:var(--text2);flex-shrink:0;}
 .apg-total{font-size:11px;color:var(--text3);margin-top:8px;text-align:right;}
 
+/* INVENTORY */
+.inv-thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid var(--border);background:var(--bg1);display:block;}
+.inv-thumb-ph{width:44px;height:44px;border-radius:10px;background:var(--bg1);border:1.5px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text3);}
+.inv-drop{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:12px;text-align:center;cursor:pointer;background:var(--bg1);}
+.inv-drop:hover{border-color:var(--p);}
+.inv-prev{max-width:120px;max-height:120px;border-radius:12px;border:1px solid var(--border);display:block;margin:8px auto 0;}
+.binv{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;display:inline-block;white-space:nowrap;}
+.binv-it{background:rgba(59,130,246,0.1);color:#1d4ed8;}
+.binv-atm{background:rgba(139,92,246,0.12);color:#6d28d9;}
+.binv-cash{background:rgba(245,158,11,0.14);color:#92400e;}
+.binv-sent{background:rgba(245,158,11,0.14);color:#92400e;}
+.binv-recv{background:rgba(16,185,129,0.12);color:#047857;}
+.binv-low{background:rgba(239,68,68,0.1);color:#b91c1c;}
+.binv-ok{background:rgba(16,185,129,0.12);color:#047857;}
+.inv-br-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.inv-br-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;cursor:pointer;box-shadow:var(--shadow);transition:transform 0.15s ease;}
+.inv-br-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+
 /* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:var(--radius);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -692,6 +710,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <button class="nb-d" onclick="goTab('password',this)"><span class="ni">🔑</span>Password</button>
     <button class="nb-d" onclick="goTab('report',this)"><span class="ni">◈</span>ລາຍງານ</button>
     <button class="nb-d" onclick="goTab('atmlist',this)"><span class="ni">📍</span>ATM ຂໍ້ມູນຕູ້</button>
+    <button class="nb-d" onclick="goTab('inventory',this)"><span class="ni">📦</span>ຄັງອຸປະກອນ</button>
     <button class="nb-d" onclick="goTab('ip',this)"><span class="ni">⊞</span>IP Manager</button>
     <button class="nb-d" onclick="goTab('drive',this)"><span class="ni">☁</span>Backup/Drive</button>
   </div>
@@ -1198,6 +1217,116 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
   </div>
 </div>
 
+<!-- INVENTORY -->
+<div id="tab-inventory" class="tab-pane">
+  <div class="page-hd"><div class="page-title">ຄັງອຸປະກອນ</div><div class="page-sub">ອຸປະກອນ IT · ອາໄຫຼ່ ATM · ກ່ອງເງິນ · ການສົ່ງໄປໜ່ວຍ</div></div>
+
+  <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+    <div class="stat-card"><div class="stat-lbl">ລາຍການ</div><div class="stat-num" id="inv-s-items">0</div><div class="stat-sub" id="inv-s-items2">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">ໃນຄັງ</div><div class="stat-num" id="inv-s-stock">0</div><div class="stat-sub">ທຸກລາຍການລວມ</div></div>
+    <div class="stat-card"><div class="stat-lbl">ສົ່ງແລ້ວ</div><div class="stat-num" id="inv-s-sent">0</div><div class="stat-sub" id="inv-s-sent2">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">ໃກ້ໝົດ</div><div class="stat-num" id="inv-s-low">0</div><div class="stat-sub">ຕໍ່າກວ່າຂັ້ນຕໍ່າ</div></div>
+  </div>
+
+  <!-- Low stock alert -->
+  <div class="card" id="inv-low-card" style="display:none;border-color:rgba(239,68,68,0.3);">
+    <div class="card-hd"><span class="card-title" style="color:var(--red);">⚠️ ອຸປະກອນໃກ້ໝົດ</span></div>
+    <div class="card-body" id="inv-low-list" style="padding:8px 16px;"></div>
+  </div>
+
+  <!-- Item form -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title" id="inv-form-title"><span class="cdot"></span>+ ເພີ່ມລາຍການ</span></div>
+    <div class="card-body">
+      <input type="hidden" id="iv-edit-id">
+      <div class="frow c2">
+        <div class="field"><label>ຊື່ອຸປະກອນ *</label><input id="iv-name" type="text" placeholder="ເຊັ່ນ: Card Reader, ກ່ອງເງິນ CMD-V4, Keyboard..."></div>
+        <div class="field"><label>ປະເພດ *</label><select id="iv-cat" onchange="onInvCatChange(this)"></select></div>
+      </div>
+      <div class="frow c3">
+        <div class="field"><label>Serial / ລະຫັດ</label><input id="iv-serial" type="text" placeholder="SN..."></div>
+        <div class="field"><label>ຈຳນວນ *</label><input id="iv-qty" type="number" min="0" placeholder="0"></div>
+        <div class="field"><label>ຂັ້ນຕໍ່າ (ເຕືອນ)</label><input id="iv-min" type="number" min="0" placeholder="2"></div>
+      </div>
+      <div class="frow c2">
+        <div class="field"><label>ວັນທີນຳເຂົ້າ</label><input id="iv-date" type="date"></div>
+        <div class="field"><label>ຮູບອຸປະກອນ</label>
+          <div class="inv-drop" onclick="g('iv-img-file').click()">
+            <span id="iv-img-hint" style="font-size:12.5px;color:var(--text2);">📷 ກົດເລືອກຮູບ (ຫຍໍ້ອັດຕະໂນມັດ)</span>
+            <img id="iv-img-prev" class="inv-prev" style="display:none;">
+          </div>
+          <input type="file" id="iv-img-file" accept="image/*" style="display:none;" onchange="onInvImgPick(this)">
+          <input type="hidden" id="iv-img">
+        </div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ໝາຍເຫດ</label><textarea id="iv-note" placeholder="ລາຍລະອຽດເພີ່ມເຕີມ..."></textarea></div></div>
+      <div class="btn-row"><button class="btn" onclick="clrInv()">ລ້າງ</button><button class="btn btn-grad" id="iv-save-btn" onclick="svInv()">💾 ບັນທຶກ</button></div>
+    </div>
+  </div>
+
+  <!-- Item list -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ລາຍການໃນຄັງ</span>
+      <div style="display:flex;gap:8px;align-items:center;"><button class="btn btn-sm btn-green" onclick="exportInvXlsx()">📊 Export Excel</button><span class="nbadge" id="inv-cnt">0</span></div>
+    </div>
+    <div class="card-body" style="padding:12px 16px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="iv-search" placeholder="🔍 ຄົ້ນຫາ ຊື່, serial..." oninput="renderInv()" style="flex:2;min-width:160px;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-size:13.5px;color:var(--text);outline:none;">
+        <select id="iv-f-cat" onchange="renderInv()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;"></select>
+        <select id="iv-f-stock" onchange="renderInv()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📦 ທັງໝົດ</option><option value="low">⚠️ ໃກ້ໝົດ</option><option value="out">🚫 ໝົດ</option><option value="ok">✅ ພໍ</option>
+        </select>
+        <button class="btn btn-sm" onclick="['iv-search','iv-f-cat','iv-f-stock'].forEach(i=>{if(g(i))g(i).value='';});renderInv();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="inv-list"></div>
+  </div>
+
+  <!-- Dispatch form -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>🚚 ບັນທຶກການສົ່ງ ໄປໜ່ວຍ</span></div>
+    <div class="card-body">
+      <div class="frow c2">
+        <div class="field"><label>ອຸປະກອນ *</label><select id="ivd-item" onchange="onInvDpItemChange()"></select></div>
+        <div class="field"><label>ສົ່ງໄປໜ່ວຍ *</label><select id="ivd-br" onchange="onBranchChange(this)"></select></div>
+      </div>
+      <div class="frow c3">
+        <div class="field"><label>ຈຳນວນ * <span id="ivd-stock-hint" style="color:var(--text3);font-weight:400;"></span></label><input id="ivd-qty" type="number" min="1" placeholder="1"></div>
+        <div class="field"><label>ວັນທີສົ່ງ</label><input id="ivd-date" type="date"></div>
+        <div class="field"><label>ຜູ້ສົ່ງ</label><input id="ivd-by" type="text" placeholder="ຊື່ຜູ້ສົ່ງ"></div>
+      </div>
+      <div class="frow c1"><div class="field"><label>ໝາຍເຫດ</label><textarea id="ivd-note" placeholder="ເຊັ່ນ: ສົ່ງກັບລົດຂົນເງິນ..."></textarea></div></div>
+      <div class="btn-row"><button class="btn" onclick="clrInvD()">ລ້າງ</button><button class="btn btn-grad" onclick="svInvD()">🚚 ບັນທຶກສົ່ງ</button></div>
+    </div>
+  </div>
+
+  <!-- Dispatch list -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>ປະຫວັດການສົ່ງ</span>
+      <div style="display:flex;gap:8px;align-items:center;"><button class="btn btn-sm btn-green" onclick="exportInvDXlsx()">📊 Export Excel</button><span class="nbadge" id="ivd-cnt">0</span></div>
+    </div>
+    <div class="card-body" style="padding:12px 16px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="ivd-search" placeholder="🔍 ຄົ້ນຫາ..." oninput="renderInvD()" style="flex:2;min-width:150px;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-size:13.5px;color:var(--text);outline:none;">
+        <select id="ivd-f-br" onchange="renderInvD()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;"></select>
+        <select id="ivd-f-st" onchange="renderInvD()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
+          <option value="">📊 ທຸກສະຖານະ</option><option value="sent">🚚 ກຳລັງສົ່ງ</option><option value="received">✅ ຮັບແລ້ວ</option>
+        </select>
+        <input type="date" id="ivd-f-from" onchange="renderInvD()" style="flex:1;min-width:125px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
+        <input type="date" id="ivd-f-to" onchange="renderInvD()" style="flex:1;min-width:125px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
+        <button class="btn btn-sm" onclick="['ivd-search','ivd-f-br','ivd-f-st','ivd-f-from','ivd-f-to'].forEach(i=>{if(g(i))g(i).value='';});renderInvD();">✕ ລ້າງ</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;" id="invd-list"></div>
+  </div>
+
+  <!-- Per-branch summary -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title"><span class="cdot"></span>🏢 ເຄື່ອງທີ່ແຕ່ລະໜ່ວຍໄດ້ຮັບ</span><span style="font-size:11.5px;color:var(--text2);">ກົດໜ່ວຍໃດ ເບິ່ງລາຍລະອຽດ</span></div>
+    <div class="card-body"><div class="inv-br-grid" id="inv-br-grid"></div></div>
+  </div>
+</div>
+
 <!-- IP MANAGER -->
 <div id="tab-ip" class="tab-pane">
   <div class="page-hd"><div class="page-title">IP Manager</div><div class="page-sub">ຈັດການ IP ຄອມໃນທະນາຄານ</div></div>
@@ -1270,6 +1399,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
         <button class="btn btn-full" onclick="sbCheckOnly()">🔍 ກວດເບິ່ງ Supabase (ບໍ່ overwrite)</button>
         <button class="btn btn-grad btn-full" onclick="pullFromSheets()">🔄 Pull ຈາກ Google Sheets</button>
         <button class="btn btn-full" style="background:var(--grad1);color:#fff;border:none;" onclick="forceSyncAll()">☁️ Force Sync → Sheets</button>
+        <button class="btn btn-full" style="background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;border:none;" onclick="recoverPWfromAudit()">🔧 ກູ້ Password ຈາກ Audit Log</button>
       </div>
     </div>
   </div>
@@ -1467,6 +1597,7 @@ function fmtTime(val){
 /* ===== CONFIG (custom branches + ATM IDs + ATM Types) ===== */
 const ATM_TYPES_DEFAULT=['ເງິນໝົດ/ເຕີມ','ບັດຄ້າງ','ເຄື່ອງບໍ່ເຮັດວຽກ','ໜ້າຈໍຜິດ','ເຄືອຂ່າຍຂາດ','Printer','CCTV','ອື່ນໆ'];
 const PW_SYSTEMS_DEFAULT=['Email','Core Banking','AD / Domain','ATM','Internet Banking','Mobile Banking','Windows','VPN','ອື່ນໆ'];
+const INV_CATS_DEFAULT=['ອຸປະກອນ IT','ອາໄຫຼ່ ATM','ກ່ອງເງິນ'];
 const REPAIR_DEV_DEFAULT=['Printer','UPS','PC','Notebook','Server','Switch','Router','CCTV','Scanner','ໂທລະສັບ','ອື່ນໆ'];
 const CFG={
   branches:JSON.parse(localStorage.getItem('apb26_branches')||'null')||BRANCHES.slice(),
@@ -1474,12 +1605,14 @@ const CFG={
   atmTypes:JSON.parse(localStorage.getItem('apb26_atmtypes')||'null')||ATM_TYPES_DEFAULT.slice(),
   pwSystems:JSON.parse(localStorage.getItem('apb26_pwsystems')||'null')||PW_SYSTEMS_DEFAULT.slice(),
   repDevices:JSON.parse(localStorage.getItem('apb26_repdevices')||'null')||REPAIR_DEV_DEFAULT.slice(),
+  invCats:JSON.parse(localStorage.getItem('apb26_invcats')||'null')||INV_CATS_DEFAULT.slice(),
   save(){
     localStorage.setItem('apb26_branches',JSON.stringify(this.branches));
     localStorage.setItem('apb26_atmids',JSON.stringify(this.atmIds));
     localStorage.setItem('apb26_atmtypes',JSON.stringify(this.atmTypes));
     localStorage.setItem('apb26_pwsystems',JSON.stringify(this.pwSystems));
     localStorage.setItem('apb26_repdevices',JSON.stringify(this.repDevices));
+    localStorage.setItem('apb26_invcats',JSON.stringify(this.invCats));
     if(navigator.onLine)sbPushConfig();
   }
 };
@@ -1876,6 +2009,377 @@ function addRepDvFromMgr(){
   toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
 }
 
+/* ===== ກູ້ Password ຈາກ Audit Log ===== */
+function recoverPWfromAudit(){
+  if(!requireAdmin())return;
+  const adds=(AUDIT.list||[]).filter(e=>e&&e.action==='add'&&e.entity==='Password');
+  if(!adds.length)return toast('ບໍ່ພົບ add Password ໃນ Audit');
+  let added=0;
+  adds.forEach((e,idx)=>{
+    let dt='',tm='';
+    try{const ts=new Date(e.ts);dt=ts.toISOString().slice(0,10);tm=ts.toTimeString().slice(0,5);}catch(err){}
+    const user=String(e.id||'').trim();
+    const info=String(e.info||'');
+    const sep=info.indexOf(' · ');
+    const br=sep>=0?info.slice(0,sep).trim():info.trim();
+    const sys=sep>=0?info.slice(sep+3).trim():'';
+    if(!user&&!br)return;
+    // ຂ້າມຖ້າມີແລ້ວ (user+dt+tm ກົງ)
+    if(DB.pw.some(x=>String(x.user||'')===user&&String(x.dt||'')===dt&&String(x.tm||'')===tm))return;
+    DB.pw.push({id:(new Date(e.ts).getTime()||Date.now())+idx,user:user,br:br,sys:sys,
+      tp:'reset',dt:dt,tm:tm,st:'done',rs:'(ກູ້ຈາກ Audit — ກະລຸນາຕື່ມ)',nt:'',doneAt:''});
+    added++;
+  });
+  if(added){
+    sortByDate(DB.pw);
+    DB.save();renderPW();updStats();syncToSheets('Password',DB.pw);
+    toast('✅ ກູ້ '+added+' ລາຍການ — ກະລຸນາແກ້ໄຂຕື່ມ ປະເພດ/ເຫດຜົນ',4000);
+  }else toast('ບໍ່ມີລາຍການໃໝ່ໃຫ້ກູ້ (ອາດກູ້ໄປແລ້ວ)');
+}
+
+/* ===== INVENTORY (ຄັງອຸປະກອນ + ການສົ່ງ) ===== */
+function onInvImgPick(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const compress=(maxW,q)=>{
+        const scale=Math.min(1,maxW/img.width);
+        const cv=document.createElement('canvas');
+        cv.width=Math.round(img.width*scale);cv.height=Math.round(img.height*scale);
+        cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+        return cv.toDataURL('image/jpeg',q);
+      };
+      let b64=compress(300,0.6);
+      if(b64.length>45000)b64=compress(240,0.45);
+      if(b64.length>45000)b64=compress(180,0.4);
+      g('iv-img').value=b64;
+      const p=g('iv-img-prev');p.src=b64;p.style.display='block';
+      g('iv-img-hint').textContent='📷 ປ່ຽນຮູບ';
+    };
+    img.src=e.target.result;
+  };
+  rd.readAsDataURL(f);
+  inp.value='';
+}
+function invCatBadge(c){
+  const s=String(c||'');
+  let cls='binv-it';
+  if(s.includes('ATM'))cls='binv-atm';else if(s.includes('ເງິນ'))cls='binv-cash';
+  return '<span class="binv '+cls+'">'+escHtml(s||'—')+'</span>';
+}
+function invStockBadge(r){
+  const q=parseInt(r.qty)||0,m=parseInt(r.min)||0;
+  if(q<=0)return '<span class="binv binv-low">🚫 ໝົດ</span>';
+  if(m&&q<=m)return '<span class="binv binv-low">⚠️ ໃກ້ໝົດ</span>';
+  return '<span class="binv binv-ok">✅ ພໍ</span>';
+}
+function svInv(){
+  if(!requireAdmin())return;
+  if(!v('iv-name'))return toast('⚠️ ໃສ່ຊື່ອຸປະກອນ');
+  if(!v('iv-cat'))return toast('⚠️ ເລືອກປະເພດ');
+  if(v('iv-qty')==='')return toast('⚠️ ໃສ່ຈຳນວນ');
+  const eid=v('iv-edit-id');
+  const rec={id:eid?parseInt(eid):Date.now(),name:v('iv-name'),cat:v('iv-cat'),serial:v('iv-serial'),
+    qty:parseInt(v('iv-qty'))||0,unit:'ອັນ',min:parseInt(v('iv-min'))||0,
+    inDate:v('iv-date'),img:v('iv-img'),note:v('iv-note')};
+  if(eid){const i=DB.inv.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.inv[i]=rec;else DB.inv.push(rec);AUDIT.log('edit','Inventory',rec.name,rec.cat);toast('✅ ອັບເດດ!');}
+  else{DB.inv.push(rec);AUDIT.log('add','Inventory',rec.name,rec.cat);toast('✅ ບັນທຶກ!');}
+  DB.save();clrInv();renderInvAll();syncToSheets('Items',DB.inv);
+}
+function clrInv(){['iv-name','iv-serial','iv-qty','iv-min','iv-note','iv-img','iv-edit-id'].forEach(i=>{if(g(i))g(i).value='';});
+  if(g('iv-date'))g('iv-date').value=new Date().toISOString().slice(0,10);
+  if(g('iv-cat'))g('iv-cat').value='';
+  const p=g('iv-img-prev');if(p)p.style.display='none';
+  const h=g('iv-img-hint');if(h)h.textContent='📷 ກົດເລືອກຮູບ (ຫຍໍ້ອັດຕະໂນມັດ)';
+  const t=g('inv-form-title');if(t)t.innerHTML='<span class="cdot"></span>+ ເພີ່ມລາຍການ';
+  const b=g('iv-save-btn');if(b)b.textContent='💾 ບັນທຶກ';}
+function editInv(id){
+  if(!requireAdmin())return;
+  const r=DB.inv.find(x=>x.id===id);if(!r)return;
+  g('iv-edit-id').value=id;g('iv-name').value=r.name||'';g('iv-cat').value=r.cat||'';
+  g('iv-serial').value=r.serial||'';g('iv-qty').value=r.qty!=null?r.qty:'';
+  g('iv-min').value=r.min!=null?r.min:'';g('iv-date').value=fmtDate(r.inDate)||'';g('iv-note').value=r.note||'';
+  g('iv-img').value=r.img||'';
+  const p=g('iv-img-prev');
+  if(r.img){p.src=r.img;p.style.display='block';g('iv-img-hint').textContent='📷 ປ່ຽນຮູບ';}
+  else p.style.display='none';
+  g('inv-form-title').innerHTML='<span class="cdot"></span>✏️ ແກ້ໄຂ: '+escHtml(r.name);
+  g('iv-save-btn').textContent='💾 ບັນທຶກການແກ້ໄຂ';
+  g('tab-inventory').scrollIntoView({behavior:'smooth'});
+}
+function delInv(id){
+  if(!requireAdmin())return;
+  const r=DB.inv.find(x=>x.id===id);if(!r)return;
+  const used=DB.invd.filter(d=>d.itemId===id).length;
+  if(!confirm('ລຶບ "'+r.name+'"?'+(used?'\n(ມີປະຫວັດສົ່ງ '+used+' ຄັ້ງ — ປະຫວັດຈະຍັງຢູ່)':'')))return;
+  DB.inv=DB.inv.filter(x=>x.id!==id);tombAdd('Items',id);
+  AUDIT.log('delete','Inventory',r.name,r.cat);
+  DB.save();renderInvAll();deleteFromSheets('Items',id);toast('🗑 ລຶບແລ້ວ');
+}
+function showInvItem(id){
+  const r=DB.inv.find(x=>x.id===id);if(!r)return;
+  const sent=DB.invd.filter(d=>d.itemId===id);
+  const totalSent=sent.reduce((s,d)=>s+(parseInt(d.qty)||0),0);
+  const row=(l,val)=>val?'<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);"><div style="width:100px;font-size:11.5px;font-weight:700;color:var(--text2);flex-shrink:0;">'+l+'</div><div style="flex:1;font-size:13.5px;color:var(--text);">'+escHtml(val)+'</div></div>':'';
+  let html='';
+  if(r.img)html+='<img src="'+r.img+'" style="max-width:100%;max-height:220px;border-radius:12px;display:block;margin:0 auto 12px;border:1px solid var(--border);">';
+  html+=row('ຊື່',r.name)+row('ປະເພດ',r.cat)+row('Serial',r.serial)
+    +row('ໃນຄັງ',(r.qty||0)+' ອັນ')+(r.min?row('ຂັ້ນຕໍ່າ',r.min+' ອັນ'):'')
+    +row('ນຳເຂົ້າ',fmtDate(r.inDate))+row('ສົ່ງໄປແລ້ວ',String(totalSent))+row('ໝາຍເຫດ',r.note);
+  if(sent.length){
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 6px;">🚚 ປະຫວັດສົ່ງ</div>';
+    sent.slice().reverse().forEach(d=>{
+      html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px;"><span>'+escHtml(d.br)+' × '+(d.qty||0)+'</span><span style="color:var(--text2);">'+escHtml(fmtDate(d.dt)||'')+'</span></div>';
+    });
+  }
+  g('modal-title').textContent='📦 '+(r.name||'');
+  g('modal-body').innerHTML=html;
+  g('detail-modal').style.display='flex';
+}
+function renderInv(){
+  const c=g('inv-list');if(!c)return;
+  const q=v('iv-search').toLowerCase(),fc=v('iv-f-cat'),fs=v('iv-f-stock');
+  let list=DB.inv.slice().reverse();
+  if(q)list=list.filter(r=>((r.name||'')+(r.serial||'')+(r.note||'')).toLowerCase().includes(q));
+  if(fc)list=list.filter(r=>String(r.cat||'')===fc);
+  if(fs==='low')list=list.filter(r=>{const qy=parseInt(r.qty)||0,m=parseInt(r.min)||0;return qy>0&&m&&qy<=m;});
+  if(fs==='out')list=list.filter(r=>(parseInt(r.qty)||0)<=0);
+  if(fs==='ok')list=list.filter(r=>{const qy=parseInt(r.qty)||0,m=parseInt(r.min)||0;return qy>0&&(!m||qy>m);});
+  const cnt=g('inv-cnt');if(cnt)cnt.textContent=list.length+(q||fc||fs?'/'+DB.inv.length:'');
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີລາຍການ</div>';return;}
+  c.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>ຮູບ</th><th>ຊື່</th><th>ປະເພດ</th><th>Serial</th><th>ໃນຄັງ</th><th>ສົ່ງແລ້ວ</th><th>ນຳເຂົ້າ</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead><tbody>'
+    +list.map(r=>{
+      const sent=DB.invd.filter(d=>d.itemId===r.id).reduce((s,d)=>s+(parseInt(d.qty)||0),0);
+      return '<tr>'
+      +'<td>'+(r.img?'<img class="inv-thumb" src="'+r.img+'" onclick="showInvItem('+r.id+')" style="cursor:pointer;">':'<div class="inv-thumb-ph">📦</div>')+'</td>'
+      +'<td style="font-weight:600;color:var(--p2);cursor:pointer;" onclick="showInvItem('+r.id+')">'+escHtml(r.name)+'</td>'
+      +'<td>'+invCatBadge(r.cat)+'</td>'
+      +'<td style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--text2);">'+escHtml(r.serial||'—')+'</td>'
+      +'<td style="font-weight:700;">'+(r.qty||0)+'</td>'
+      +'<td style="color:var(--text2);">'+sent+'</td>'
+      +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.inDate)||'—')+'</td>'
+      +'<td>'+invStockBadge(r)+'</td>'
+      +'<td style="text-align:center;"><div style="display:inline-flex;gap:4px;">'
+        +'<button title="ເບິ່ງ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid var(--border2);background:rgba(65,153,236,0.08);color:var(--p);cursor:pointer;" onclick="showInvItem('+r.id+')">👁</button>'
+        +'<button title="ແກ້ໄຂ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editInv('+r.id+')">✏️</button>'
+        +'<button title="ລຶບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delInv('+r.id+')">🗑</button>'
+      +'</div></td></tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+/* ---- Dispatch ---- */
+function onInvDpItemChange(){
+  const id=parseInt(v('ivd-item'))||0;
+  const r=DB.inv.find(x=>x.id===id);
+  g('ivd-stock-hint').textContent=r?('(ໃນຄັງ: '+(r.qty||0)+')'):'';
+}
+function svInvD(){
+  if(!requireAdmin())return;
+  const itemId=parseInt(v('ivd-item'))||0;
+  if(!itemId)return toast('⚠️ ເລືອກອຸປະກອນ');
+  if(!v('ivd-br'))return toast('⚠️ ເລືອກໜ່ວຍ');
+  const qty=parseInt(v('ivd-qty'))||0;
+  if(qty<1)return toast('⚠️ ໃສ່ຈຳນວນ');
+  const item=DB.inv.find(x=>x.id===itemId);
+  if(!item)return toast('⚠️ ບໍ່ພົບອຸປະກອນ');
+  if(qty>(parseInt(item.qty)||0))return toast('⚠️ ຈຳນວນເກີນທີ່ມີໃນຄັງ ('+(item.qty||0)+')');
+  const rec={id:Date.now(),itemId:itemId,itemName:item.name,cat:item.cat,
+    qty:qty,br:v('ivd-br'),dt:v('ivd-date')||new Date().toISOString().slice(0,10),by:v('ivd-by'),note:v('ivd-note'),st:'sent',receivedAt:''};
+  item.qty=(parseInt(item.qty)||0)-qty;
+  DB.invd.push(rec);
+  AUDIT.log('add','Dispatch',item.name,'→ '+rec.br+' × '+qty);
+  DB.save();clrInvD();renderInvAll();
+  syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
+  toast('🚚 ສົ່ງ '+qty+' → '+rec.br);
+}
+function clrInvD(){['ivd-item','ivd-br','ivd-qty','ivd-by','ivd-note'].forEach(i=>{if(g(i))g(i).value='';});
+  if(g('ivd-date'))g('ivd-date').value=new Date().toISOString().slice(0,10);
+  if(g('ivd-stock-hint'))g('ivd-stock-hint').textContent='';}
+function markInvDRecv(id){
+  if(!requireAdmin())return;
+  const r=DB.invd.find(x=>x.id===id);if(!r)return;
+  r.st='received';r.receivedAt=new Date().toISOString().slice(0,16).replace('T',' ');
+  AUDIT.log('done','Dispatch',r.itemName,'ຮັບແລ້ວ · '+r.br);
+  DB.save();renderInvAll();syncToSheets('Dispatch',DB.invd);toast('✅ ຢືນຢັນຮັບແລ້ວ');
+}
+function delInvD(id){
+  if(!requireAdmin())return;
+  const r=DB.invd.find(x=>x.id===id);if(!r)return;
+  if(!confirm('ລຶບການສົ່ງ "'+r.itemName+' → '+r.br+'"?\n\n(ຈຳນວນ '+r.qty+' ຈະຄືນເຂົ້າຄັງ)'))return;
+  const item=DB.inv.find(x=>x.id===r.itemId);
+  if(item)item.qty=(parseInt(item.qty)||0)+(parseInt(r.qty)||0);
+  DB.invd=DB.invd.filter(x=>x.id!==id);tombAdd('Dispatch',id);
+  AUDIT.log('delete','Dispatch',r.itemName,r.br);
+  DB.save();renderInvAll();
+  syncToSheets('Items',DB.inv);deleteFromSheets('Dispatch',id);
+  toast('🗑 ລຶບ + ຄືນເຂົ້າຄັງ');
+}
+function renderInvD(){
+  const c=g('invd-list');if(!c)return;
+  const q=v('ivd-search').toLowerCase(),fbr=v('ivd-f-br'),fst=v('ivd-f-st'),from=v('ivd-f-from'),to=v('ivd-f-to');
+  let list=DB.invd.slice().reverse();
+  if(q)list=list.filter(r=>((r.itemName||'')+(r.br||'')+(r.by||'')+(r.note||'')).toLowerCase().includes(q));
+  if(fbr)list=list.filter(r=>String(r.br||'')===fbr);
+  if(fst)list=list.filter(r=>r.st===fst);
+  if(from)list=list.filter(r=>String(r.dt||'')>=from);
+  if(to)list=list.filter(r=>String(r.dt||'')<=to);
+  const cnt=g('ivd-cnt');if(cnt)cnt.textContent=list.length+(q||fbr||fst||from||to?'/'+DB.invd.length:'');
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີການສົ່ງ</div>';return;}
+  c.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>ອຸປະກອນ</th><th>ໄປໜ່ວຍ</th><th>ຈຳນວນ</th><th>ວັນທີສົ່ງ</th><th>ຜູ້ສົ່ງ</th><th>ສະຖານະ</th><th>ຮັບເມື່ອ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead><tbody>'
+    +list.map(r=>'<tr>'
+      +'<td style="font-weight:600;color:var(--p2);">'+escHtml(r.itemName)+'</td>'
+      +'<td>'+escHtml(r.br)+'</td>'
+      +'<td style="font-weight:700;">'+(r.qty||0)+'</td>'
+      +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.dt)||'—')+'</td>'
+      +'<td style="font-size:12px;">'+escHtml(r.by||'—')+'</td>'
+      +'<td>'+(r.st==='received'?'<span class="binv binv-recv">✅ ຮັບແລ້ວ</span>':'<span class="binv binv-sent">🚚 ກຳລັງສົ່ງ</span>')+'</td>'
+      +'<td style="font-size:11px;color:var(--text2);white-space:nowrap;">'+escHtml(r.receivedAt||'—')+'</td>'
+      +'<td style="text-align:center;"><div style="display:inline-flex;gap:4px;">'
+        +(r.st!=='received'?'<button title="ຢືນຢັນຮັບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markInvDRecv('+r.id+')">✅</button>':'')
+        +'<button title="ລຶບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delInvD('+r.id+')">🗑</button>'
+      +'</div></td></tr>').join('')+'</tbody></table></div>';
+}
+
+/* ---- Branch summary + cats + stats ---- */
+function showInvBranch(name){
+  name=String(name);
+  const sent=DB.invd.filter(d=>String(d.br||'')===name);
+  const agg={};
+  sent.forEach(d=>{
+    const k=String(d.itemName||'');
+    if(!agg[k])agg[k]={qty:0,cat:d.cat||'',last:''};
+    agg[k].qty+=parseInt(d.qty)||0;
+    if(String(d.dt||'')>agg[k].last)agg[k].last=String(d.dt||'');
+  });
+  const keys=Object.keys(agg).sort((a,b)=>agg[b].qty-agg[a].qty);
+  let html='';
+  if(!keys.length)html='<div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ໄດ້ສົ່ງຫຍັງໄປໜ່ວຍນີ້</div>';
+  else{
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">📦 ສະຫຼຸບ ('+keys.length+' ລາຍການ)</div>';
+    keys.forEach(k=>{
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">'
+        +'<div><div style="font-weight:600;font-size:13.5px;color:var(--text);">'+escHtml(k)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">'+invCatBadge(agg[k].cat)+' · ຫຼ້າສຸດ '+escHtml(fmtDate(agg[k].last)||'—')+'</div></div>'
+        +'<div style="font-weight:700;font-size:16px;color:var(--p2);">'+agg[k].qty+'</div></div>';
+    });
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:14px 0 6px;">🚚 ປະຫວັດ ('+sent.length+' ຄັ້ງ)</div>';
+    sent.slice().reverse().forEach(d=>{
+      html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px;">'
+        +'<span style="color:var(--text);">'+escHtml(d.itemName)+' × '+(d.qty||0)+' '+(d.st==='received'?'<span class="binv binv-recv" style="font-size:10px;">ຮັບແລ້ວ</span>':'<span class="binv binv-sent" style="font-size:10px;">ກຳລັງສົ່ງ</span>')+'</span>'
+        +'<span style="color:var(--text2);">'+escHtml(fmtDate(d.dt)||'')+'</span></div>';
+    });
+  }
+  g('modal-title').textContent='🏢 '+name;
+  g('modal-body').innerHTML=html;
+  g('detail-modal').style.display='flex';
+}
+function renderInvBr(){
+  const c=g('inv-br-grid');if(!c)return;
+  const brs=getBranches();
+  if(!brs.length){c.innerHTML='<div style="color:var(--text2);">ຍັງບໍ່ມີໜ່ວຍ</div>';return;}
+  c.innerHTML=brs.map(b=>{
+    const sent=DB.invd.filter(d=>String(d.br||'')===String(b));
+    const total=sent.reduce((s,d)=>s+(parseInt(d.qty)||0),0);
+    const pending=sent.filter(d=>d.st!=='received').length;
+    return '<div class="inv-br-card" onclick="showInvBranch(\''+escHtml(String(b)).replace(/'/g,"\\'")+'\')">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
+        +'<div style="width:34px;height:34px;border-radius:10px;background:var(--grad1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🏢</div>'
+        +'<div style="font-weight:700;font-size:13.5px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(String(b))+'</div></div>'
+      +'<div style="font-size:11.5px;color:var(--text2);">ຮັບແລ້ວ <b style="color:var(--p2);">'+total+'</b> ຊິ້ນ · '+sent.length+' ຄັ້ງ'
+      +(pending?' · <span style="color:var(--amber);font-weight:600;">'+pending+' ກຳລັງສົ່ງ</span>':'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+function onInvCatChange(el){
+  if(el.value==='__ADD__'){
+    el.value='';
+    if(isViewer()){toast('🔒 ບໍ່ມີສິດ');return;}
+    const n=prompt('➕ ເພີ່ມປະເພດໃໝ່:');
+    if(!n||!n.trim())return;
+    if(CFG.invCats.includes(n.trim())){toast('⚠️ ມີແລ້ວ');return;}
+    CFG.invCats.push(n.trim());CFG.save();
+    populateInvDropdowns();el.value=n.trim();
+    toast('✅ ເພີ່ມແລ້ວ');
+  }
+}
+function populateInvDropdowns(){
+  const cats=CFG.invCats||[];
+  const ic=g('iv-cat');
+  if(ic){const cur=ic.value;let h='<option value="">-- ເລືອກປະເພດ --</option>';
+    cats.forEach(t=>h+='<option value="'+escHtml(t)+'">'+escHtml(t)+'</option>');
+    h+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມປະເພດໃໝ່...</option>';
+    ic.innerHTML=h;if(cur&&cats.includes(cur))ic.value=cur;}
+  const fc=g('iv-f-cat');
+  if(fc){const cur=fc.value;let h='<option value="">🏷️ ທຸກປະເພດ</option>';
+    cats.forEach(t=>h+='<option value="'+escHtml(t)+'">'+escHtml(t)+'</option>');
+    fc.innerHTML=h;if(cur)fc.value=cur;}
+  const di=g('ivd-item');
+  if(di){const cur=di.value;let h='<option value="">-- ເລືອກອຸປະກອນ --</option>';
+    DB.inv.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(r=>{
+      h+='<option value="'+r.id+'">'+escHtml(r.name)+' ('+(r.qty||0)+')</option>';});
+    di.innerHTML=h;if(cur)di.value=cur;}
+  const brs=getBranches();
+  const db2=g('ivd-br');
+  if(db2){const cur=db2.value;let h='<option value="">-- ເລືອກໜ່ວຍ --</option>';
+    brs.forEach(b=>h+='<option value="'+escHtml(b)+'">'+escHtml(b)+'</option>');
+    h+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມໜ່ວຍໃໝ່...</option>';
+    db2.innerHTML=h;if(cur)db2.value=cur;}
+  const fb=g('ivd-f-br');
+  if(fb){const cur=fb.value;let h='<option value="">🏢 ທຸກໜ່ວຍ</option>';
+    brs.forEach(b=>h+='<option value="'+escHtml(b)+'">'+escHtml(b)+'</option>');
+    fb.innerHTML=h;if(cur)fb.value=cur;}
+}
+function renderInvStats(){
+  const items=DB.inv,disp=DB.invd;
+  const set=(id,val)=>{const e=g(id);if(e)e.textContent=val;};
+  const totalStock=items.reduce((s,r)=>s+(parseInt(r.qty)||0),0);
+  const totalSent=disp.reduce((s,d)=>s+(parseInt(d.qty)||0),0);
+  const pending=disp.filter(d=>d.st!=='received').length;
+  const low=items.filter(r=>{const q=parseInt(r.qty)||0,m=parseInt(r.min)||0;return q<=0||(m&&q<=m);});
+  set('inv-s-items',items.length);
+  set('inv-s-items2',(CFG.invCats||[]).map(c=>{const n=items.filter(r=>String(r.cat||'')===c).length;return n?c.split(' ')[0]+' '+n:'';}).filter(x=>x).join(' · ')||'—');
+  set('inv-s-stock',totalStock);
+  set('inv-s-sent',totalSent);
+  set('inv-s-sent2',disp.length+' ຄັ້ງ'+(pending?' · '+pending+' ກຳລັງສົ່ງ':''));
+  set('inv-s-low',low.length);
+  const lc=g('inv-low-card'),ll=g('inv-low-list');
+  if(lc&&ll){
+    if(low.length){lc.style.display='block';
+      ll.innerHTML=low.map(r=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">'
+        +'<div style="display:flex;align-items:center;gap:10px;">'+(r.img?'<img class="inv-thumb" src="'+r.img+'">':'<div class="inv-thumb-ph">📦</div>')
+        +'<div><div style="font-weight:600;font-size:13.5px;color:var(--text);">'+escHtml(r.name)+'</div><div style="font-size:11px;color:var(--text3);">'+escHtml(r.cat||'')+'</div></div></div>'
+        +'<div style="font-weight:700;color:var(--red);">'+(r.qty||0)+'</div></div>').join('');
+    }else lc.style.display='none';
+  }
+}
+function renderInvAll(){populateInvDropdowns();renderInv();renderInvD();renderInvBr();renderInvStats();}
+
+/* ---- Export ---- */
+function exportInvXlsx(){
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  loadXlsxThen(()=>{
+    const rows=DB.inv.map((r,i)=>{
+      const sent=DB.invd.filter(d=>d.itemId===r.id).reduce((s,d)=>s+(parseInt(d.qty)||0),0);
+      return {'#':i+1,'ຊື່':r.name||'','ປະເພດ':r.cat||'','Serial':r.serial||'','ໃນຄັງ':r.qty||0,'ຂັ້ນຕໍ່າ':r.min||0,'ສົ່ງແລ້ວ':sent,'ນຳເຂົ້າ':fmtDate(r.inDate)||'','ໝາຍເຫດ':r.note||''};
+    });
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{}]),'Items');
+    XLSX.writeFile(wb,'APB_Inventory_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('📊 Export ສຳເລັດ ('+rows.length+' ລາຍການ)');
+  });
+}
+function exportInvDXlsx(){
+  toast('⏳ ກຳລັງສ້າງ Excel...');
+  loadXlsxThen(()=>{
+    const rows=DB.invd.map((r,i)=>({'#':i+1,'ອຸປະກອນ':r.itemName||'','ປະເພດ':r.cat||'','ຈຳນວນ':r.qty||0,'ໄປໜ່ວຍ':r.br||'','ວັນທີສົ່ງ':fmtDate(r.dt)||'','ຜູ້ສົ່ງ':r.by||'','ສະຖານະ':r.st==='received'?'ຮັບແລ້ວ':'ກຳລັງສົ່ງ','ຮັບເມື່ອ':r.receivedAt||'','ໝາຍເຫດ':r.note||''}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{}]),'Dispatch');
+    XLSX.writeFile(wb,'APB_Dispatch_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('📊 Export ສຳເລັດ ('+rows.length+' ຄັ້ງ)');
+  });
+}
+
 /* ===== AUDIT LOG (with Supabase sync) ===== */
 const AUDIT={
   list:JSON.parse(localStorage.getItem('apb26_audit')||'[]'),
@@ -1989,12 +2493,16 @@ const DB={
   rpt:JSON.parse(localStorage.getItem('apb26_rpt')||'[]'),
   ip:JSON.parse(localStorage.getItem('apb26_ip')||'[]'),
   pw:JSON.parse(localStorage.getItem('apb26_pw')||'[]'),
+  inv:JSON.parse(localStorage.getItem('apb26_inv')||'[]'),
+  invd:JSON.parse(localStorage.getItem('apb26_invd')||'[]'),
   save(){
     localStorage.setItem('apb26_atm',JSON.stringify(this.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(this.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(this.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(this.ip));
     localStorage.setItem('apb26_pw',JSON.stringify(this.pw));
+    localStorage.setItem('apb26_inv',JSON.stringify(this.inv));
+    localStorage.setItem('apb26_invd',JSON.stringify(this.invd));
     autoBackup();
     if(navigator.onLine)sbPush().then(ok=>showSyncStatus(ok?'ok':'error'));
   }
@@ -2007,7 +2515,7 @@ async function sbUpsert(tbl,id,data){const r=await fetch(`${SB_URL}/rest/v1/${tb
 async function sbPushConfig(){
   if(!navigator.onLine)return;
   try{
-    await sbUpsert('config_data','main',{branches:CFG.branches,atmIds:CFG.atmIds,atmTypes:CFG.atmTypes});
+    await sbUpsert('config_data','main',{branches:CFG.branches,atmIds:CFG.atmIds,atmTypes:CFG.atmTypes,invCats:CFG.invCats,pwSystems:CFG.pwSystems,repDevices:CFG.repDevices});
   }catch(e){console.error('sbPushConfig:',e);}
 }
 async function sbPullConfig(){
@@ -2026,6 +2534,18 @@ async function sbPullConfig(){
       if(Array.isArray(r.data.atmTypes)&&r.data.atmTypes.length){
         CFG.atmTypes=r.data.atmTypes;
         localStorage.setItem('apb26_atmtypes',JSON.stringify(CFG.atmTypes));
+      }
+      if(Array.isArray(r.data.invCats)&&r.data.invCats.length){
+        CFG.invCats=r.data.invCats.map(String);
+        localStorage.setItem('apb26_invcats',JSON.stringify(CFG.invCats));
+      }
+      if(Array.isArray(r.data.pwSystems)&&r.data.pwSystems.length){
+        CFG.pwSystems=r.data.pwSystems.map(String);
+        localStorage.setItem('apb26_pwsystems',JSON.stringify(CFG.pwSystems));
+      }
+      if(Array.isArray(r.data.repDevices)&&r.data.repDevices.length){
+        CFG.repDevices=r.data.repDevices.map(String);
+        localStorage.setItem('apb26_repdevices',JSON.stringify(CFG.repDevices));
       }
     }
     return true;
@@ -2058,8 +2578,9 @@ async function sbPullAudit(){
 
 async function sbPull(){
   try{
-    const [ra,rr,rp,ri]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data')]);
-    const pr=rows=>{const r=rows.find(x=>x.id==='main');return r&&Array.isArray(r.data)?r.data:[];};
+    const sbGetSafe=async t=>{try{return await sbGet(t);}catch(e){return [];}};
+    const [ra,rr,rp,ri,rpw,rinv,rinvd]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data'),sbGetSafe('password_data'),sbGetSafe('items_data'),sbGetSafe('dispatch_data')]);
+    const pr=rows=>{const r=(rows||[]).find(x=>String(x.id)==='main');return r&&Array.isArray(r.data)?r.data:[];};
     const dedup=arr=>{const out=[];const sigs=new Set();const ids=new Set();let auto=0;(arr||[]).forEach(r=>{
       if(!r||typeof r!=='object')return;
       const hasData=Object.keys(r).some(k=>String(r[k]||'').trim()!=='');
@@ -2081,25 +2602,59 @@ async function sbPull(){
     DB.rep=dedup(pr(rr).map(r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     DB.rpt=dedup(pr(rp).map(r=>normRec({...r,dt:fmtDate(r.dt)})));
     DB.ip=dedup(pr(ri).map(r=>normRec({...r,bought:fmtDate(r.bought)})));
-    sortByDate(DB.atm);sortByDate(DB.rep);sortByDate(DB.ip);
+    // pw/inv/invd: merge (ບໍ່ overwrite) — ກັນ table ຫວ່າງລ້າງ local
+    const mrg=(remoteArr,cur)=>{const rem=dedup((remoteArr||[]).map(r=>normRec({...r})));const ids=new Set(rem.map(x=>String(x.id)));const extra=(cur||[]).filter(x=>x&&!ids.has(String(x.id)));return dedup(rem.concat(extra));};
+    DB.pw=mrg(pr(rpw),DB.pw);
+    DB.inv=mrg(pr(rinv),DB.inv);
+    DB.invd=mrg(pr(rinvd),DB.invd);
+    sortByDate(DB.atm);sortByDate(DB.rep);sortByDate(DB.ip);sortByDate(DB.pw);sortByDate(DB.inv);sortByDate(DB.invd);
     localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
+    localStorage.setItem('apb26_pw',JSON.stringify(DB.pw));
+    localStorage.setItem('apb26_inv',JSON.stringify(DB.inv));
+    localStorage.setItem('apb26_invd',JSON.stringify(DB.invd));
     await sbPullConfig();
     await sbPullAudit();
     return true;
   }catch(e){console.error('sbPull:',e);return false;}
 }
+// merge-push: ດຶງ Supabase ກ່ອນ → ລວມ local + remote (union by id) → ຈຶ່ງຂຽນ
+// ກັນເຄື່ອງເກົ່າ push ທັບຂໍ້ມູນໃໝ່ + ກູ້ຂໍ້ມູນທີ່ Supabase ມີ ແຕ່ local ບໍ່ມີ
+let _sbGrew=false;
+async function sbMerge(table,dbKey,lsKey,arr){
+  let merged=Array.isArray(arr)?arr.slice():[];
+  try{
+    const rows=await sbGet(table);
+    const cur=(rows||[]).find(x=>String(x.id)==='main');
+    if(cur&&Array.isArray(cur.data)){
+      const ids=new Set(merged.map(r=>String(r&&r.id)));
+      const tomb=(tombGet()[table]||{});
+      const extra=cur.data.filter(r=>r&&r.id!=null&&!ids.has(String(r.id))&&!tomb[String(r.id)]);
+      if(extra.length){merged=merged.concat(extra);_sbGrew=true;}
+    }
+  }catch(e){}
+  const seen=new Set();merged=merged.filter(r=>{const i=String(r&&r.id);if(seen.has(i))return false;seen.add(i);return true;});
+  if(typeof sortByDate==='function')sortByDate(merged);
+  if(dbKey&&DB[dbKey]!==undefined)DB[dbKey]=merged;
+  if(lsKey)localStorage.setItem(lsKey,JSON.stringify(merged));
+  try{await sbUpsert(table,'main',merged);}catch(e){/* table ອາດຍັງບໍ່ມີ (404) → ຂ້າມ ບໍ່ພັງ */}
+}
 async function sbPush(){
   try{
+    _sbGrew=false;
     await Promise.all([
-      sbUpsert('atm_data','main',DB.atm),
-      sbUpsert('repair_data','main',DB.rep),
-      sbUpsert('report_data','main',DB.rpt),
-      sbUpsert('ip_data','main',DB.ip),
-      sbUpsert('config_data','main',{branches:CFG.branches,atmIds:CFG.atmIds,atmTypes:CFG.atmTypes})
+      sbMerge('atm_data','atm','apb26_atm',DB.atm),
+      sbMerge('repair_data','rep','apb26_rep',DB.rep),
+      sbMerge('report_data','rpt','apb26_rpt',DB.rpt),
+      sbMerge('ip_data','ip','apb26_ip',DB.ip),
+      sbMerge('password_data','pw','apb26_pw',DB.pw),
+      sbMerge('items_data','inv','apb26_inv',DB.inv),
+      sbMerge('dispatch_data','invd','apb26_invd',DB.invd),
+      sbUpsert('config_data','main',{branches:CFG.branches,atmIds:CFG.atmIds,atmTypes:CFG.atmTypes,invCats:CFG.invCats,pwSystems:CFG.pwSystems,repDevices:CFG.repDevices})
     ]);
+    if(_sbGrew&&typeof renderAll==='function')renderAll(); // ໄດ້ຂໍ້ມູນເພີ່ມ → render ໃໝ່
     return true;
   }
   catch(e){console.error('sbPush:',e);return false;}
@@ -2228,37 +2783,59 @@ async function sheetsGet(t){try{const r=await fetch(`${SHEETS_URL}?type=${t}`);r
 function sortByDate(rows){
   if(!Array.isArray(rows))return rows;
   rows.sort((a,b)=>{
-    const ka=(String(a.dt||a.bought||'')+' '+String(a.tm||'')).trim();
-    const kb=(String(b.dt||b.bought||'')+' '+String(b.tm||'')).trim();
+    const ka=(String(a.dt||a.bought||a.inDate||'')+' '+String(a.tm||'')).trim();
+    const kb=(String(b.dt||b.bought||b.inDate||'')+' '+String(b.tm||'')).trim();
     if(ka===kb)return (Number(a.id)||0)-(Number(b.id)||0);
     return ka<kb?-1:1;
   });
   return rows;
 }
-async function syncToSheets(type,rows){
-  if(!navigator.onLine)return;
-  // ຮຽງກ່ອນ push + ບັນທຶກ local ໃຫ້ກົງ
-  try{
-    sortByDate(rows);
-    const km={ATM:'apb26_atm',Repair:'apb26_rep',Report:'apb26_rpt',IP:'apb26_ip',Password:'apb26_pw'};
-    if(km[type])localStorage.setItem(km[type],JSON.stringify(rows));
-  }catch(e){}
-  showSyncStatus('syncing');
-  const r=await sheetsPost({type,action:'overwrite',rows});
-  showSyncStatus(r.ok?'ok':'error');
-}
 // Normalize: ບັງຄັບ field ຂໍ້ຄວາມເປັນ string (ກັນ number ຈາກ Sheets → filter/search/compare ບໍ່ກົງ)
-const NORM_TEXT_FIELDS=['atmId','br','tp','dv','sys','st','user','tc','rq','ds','ac','is','rs','nt','name','addr','mac','location','note','os','type','solution','dept','serial','vlan','cpu','ram','hr'];
+const NORM_TEXT_FIELDS=['atmId','br','tp','dv','sys','st','user','tc','rq','ds','ac','is','rs','nt','name','addr','mac','location','note','os','type','solution','dept','serial','vlan','cpu','ram','hr','cat','unit','itemName','by','inDate','receivedAt','img'];
 function normRec(r){
   if(!r||typeof r!=='object')return r;
   NORM_TEXT_FIELDS.forEach(k=>{ if(r[k]!=null&&typeof r[k]!=='string')r[k]=String(r[k]); });
   return r;
 }
+function _nDoneAt(v){if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){}}return s;}
+function normByType(type,r){
+  if(!r||typeof r!=='object')return r;
+  if(type==='Items'){const o=normRec({...r,inDate:fmtDate(r.inDate)});o.qty=parseInt(o.qty)||0;o.min=parseInt(o.min)||0;o.id=parseInt(o.id)||o.id;return o;}
+  if(type==='Dispatch'){const o=normRec({...r,dt:fmtDate(r.dt)});o.qty=parseInt(o.qty)||0;o.itemId=parseInt(o.itemId)||0;o.id=parseInt(o.id)||o.id;return o;}
+  if(type==='IP')return normRec({...r,bought:fmtDate(r.bought)});
+  if(type==='Report')return normRec({...r,dt:fmtDate(r.dt)});
+  return normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:_nDoneAt(r.doneAt)});
+}
+const SHEET_DB_KEY={ATM:'atm',Repair:'rep',Report:'rpt',IP:'ip',Password:'pw',Items:'inv',Dispatch:'invd'};
+const SHEET_LS_KEY={ATM:'apb26_atm',Repair:'apb26_rep',Report:'apb26_rpt',IP:'apb26_ip',Password:'apb26_pw',Items:'apb26_inv',Dispatch:'apb26_invd'};
+/* Tombstone: ຈື່ id ທີ່ລຶບ → ກັນ read-merge-write ດຶງກັບຄືນ */
+function tombGet(){try{return JSON.parse(localStorage.getItem('apb26_tomb')||'{}');}catch(e){return {};}}
+function tombAdd(type,id){const t=tombGet();t[type]=t[type]||{};t[type][String(id)]=Date.now();localStorage.setItem('apb26_tomb',JSON.stringify(t));}
+function tombClean(){const t=tombGet();const cut=Date.now()-30*864e5;let ch=false;Object.keys(t).forEach(ty=>{Object.keys(t[ty]).forEach(id=>{if(t[ty][id]<cut){delete t[ty][id];ch=true;}});});if(ch)localStorage.setItem('apb26_tomb',JSON.stringify(t));}
+// read-merge-write: ດຶງ Sheet ກ່ອນ → ລວມ local + remote (ຂ້າມ tombstone) → ຈຶ່ງຂຽນທັບ
+// ກັນເຄື່ອງອື່ນ push ທັບກັນ ເຮັດຂໍ້ມູນຫາຍ
+// upsert (default): server update ຕາມ id, ບໍ່ລຶບແຖວອື່ນ → ບໍ່ຫາຍຂ້າມເຄື່ອງ
+// overwrite: ຂຽນທັບໝົດ (ໃຊ້ສະເພາະ Force Sync)
+async function syncToSheets(type,rows,mode){
+  if(!navigator.onLine)return;
+  showSyncStatus('syncing');
+  try{
+    sortByDate(rows);
+    if(SHEET_LS_KEY[type])localStorage.setItem(SHEET_LS_KEY[type],JSON.stringify(rows));
+  }catch(e){}
+  const r=await sheetsPost({type,action:mode||'upsert',rows});
+  showSyncStatus(r.ok?'ok':'error');
+}
+// ລຶບແຖວທີ່ Sheet (ຕາມ id) → ໃຊ້ຕອນ del
+async function deleteFromSheets(type,id){
+  if(!navigator.onLine)return;
+  try{await sheetsPost({type,action:'delete',ids:[id]});}catch(e){}
+}
 async function pullFromSheets(silent){
   if(!navigator.onLine){if(!silent)toast('📴 Offline');return false;}
   showSyncStatus('syncing');if(!silent)toast('⏳ ດຶງຈາກ Sheets...');
   try{
-    const [ra,rr,rp,ri,rw]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP'),sheetsGet('Password')]);
+    const [ra,rr,rp,ri,rw,rv,rvd]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP'),sheetsGet('Password'),sheetsGet('Items'),sheetsGet('Dispatch')]);
     const dedup=arr=>{const out=[];const sigs=new Set();const ids=new Set();let auto=0;(arr||[]).forEach(r=>{
       if(!r||typeof r!=='object')return;
       const hasData=Object.keys(r).some(k=>String(r[k]||'').trim()!=='');
@@ -2276,26 +2853,41 @@ async function pullFromSheets(silent){
       out.push(r);
     });return out;};
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
-    // guard: ຖ້າ ok ແຕ່ data ຫວ່າງ ທັງໆທີ່ເຄີຍມີຂໍ້ມູນ → ບໍ່ລ້າງ (ກັນ glitch ຊົ່ວຄາວ ເຮັດຂໍ້ມູນຫາຍ)
-    const safe=(res,cur,map)=>{
+    // MERGE (ບໍ່ຂຽນທັບ): ລວມ Sheet + ແຖວທ້ອງຖິ່ນທີ່ຍັງບໍ່ທັນ sync ຂຶ້ນ → ກັນຂໍ້ມູນໃໝ່ຫາຍ
+    const _needPush={};
+    const merge=(res,cur,map,sheetName)=>{
       if(!res||!res.ok)return cur; // ດຶງບໍ່ໄດ້ → ເກັບເກົ່າ
-      const arr=dedup((res.data||[]).map(map));
-      if(arr.length===0&&(cur||[]).length>3){console.warn('SW: empty pull ignored (kept existing)');return cur;}
-      return arr;
+      const fromSheet=dedup((res.data||[]).map(map));
+      const sheetIds=new Set(fromSheet.map(r=>String(r.id)));
+      // ແຖວທ້ອງຖິ່ນທີ່ Sheet ຍັງບໍ່ມີ = ຂໍ້ມູນທີ່ຫາກໍ່ເພີ່ມ ຍັງບໍ່ທັນ push
+      const localExtra=(cur||[]).filter(r=>r&&!sheetIds.has(String(r.id)));
+      if(fromSheet.length===0&&(cur||[]).length>3){console.warn('empty pull ignored');return cur;}
+      if(localExtra.length>0)_needPush[sheetName]=true; // ຕ້ອງ push ຄືນໃຫ້ Sheet ຕາມທັນ
+      return dedup(fromSheet.concat(localExtra));
     };
     const mapDate=r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)});
-    DB.atm=safe(ra,DB.atm,mapDate);
-    DB.rep=safe(rr,DB.rep,mapDate);
-    DB.rpt=safe(rp,DB.rpt,r=>normRec({...r,dt:fmtDate(r.dt)}));
-    DB.ip=safe(ri,DB.ip,r=>normRec({...r,bought:fmtDate(r.bought)}));
-    DB.pw=safe(rw,DB.pw,mapDate);
-    sortByDate(DB.atm);sortByDate(DB.rep);sortByDate(DB.ip);sortByDate(DB.pw);
+    DB.atm=merge(ra,DB.atm,mapDate,'ATM');
+    DB.rep=merge(rr,DB.rep,mapDate,'Repair');
+    DB.rpt=merge(rp,DB.rpt,r=>normRec({...r,dt:fmtDate(r.dt)}),'Report');
+    DB.ip=merge(ri,DB.ip,r=>normRec({...r,bought:fmtDate(r.bought)}),'IP');
+    DB.pw=merge(rw,DB.pw,mapDate,'Password');
+    DB.inv=merge(rv,DB.inv,r=>{const o=normRec({...r,inDate:fmtDate(r.inDate)});o.qty=parseInt(o.qty)||0;o.min=parseInt(o.min)||0;return o;},'Items');
+    DB.invd=merge(rvd,DB.invd,r=>{const o=normRec({...r,dt:fmtDate(r.dt)});o.qty=parseInt(o.qty)||0;o.itemId=parseInt(o.itemId)||0;return o;},'Dispatch');
+    window._invNeedPush=_needPush;
+    sortByDate(DB.atm);sortByDate(DB.rep);sortByDate(DB.ip);sortByDate(DB.pw);sortByDate(DB.inv);sortByDate(DB.invd);
     localStorage.setItem('apb26_atm',JSON.stringify(DB.atm));
     localStorage.setItem('apb26_rep',JSON.stringify(DB.rep));
     localStorage.setItem('apb26_rpt',JSON.stringify(DB.rpt));
     localStorage.setItem('apb26_ip',JSON.stringify(DB.ip));
     localStorage.setItem('apb26_pw',JSON.stringify(DB.pw));
+    localStorage.setItem('apb26_inv',JSON.stringify(DB.inv));
+    localStorage.setItem('apb26_invd',JSON.stringify(DB.invd));
     renderAll();showSyncStatus('ok');if(!silent)toast('✅ ດຶງ Sheets ສຳເລັດ!');
+    // push ຄືນ Sheet ສະເພາະ dataset ທີ່ມີແຖວທ້ອງຖິ່ນຍັງບໍ່ທັນ sync (ກັນຫາຍ)
+    const np=window._invNeedPush||{};
+    const dsMap={ATM:DB.atm,Repair:DB.rep,Report:DB.rpt,IP:DB.ip,Password:DB.pw,Items:DB.inv,Dispatch:DB.invd};
+    Object.keys(np).forEach(k=>{if(np[k]&&dsMap[k])syncToSheets(k,dsMap[k]);});
+    window._invNeedPush={};
     return true;
   }catch(e){showSyncStatus('error');if(!silent)toast('⚠️ ດຶງ Sheets ບໍ່ໄດ້');return false;}
 }
@@ -2323,9 +2915,10 @@ async function forceSyncAll(){
   if(!confirm('Force Sync ທັງໝົດ → Sheets?'))return;
   showSyncStatus('syncing');toast('☁️ Syncing...');
   try{
-    await syncToSheets('ATM',DB.atm);await syncToSheets('Repair',DB.rep);
-    await syncToSheets('Report',DB.rpt);await syncToSheets('IP',DB.ip);
-    await syncToSheets('Password',DB.pw);
+    await syncToSheets('ATM',DB.atm,'overwrite');await syncToSheets('Repair',DB.rep,'overwrite');
+    await syncToSheets('Report',DB.rpt,'overwrite');await syncToSheets('IP',DB.ip,'overwrite');
+    await syncToSheets('Password',DB.pw,'overwrite');
+    await syncToSheets('Items',DB.inv,'overwrite');await syncToSheets('Dispatch',DB.invd,'overwrite');
     showSyncStatus('ok');toast('✅ Force Sync ສຳເລັດ!');
   }catch(e){showSyncStatus('error');toast('⚠️ Sync ຜິດ');}
 }
@@ -2361,7 +2954,7 @@ function editATM(id){
   const b=g('atm-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
   g('atm-form-card').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function delATM(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.atm.find(x=>x.id===id);DB.atm=DB.atm.filter(x=>x.id!==id);if(r)AUDIT.log('delete','ATM',r.atmId,r.br+' · '+r.tp);DB.save();renderATM();updStats();syncToSheets('ATM',DB.atm);toast('🗑 ລຶບ ATM');}
+function delATM(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.atm.find(x=>x.id===id);DB.atm=DB.atm.filter(x=>x.id!==id);tombAdd('ATM',id);if(r)AUDIT.log('delete','ATM',r.atmId,r.br+' · '+r.tp);DB.save();renderATM();updStats();deleteFromSheets('ATM',id);toast('🗑 ລຶບ ATM');}
 
 /* ===== REPAIR CRUD ===== */
 function svRep(){
@@ -2386,7 +2979,7 @@ function editRep(id){
   const b=g('rep-save-btn');if(b)b.textContent='💾 ບັນທຶກການແກ້ໄຂ';
   g('tab-repair').scrollIntoView({behavior:'smooth'});
 }
-function delRep(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.rep.find(x=>x.id===id);DB.rep=DB.rep.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Repair',r.dv,r.br);DB.save();renderRep();updStats();syncToSheets('Repair',DB.rep);toast('🗑 ລຶບ');}
+function delRep(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.rep.find(x=>x.id===id);DB.rep=DB.rep.filter(x=>x.id!==id);tombAdd('Repair',id);if(r)AUDIT.log('delete','Repair',r.dv,r.br);DB.save();renderRep();updStats();deleteFromSheets('Repair',id);toast('🗑 ລຶບ');}
 
 /* ===== PASSWORD CRUD ===== */
 function svPW(){
@@ -2414,7 +3007,7 @@ function editPW(id){
   const t=g('pw-form-title');if(t)t.innerHTML='<span class="cdot"></span>✏️ ແກ້ໄຂ: '+escHtml(r.user||'');
   g('tab-password').scrollIntoView({behavior:'smooth'});
 }
-function delPW(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.pw.find(x=>x.id===id);DB.pw=DB.pw.filter(x=>x.id!==id);if(r)AUDIT.log('delete','Password',r.user,r.br+' · '+r.sys);DB.save();renderPW();updStats();syncToSheets('Password',DB.pw);toast('🗑 ລຶບ');}
+function delPW(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.pw.find(x=>x.id===id);DB.pw=DB.pw.filter(x=>x.id!==id);tombAdd('Password',id);if(r)AUDIT.log('delete','Password',r.user,r.br+' · '+r.sys);DB.save();renderPW();updStats();deleteFromSheets('Password',id);toast('🗑 ລຶບ');}
 function markPWDone(id){
   if(!requireAdmin())return;
   const r=DB.pw.find(x=>x.id===id);if(!r)return;
@@ -3690,7 +4283,7 @@ function editIP(id){
   g('ip-edit-id').value=id;g('ip-name').value=r.name||'';g('ip-addr').value=r.addr||'';g('ip-mac').value=r.mac||'';g('ip-br').value=r.br||'';g('ip-user').value=r.user||'';g('ip-os').value=r.os||'Windows 11';g('ip-type').value=r.type||'Static (ຄົງທີ)';g('ip-st').value=r.st||'active';g('ip-note').value=r.note||'';
   g('tab-ip').scrollIntoView({behavior:'smooth'});
 }
-function delIP(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.ip.find(x=>x.id===id);DB.ip=DB.ip.filter(x=>x.id!==id);if(r)AUDIT.log('delete','IP',r.name,r.addr+' · '+r.br);DB.save();renderIP();syncToSheets('IP',DB.ip);toast('🗑 ລຶບ');}
+function delIP(id){if(!requireAdmin())return;if(!confirm('ລຶບ?'))return;const r=DB.ip.find(x=>x.id===id);DB.ip=DB.ip.filter(x=>x.id!==id);tombAdd('IP',id);if(r)AUDIT.log('delete','IP',r.name,r.addr+' · '+r.br);DB.save();renderIP();deleteFromSheets('IP',id);toast('🗑 ລຶບ');}
 function updIPStats(){
   if(g('ip-s-total'))g('ip-s-total').textContent=DB.ip.length;
   if(g('ip-s-used'))g('ip-s-used').textContent=DB.ip.filter(x=>x.st==='active').length;
@@ -4088,10 +4681,15 @@ function goTab(name,btn){
   if(name==='dashboard')renderDash();
   if(name==='report')updPrev();
   if(name==='atmlist'){renderBranchMgr();populateBranchDropdowns();renderATMList();renderATMProblems();setTimeout(()=>initALMap(),200);}
+  if(name==='inventory'){
+    if(g('iv-date')&&!g('iv-date').value)g('iv-date').value=new Date().toISOString().slice(0,10);
+    if(g('ivd-date')&&!g('ivd-date').value)g('ivd-date').value=new Date().toISOString().slice(0,10);
+    renderInvAll();
+  }
 }
 
 /* ===== RENDER ALL ===== */
-function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();populateRepDvDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();if(g('atmlist-list'))renderATMList();if(g('atm-problems-grid'))renderATMProblems();if(g('audit-list'))renderAudit();updStats();}
+function renderAll(){populateBranchDropdowns();populateATMIDDropdown();populateATMTypeDropdown();populatePWSysDropdown();populateRepDvDropdown();renderATM();renderRep();renderPW();renderDash();renderIP();renderInvAll();if(g('atmlist-list'))renderATMList();if(g('atm-problems-grid'))renderATMProblems();if(g('audit-list'))renderAudit();updStats();}
 
 /* ===== INIT ===== */
 function initDates(){
@@ -4113,6 +4711,7 @@ window.addEventListener('load',function(){
   // Apply saved theme
   const theme=localStorage.getItem('apb26_theme');
   if(theme==='dark'){document.body.classList.add('dark');const btn=g('theme-btn');if(btn)btn.textContent='☀️';}
+  try{tombClean();}catch(e){}
   initDates();renderAll();renderBackupList();checkOnline();checkAuth();
   // Auto-sync ຕອນເປີດ (ດຶງ Sheets → mirror Supabase) — ບໍ່ຕ້ອງກົດເອງ
   autoSync();
