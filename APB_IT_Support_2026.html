@@ -601,6 +601,8 @@ async function doLogin(){
   const unm=document.querySelector('.unm');if(unm)unm.textContent=found.display;
   try{AUDIT.log('login','Auth',found.user,found.display);}catch(e){}
   applyRole();
+  // ດຶງຂໍ້ມູນລ່າສຸດທັນທີຫຼັງ login (ບໍ່ຕ້ອງລໍ)
+  if(navigator.onLine){toast('⏳ ກຳລັງດຶງຂໍ້ມູນລ່າສຸດ...');autoSync();}
 }
 function doLogout(){
   if(!confirm('ອອກຈາກລະບົບ?'))return;
@@ -2642,8 +2644,7 @@ async function sbMerge(table,dbKey,lsKey,arr){
   merged=merged.filter(r=>!tomb[String(r&&r.id)]);
   merged=dedupById(merged); // dedup ຕາມ id ເທົ່ານັ້ນ → ເກັບທຸກແຖວ, ບໍ່ໃຫ້ id ຊ້ຳ (ບໍ່ຕັດເນື້ອໃນ)
   if(typeof sortByDate==='function')sortByDate(merged);
-  if(dbKey&&DB[dbKey]!==undefined)DB[dbKey]=merged;
-  if(lsKey)localStorage.setItem(lsKey,JSON.stringify(merged));
+  // ບໍ່ແຕະ DB/localStorage/ໜ້າຈໍ → ໃຫ້ແອັບ = Google Sheets. push merged ໄປ Supabase (backup superset)
   try{await sbUpsert(table,'main',merged);}catch(e){/* table ອາດຍັງບໍ່ມີ (404) → ຂ້າມ ບໍ່ພັງ */}
 }
 async function sbPush(){
@@ -2893,17 +2894,8 @@ async function autoSync(){
   if(okSheets){
     renderAll();if(typeof updIPStats==='function')updIPStats();
     showSyncStatus('ok');
-    // ລວມ Supabase ນຳ (ດຶງຂໍ້ມູນເກົ່າ) → sbPush/sbMerge union Supabase ເຂົ້າ DB
-    if((DB.atm.length+DB.rep.length+DB.ip.length)>0){
-      _sbGrew=false;
-      await sbPush().catch(()=>{}); // sbMerge: DB = Sheets ∪ Supabase (keep-all)
-      if(_sbGrew){
-        // Supabase ມີ record ທີ່ Sheets ບໍ່ມີ → push union ຄືນ Sheets ໃຫ້ຄົບ (upsert)
-        renderAll();
-        syncToSheets('ATM',DB.atm);syncToSheets('Repair',DB.rep);syncToSheets('Report',DB.rpt);
-        syncToSheets('IP',DB.ip);syncToSheets('Password',DB.pw);syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
-      }
-    }
+    // mirror ໄປ Supabase (backup ຢ່າງດຽວ — ບໍ່ດຶງມາປົນໜ້າຈໍ ໃຫ້ແອັບ = Sheets)
+    if((DB.atm.length+DB.rep.length+DB.ip.length)>0)sbPush().catch(()=>{});
   }else{
     // Sheets ລົ້ມ → ໃຊ້ Supabase ແທນ
     const ok=await sbPull();
