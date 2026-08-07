@@ -2581,22 +2581,7 @@ async function sbPull(){
     const sbGetSafe=async t=>{try{return await sbGet(t);}catch(e){return [];}};
     const [ra,rr,rp,ri,rpw,rinv,rinvd]=await Promise.all([sbGet('atm_data'),sbGet('repair_data'),sbGet('report_data'),sbGet('ip_data'),sbGetSafe('password_data'),sbGetSafe('items_data'),sbGetSafe('dispatch_data')]);
     const pr=rows=>{const r=(rows||[]).find(x=>String(x.id)==='main');return r&&Array.isArray(r.data)?r.data:[];};
-    const dedup=arr=>{const out=[];const sigs=new Set();const ids=new Set();let auto=0;(arr||[]).forEach(r=>{
-      if(!r||typeof r!=='object')return;
-      const hasData=Object.keys(r).some(k=>String(r[k]||'').trim()!=='');
-      if(!hasData)return; // ຂ້າມສະເພາະແຖວຫວ່າງລ້ວນໆ
-      // signature ຕາມເນື້ອໃນ (ບໍ່ນັບ id) → ກັນຂໍ້ມູນຊ້ຳແທ້ໆ
-      const sig=Object.keys(r).filter(k=>k!=='id').sort().map(k=>k+'='+String(r[k]==null?'':r[k]).trim()).join('|');
-      if(sigs.has(sig))return; // ຊ້ຳເນື້ອໃນ → ຂ້າມ
-      sigs.add(sig);
-      let id=(r.id!=null&&String(r.id).trim()!=='')?String(r.id):'';
-      if(!id||ids.has(id)){ // id ຫວ່າງ ຫຼື ຊ້ຳ (ແຕ່ເນື້ອໃນຕ່າງ) → ສ້າງ id ໃໝ່ ບໍ່ຖິ້ມແຖວ
-        let nid; do{ nid=String(Date.now()+(++auto)); }while(ids.has(nid));
-        id=nid; r.id=Number(nid);
-      }
-      ids.add(id);
-      out.push(r);
-    });return out;};
+    const dedup=dedupById; // id-based keep-all: ເກັບທຸກແຖວ, ບໍ່ໃຫ້ id ຊ້ຳ, ບໍ່ຕັດເນື້ອໃນ
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
     DB.atm=dedup(pr(ra).map(r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
     DB.rep=dedup(pr(rr).map(r=>normRec({...r,dt:fmtDate(r.dt),tm:fmtTime(r.tm),doneAt:nDoneAt(r.doneAt)})));
@@ -2623,16 +2608,14 @@ async function sbPull(){
 // merge-push: ດຶງ Supabase ກ່ອນ → ລວມ local + remote (union by id) → ຈຶ່ງຂຽນ
 // ກັນເຄື່ອງເກົ່າ push ທັບຂໍ້ມູນໃໝ່ + ກູ້ຂໍ້ມູນທີ່ Supabase ມີ ແຕ່ local ບໍ່ມີ
 const SB_TOMB_KEY={atm_data:'ATM',repair_data:'Repair',report_data:'Report',ip_data:'IP',password_data:'Password',items_data:'Items',dispatch_data:'Dispatch'};
-// dedup ຕາມເນື້ອໃນ (ບໍ່ນັບ id) → ຕັດ content duplicate, ເກັບອັນທຳອິດ (id ເດີມ)
-function dedupContent(arr){
-  const out=[];const sigs=new Set();const ids=new Set();let auto=0;
+// dedup ຕາມ id ເທົ່ານັ້ນ (ເກັບທຸກແຖວ — ບໍ່ຕັດເນື້ອໃນຊ້ຳ) → ຖ້າ id ຊ້ຳ/ຫວ່າງ ໃຫ້ id ໃໝ່ ບໍ່ຖິ້ມ
+// ກັນຂໍ້ມູນຫາຍ (ຍອມໃຫ້ມີເນື້ອໃນຊ້ຳ ດີກວ່າຫາຍ)
+function dedupById(arr){
+  const out=[];const ids=new Set();let auto=0;
   (arr||[]).forEach(r=>{
     if(!r||typeof r!=='object')return;
     const hasData=Object.keys(r).some(k=>String(r[k]==null?'':r[k]).trim()!=='');
-    if(!hasData)return;
-    const sig=Object.keys(r).filter(k=>k!=='id').sort().map(k=>k+'='+String(r[k]==null?'':r[k]).trim()).join('|');
-    if(sigs.has(sig))return;
-    sigs.add(sig);
+    if(!hasData)return; // ຂ້າມສະເພາະແຖວຫວ່າງລ້ວນໆ
     let id=(r.id!=null&&String(r.id).trim()!=='')?String(r.id):'';
     if(!id||ids.has(id)){let nid;do{nid=String(Date.now()+(++auto));}while(ids.has(nid));id=nid;r.id=Number(nid);}
     ids.add(id);
@@ -2657,7 +2640,7 @@ async function sbMerge(table,dbKey,lsKey,arr){
   }catch(e){}
   // ຕັດ record ທີ່ຖືກລົບ (tombstone) ອອກທັງໝົດ → ກັນ resurrection (ລວມ record ທີ່ເຄີຍ resurrect)
   merged=merged.filter(r=>!tomb[String(r&&r.id)]);
-  merged=dedupContent(merged); // dedup ຕາມເນື້ອໃນ → ຕັດ content duplicate (id ຕ່າງ ແຕ່ຂໍ້ມູນຄືກັນ)
+  merged=dedupById(merged); // dedup ຕາມ id ເທົ່ານັ້ນ → ເກັບທຸກແຖວ, ບໍ່ໃຫ້ id ຊ້ຳ (ບໍ່ຕັດເນື້ອໃນ)
   if(typeof sortByDate==='function')sortByDate(merged);
   if(dbKey&&DB[dbKey]!==undefined)DB[dbKey]=merged;
   if(lsKey)localStorage.setItem(lsKey,JSON.stringify(merged));
@@ -2858,22 +2841,7 @@ async function pullFromSheets(silent){
   showSyncStatus('syncing');if(!silent)toast('⏳ ດຶງຈາກ Sheets...');
   try{
     const [ra,rr,rp,ri,rw,rv,rvd]=await Promise.all([sheetsGet('ATM'),sheetsGet('Repair'),sheetsGet('Report'),sheetsGet('IP'),sheetsGet('Password'),sheetsGet('Items'),sheetsGet('Dispatch')]);
-    const dedup=arr=>{const out=[];const sigs=new Set();const ids=new Set();let auto=0;(arr||[]).forEach(r=>{
-      if(!r||typeof r!=='object')return;
-      const hasData=Object.keys(r).some(k=>String(r[k]||'').trim()!=='');
-      if(!hasData)return; // ຂ້າມສະເພາະແຖວຫວ່າງລ້ວນໆ
-      // signature ຕາມເນື້ອໃນ (ບໍ່ນັບ id) → ກັນຂໍ້ມູນຊ້ຳແທ້ໆ
-      const sig=Object.keys(r).filter(k=>k!=='id').sort().map(k=>k+'='+String(r[k]==null?'':r[k]).trim()).join('|');
-      if(sigs.has(sig))return; // ຊ້ຳເນື້ອໃນ → ຂ້າມ
-      sigs.add(sig);
-      let id=(r.id!=null&&String(r.id).trim()!=='')?String(r.id):'';
-      if(!id||ids.has(id)){ // id ຫວ່າງ ຫຼື ຊ້ຳ (ແຕ່ເນື້ອໃນຕ່າງ) → ສ້າງ id ໃໝ່ ບໍ່ຖິ້ມແຖວ
-        let nid; do{ nid=String(Date.now()+(++auto)); }while(ids.has(nid));
-        id=nid; r.id=Number(nid);
-      }
-      ids.add(id);
-      out.push(r);
-    });return out;};
+    const dedup=dedupById; // id-based keep-all: ເກັບທຸກແຖວ, ບໍ່ໃຫ້ id ຊ້ຳ, ບໍ່ຕັດເນື້ອໃນ
     const nDoneAt=v=>{if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}catch(e){}}return s;};
     // MERGE (ບໍ່ຂຽນທັບ): ລວມ Sheet + ແຖວທ້ອງຖິ່ນທີ່ຍັງບໍ່ທັນ sync ຂຶ້ນ → ກັນຂໍ້ມູນໃໝ່ຫາຍ
     const _needPush={};
