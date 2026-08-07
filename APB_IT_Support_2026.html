@@ -2315,27 +2315,51 @@ function renderInvD(){
 function showInvBranch(name){
   name=String(name);
   const moves=DB.invd.filter(d=>{const ft=invFromTo(d);return ft.from===name||ft.to===name;});
-  // ຄົງເຫຼືອສຸດທິຕໍ່ລາຍການ (ຮັບເຂົ້າ - ສົ່ງອອກ)
+  // ຄົງເຫຼືອສຸດທິຕໍ່ item (keyed by itemId) — ຮັບເຂົ້າ - ສົ່ງອອກ
   const net={};
   moves.forEach(d=>{
-    const k=String(d.itemName||'');const ft=invFromTo(d);const q=parseInt(d.qty)||0;
-    if(!net[k])net[k]={qty:0,cat:d.cat||'',last:''};
-    if(ft.to===name)net[k].qty+=q;
-    if(ft.from===name)net[k].qty-=q;
-    if(String(d.dt||'')>net[k].last)net[k].last=String(d.dt||'');
+    const id=d.itemId;const ft=invFromTo(d);const q=parseInt(d.qty)||0;
+    if(!net[id])net[id]={name:String(d.itemName||''),cat:d.cat||'',qty:0,last:''};
+    if(ft.to===name)net[id].qty+=q;
+    if(ft.from===name)net[id].qty-=q;
+    if(String(d.dt||'')>net[id].last)net[id].last=String(d.dt||'');
   });
-  const keys=Object.keys(net).filter(k=>net[k].qty>0).sort((a,b)=>net[b].qty-net[a].qty);
+  // condition ດຶງຈາກຄັງຫຼັກ (ຕໍ່ item)
+  const condOf=id=>{const it=DB.inv.find(x=>x.id===parseInt(id));return it?(String(it.cond||'good')):'good';};
+  const held=Object.keys(net).filter(k=>net[k].qty>0);
+  const groups={good:[],bad:[],fixing:[]};
+  held.forEach(id=>{const c=condOf(id);(groups[c]||groups.good).push({id:id,...net[id]});});
+  const totalQty=held.reduce((s,id)=>s+net[id].qty,0);
+
+  // ໜ່ວຍນຶ່ງໝວດ
+  const section=(cond,icon,label,color,brd)=>{
+    const arr=(groups[cond]||[]).sort((a,b)=>b.qty-a.qty);
+    let h='<div style="font-size:12px;font-weight:700;color:'+color+';margin:12px 0 6px;">'+icon+' '+label+' ('+arr.length+')</div>';
+    if(!arr.length)h+='<div style="font-size:12px;color:var(--text3);padding:2px 0 6px;">—</div>';
+    else{h+='<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      arr.forEach(it=>{h+='<span style="border:1.5px solid '+brd+';border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--text);">'+escHtml(it.name)+' <b style="font-weight:700;">×'+it.qty+'</b></span>';});
+      h+='</div>';}
+    return h;
+  };
+
   let html='';
   if(!moves.length)html='<div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ມີການເຄື່ອນໄຫວ</div>';
   else{
-    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">📦 ອາໄຫຼ່ຄົງເຫຼືອຢູ່ໜ່ວຍນີ້ ('+keys.length+' ລາຍການ)</div>';
-    if(!keys.length)html+='<div style="font-size:12px;color:var(--text3);padding:4px 0;">ບໍ່ມີອາໄຫຼ່ຄົງເຫຼືອ (ສົ່ງກັບ/ໂອນໄປໝົດ)</div>';
-    keys.forEach(k=>{
-      html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">'
-        +'<div><div style="font-weight:600;font-size:13.5px;color:var(--text);">'+escHtml(k)+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">'+invCatBadge(net[k].cat)+' · ຫຼ້າສຸດ '+escHtml(fmtDate(net[k].last)||'—')+'</div></div>'
-        +'<div style="font-weight:700;font-size:16px;color:var(--green);">'+net[k].qty+' <span style="font-size:10px;font-weight:400;color:var(--text3);">ຄົງເຫຼືອ</span></div></div>';
-    });
-    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:14px 0 6px;">🚚 ປະຫວັດການເຄື່ອນໄຫວ ('+moves.length+' ຄັ້ງ)</div>';
+    // ສະຫຼຸບເທິງສຸດ
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px;">'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;">'+held.length+'</div><div style="font-size:10.5px;color:var(--text2);">ລາຍການ</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green);">'+(groups.good.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ໄດ້</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">'+(groups.bad.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ບໍ່ໄດ້</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--amber);">'+(groups.fixing.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ກຳລັງສ້ອມ</div></div>'
+      +'</div>';
+    if(!held.length)html+='<div style="font-size:12px;color:var(--text3);padding:8px 0;">ບໍ່ມີອາໄຫຼ່ຄົງເຫຼືອ (ສົ່ງກັບ/ໂອນໄປໝົດ)</div>';
+    else{
+      html+=section('good','🟢','ໃຊ້ໄດ້','var(--green)','rgba(16,185,129,0.4)');
+      html+=section('bad','🔴','ໃຊ້ບໍ່ໄດ້ (ເສຍ)','var(--red)','rgba(239,68,68,0.4)');
+      html+=section('fixing','🟡','ກຳລັງສ້ອມ','var(--amber)','rgba(245,158,11,0.4)');
+    }
+    // ປະຫວັດການເຄື່ອນໄຫວ
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:16px 0 6px;">🚚 ປະຫວັດການເຄື່ອນໄຫວ ('+moves.length+' ຄັ້ງ)</div>';
     moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);
       html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">'
         +'<span style="color:var(--text);">'+invMtypeLbl(d.mtype||'out')+' '+escHtml(d.itemName)+' ×'+(d.qty||0)+'<br><span style="font-size:10.5px;color:var(--text3);">'+escHtml(ft.from)+' → '+escHtml(ft.to)+'</span></span>'
