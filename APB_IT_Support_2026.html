@@ -625,18 +625,7 @@ function checkAuth(){
     document.getElementById('login-screen').style.display='flex';
   }
 }
-function goTab(name,btn){
-  // ປ້ອງກັນ viewer ເຂົ້າໜ້າທີ່ບໍ່ໄດ້ຮັບອະນຸຍາດ
-  let u={};try{u=JSON.parse(sessionStorage.getItem('apb_user')||'{}');}catch(e){}
-  if(u.role==='viewer'&&name!=='dashboard'){
-    toast('🔒 ບໍ່ມີສິດເຂົ້າໜ້ານີ້');
-    return;
-  }
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nb-d,.bn-item').forEach(b=>b.classList.remove('active'));
-  const t=document.getElementById('tab-'+name);if(t)t.classList.add('active');
-  if(btn){btn.classList.add('active');document.querySelectorAll('[data-tab="'+name+'"]').forEach(b=>b.classList.add('active'));}
-}
+/* goTab ນິຍາມຄົບຢູ່ດ້ານລຸ່ມ (ມີ tab hooks + viewer check) */
 function toggleTheme(){
   const dark=document.body.classList.toggle('dark');
   localStorage.setItem('apb26_theme',dark?'dark':'light');
