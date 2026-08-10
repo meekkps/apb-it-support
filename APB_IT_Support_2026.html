@@ -1326,7 +1326,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
         <input type="text" id="ivd-search" placeholder="🔍 ຄົ້ນຫາ..." oninput="renderInvD()" style="flex:2;min-width:150px;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-size:13.5px;color:var(--text);outline:none;">
         <select id="ivd-f-br" onchange="renderInvD()" style="flex:1;min-width:140px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;"></select>
         <select id="ivd-f-st" onchange="renderInvD()" style="flex:1;min-width:120px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
-          <option value="">📊 ທຸກສະຖານະ</option><option value="sent">🚚 ກຳລັງສົ່ງ</option><option value="received">✅ ຮັບແລ້ວ</option>
+          <option value="">📊 ທຸກສະຖານະ</option><option value="sent">🚚 ກຳລັງສົ່ງ</option><option value="received">✅ ຮັບແລ້ວ</option><option value="status">🔧 ປ່ຽນສະຖານະ</option><option value="writeoff">🗑 ຕັດອອກ</option>
         </select>
         <input type="date" id="ivd-f-from" onchange="renderInvD()" style="flex:1;min-width:125px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
         <input type="date" id="ivd-f-to" onchange="renderInvD()" style="flex:1;min-width:125px;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;">
@@ -2439,7 +2439,9 @@ function renderInvD(){
   let list=DB.invd.slice().reverse();
   if(q)list=list.filter(r=>((r.itemName||'')+(r.br||'')+(r.from||'')+(r.to||'')+(r.by||'')+(r.note||'')).toLowerCase().includes(q));
   if(fbr)list=list.filter(r=>{const ft=invFromTo(r);return ft.from===fbr||ft.to===fbr;});
-  if(fst)list=list.filter(r=>r.st===fst);
+  if(fst==='writeoff')list=list.filter(r=>r.mtype==='writeoff');
+  else if(fst==='status')list=list.filter(r=>r.mtype==='status');
+  else if(fst)list=list.filter(r=>r.st===fst&&r.mtype!=='writeoff'&&r.mtype!=='status');
   if(from)list=list.filter(r=>String(r.dt||'')>=from);
   if(to)list=list.filter(r=>String(r.dt||'')<=to);
   const cnt=g('ivd-cnt');if(cnt)cnt.textContent=list.length+(q||fbr||fst||from||to?'/'+DB.invd.length:'');
