@@ -1214,9 +1214,9 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
 
   <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
     <div class="stat-card"><div class="stat-lbl">ລາຍການ</div><div class="stat-num" id="inv-s-items">0</div><div class="stat-sub" id="inv-s-items2">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">ໃນຄັງ</div><div class="stat-num" id="inv-s-stock">0</div><div class="stat-sub">ທຸກລາຍການລວມ</div></div>
+    <div class="stat-card"><div class="stat-lbl">🟢 ໃຊ້ໄດ້</div><div class="stat-num" id="inv-s-good" style="color:var(--green);">0</div><div class="stat-sub" id="inv-s-good2">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">🔴 ໃຊ້ບໍ່ໄດ້</div><div class="stat-num" id="inv-s-bad" style="color:var(--red);">0</div><div class="stat-sub" id="inv-s-bad2">—</div></div>
     <div class="stat-card"><div class="stat-lbl">ສົ່ງແລ້ວ</div><div class="stat-num" id="inv-s-sent">0</div><div class="stat-sub" id="inv-s-sent2">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">ໃກ້ໝົດ</div><div class="stat-num" id="inv-s-low">0</div><div class="stat-sub">ຕໍ່າກວ່າຂັ້ນຕໍ່າ</div></div>
   </div>
 
   <!-- Low stock alert -->
@@ -2608,16 +2608,28 @@ function populateInvDropdowns(){
 function renderInvStats(){
   const items=DB.inv,disp=DB.invd;
   const set=(id,val)=>{const e=g(id);if(e)e.textContent=val;};
-  const totalStock=items.reduce((s,r)=>s+(parseInt(r.qty)||0),0);
   const totalSent=disp.reduce((s,d)=>s+(parseInt(d.qty)||0),0);
   const pending=disp.filter(d=>d.st!=='received').length;
   const low=items.filter(r=>{const q=parseInt(r.qty)||0,m=parseInt(r.min)||0;return q<=0||(m&&q<=m);});
+  // ໃຊ້ໄດ້ / ໃຊ້ບໍ່ໄດ້ (ຄັງຫຼັກ + ໜ່ວຍ) ແຍກຕາມປະເພດ
+  const brs=getBranches().map(String).filter(b=>b!==INV_HQ);
+  const catGood={},catBad={};let totGood=0,totBad=0,totFix=0;
+  items.forEach(it=>{
+    const cat=String(it.cat||'ອື່ນໆ');
+    let gd=parseInt(it.qty)||0,bd=parseInt(it.qtyBad)||0,fx=parseInt(it.qtyFix)||0;
+    brs.forEach(bn=>{const bk=invBucketsAt(it.id,bn);if(bk.good>0)gd+=bk.good;if(bk.bad>0)bd+=bk.bad;if(bk.fixing>0)fx+=bk.fixing;});
+    catGood[cat]=(catGood[cat]||0)+gd;catBad[cat]=(catBad[cat]||0)+bd;
+    totGood+=gd;totBad+=bd;totFix+=fx;
+  });
+  const catSub=m=>Object.keys(m).filter(c=>m[c]>0).sort((a,b)=>m[b]-m[a]).map(c=>c.split(' ')[0]+' '+m[c]).join(' · ')||'—';
   set('inv-s-items',items.length);
   set('inv-s-items2',(CFG.invCats||[]).map(c=>{const n=items.filter(r=>String(r.cat||'')===c).length;return n?c.split(' ')[0]+' '+n:'';}).filter(x=>x).join(' · ')||'—');
-  set('inv-s-stock',totalStock);
+  set('inv-s-good',totGood);
+  set('inv-s-good2',catSub(catGood));
+  set('inv-s-bad',totBad);
+  set('inv-s-bad2',catSub(catBad)+(totFix?' · 🟡 ສ້ອມ '+totFix:''));
   set('inv-s-sent',totalSent);
   set('inv-s-sent2',disp.length+' ຄັ້ງ'+(pending?' · '+pending+' ກຳລັງສົ່ງ':''));
-  set('inv-s-low',low.length);
   const lc=g('inv-low-card'),ll=g('inv-low-list');
   if(lc&&ll){
     if(low.length){lc.style.display='block';
