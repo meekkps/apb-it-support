@@ -1286,17 +1286,25 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
       <input type="hidden" id="ivd-edit-id">
       <div class="frow c3">
         <div class="field"><label>ປະເພດ *</label>
-          <select id="ivd-mtype" onchange="onInvMtypeChange()"><option value="out">📤 ສົ່ງໄປໜ່ວຍ</option><option value="return">📥 ສົ່ງກັບສາຂາຫຼັກ</option><option value="transfer">🔄 ໂອນໄປໜ່ວຍອື່ນ</option></select>
+          <select id="ivd-mtype" onchange="onInvMtypeChange()"><option value="out">📤 ສົ່ງໄປໜ່ວຍ</option><option value="return">📥 ສົ່ງກັບສາຂາຫຼັກ</option><option value="transfer">🔄 ໂອນໄປໜ່ວຍອື່ນ</option><option value="status">🔧 ແຈ້ງເສຍ/ປ່ຽນສະຖານະ</option></select>
         </div>
         <div class="field"><label>ອຸປະກອນ *</label><select id="ivd-item" onchange="onInvDpItemChange()"></select></div>
-        <div class="field" id="ivd-from-wrap" style="display:none;"><label>ຈາກໜ່ວຍ *</label><select id="ivd-from" onchange="onBranchChange(this)"></select></div>
+        <div class="field" id="ivd-from-wrap" style="display:none;"><label id="ivd-from-label">ຈາກໜ່ວຍ *</label><select id="ivd-from" onchange="onInvDpItemChange();onBranchChange(this)"></select></div>
       </div>
       <div class="frow c3">
-        <div class="field"><label id="ivd-to-label">ສົ່ງໄປໜ່ວຍ *</label><select id="ivd-br" onchange="onBranchChange(this)"></select></div>
+        <div class="field" id="ivd-to-wrap"><label id="ivd-to-label">ສົ່ງໄປໜ່ວຍ *</label><select id="ivd-br" onchange="onBranchChange(this)"></select></div>
+        <div class="field" id="ivd-condfrom-wrap" style="display:none;"><label>ຈາກສະພາບ *</label>
+          <select id="ivd-cond-from"><option value="good">🟢 ໃຊ້ໄດ້</option><option value="bad">🔴 ໃຊ້ບໍ່ໄດ້ (ເສຍ)</option><option value="fixing">🟡 ກຳລັງສ້ອມ</option></select>
+        </div>
+        <div class="field"><label id="ivd-cond-label">ສະພາບ</label>
+          <select id="ivd-cond"><option value="good">🟢 ໃຊ້ໄດ້</option><option value="bad">🔴 ໃຊ້ບໍ່ໄດ້ (ເສຍ)</option><option value="fixing">🟡 ກຳລັງສ້ອມ</option></select>
+        </div>
+      </div>
+      <div class="frow c3">
         <div class="field"><label>ຈຳນວນ * <span id="ivd-stock-hint" style="color:var(--text3);font-weight:400;"></span></label><input id="ivd-qty" type="number" min="1" placeholder="1"></div>
         <div class="field"><label>ວັນທີ</label><input id="ivd-date" type="date"></div>
+        <div class="field"><label>ຜູ້ດຳເນີນການ</label><input id="ivd-by" type="text" placeholder="ຊື່ຜູ້ສົ່ງ/ຮັບ"></div>
       </div>
-      <div class="frow c1"><div class="field"><label>ຜູ້ດຳເນີນການ</label><input id="ivd-by" type="text" placeholder="ຊື່ຜູ້ສົ່ງ/ຮັບ"></div></div>
       <div class="frow c1"><div class="field"><label>ໝາຍເຫດ</label><textarea id="ivd-note" placeholder="ເຊັ່ນ: ສົ່ງກັບລົດຂົນເງິນ..."></textarea></div></div>
       <div class="btn-row"><button class="btn" onclick="clrInvD()">ລ້າງ</button><button class="btn btn-grad" id="ivd-save-btn" onclick="svInvD()">🚚 ບັນທຶກສົ່ງ</button></div>
     </div>
@@ -2083,8 +2091,10 @@ function svInv(){
   if(!v('iv-cat'))return toast('⚠️ ເລືອກປະເພດ');
   if(v('iv-qty')==='')return toast('⚠️ ໃສ່ຈຳນວນ');
   const eid=v('iv-edit-id');
+  const old=eid?DB.inv.find(x=>x.id===parseInt(eid)):null;
   const rec={id:eid?parseInt(eid):Date.now(),name:v('iv-name'),cat:v('iv-cat'),serial:v('iv-serial'),
     qty:parseInt(v('iv-qty'))||0,unit:'ອັນ',min:parseInt(v('iv-min'))||0,cond:v('iv-cond')||'good',
+    qtyBad:old?(parseInt(old.qtyBad)||0):0,qtyFix:old?(parseInt(old.qtyFix)||0):0,
     inDate:v('iv-date'),img:v('iv-img'),note:v('iv-note')};
   if(eid){const i=DB.inv.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.inv[i]=rec;else DB.inv.push(rec);AUDIT.log('edit','Inventory',rec.name,rec.cat);toast('✅ ອັບເດດ!');}
   else{DB.inv.push(rec);AUDIT.log('add','Inventory',rec.name,rec.cat);toast('✅ ບັນທຶກ!');}
@@ -2129,9 +2139,10 @@ function showInvItem(id){
   const condL={good:'🟢 ໃຊ້ໄດ້',bad:'🔴 ໃຊ້ບໍ່ໄດ້ (ເສຍ)',fixing:'🟡 ກຳລັງສ້ອມ'};
   let html='';
   if(r.img)html+='<img src="'+r.img+'" style="max-width:100%;max-height:220px;border-radius:12px;display:block;margin:0 auto 12px;border:1px solid var(--border);">';
+  const hqBad=parseInt(r.qtyBad)||0,hqFix=parseInt(r.qtyFix)||0;
+  const stockStr='🟢 '+(r.qty||0)+' ໃຊ້ໄດ້'+(hqBad?' · 🔴 '+hqBad+' ເສຍ':'')+(hqFix?' · 🟡 '+hqFix+' ສ້ອມ':'');
   html+=row('ຊື່',r.name)+row('ປະເພດ',r.cat)+row('Serial',r.serial)
-    +row('ສະຖານະ',condL[r.cond||'good'])
-    +row('ໃນຄັງ',(r.qty||0)+' ອັນ')+(r.min?row('ຂັ້ນຕໍ່າ',r.min+' ອັນ'):'')
+    +row('ໃນຄັງຫຼັກ',stockStr)+(r.min?row('ຂັ້ນຕໍ່າ',r.min+' ອັນ'):'')
     +row('ນຳເຂົ້າ',fmtDate(r.inDate))+row('ສົ່ງໄປແລ້ວ',String(totalSent))+row('ໝາຍເຫດ',r.note);
   if(sent.length){
     html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 6px;">🚚 ປະຫວັດການເຄື່ອນໄຫວ</div>';
@@ -2169,7 +2180,7 @@ function renderInv(){
       +'<td style="font-weight:600;color:var(--p2);cursor:pointer;" onclick="showInvItem('+r.id+')">'+escHtml(r.name)+'</td>'
       +'<td>'+invCatBadge(r.cat)+'</td>'
       +'<td style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--text2);">'+escHtml(r.serial||'—')+'</td>'
-      +'<td style="font-weight:700;">'+(r.qty||0)+'</td>'
+      +'<td style="font-weight:700;">🟢'+(r.qty||0)+((parseInt(r.qtyBad)||0)?' <span style="color:var(--red);font-size:11px;font-weight:600;">🔴'+r.qtyBad+'</span>':'')+((parseInt(r.qtyFix)||0)?' <span style="color:var(--amber);font-size:11px;font-weight:600;">🟡'+r.qtyFix+'</span>':'')+'</td>'
       +'<td>'+invCondBadge(r.cond)+'</td>'
       +'<td style="color:var(--text2);">'+sent+'</td>'
       +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.inDate)||'—')+'</td>'
@@ -2189,7 +2200,9 @@ function invFromTo(d){
   if(d.to!=null||d.from!=null)return {from:String(d.from||INV_HQ),to:String(d.to||d.br||'')};
   return {from:INV_HQ,to:String(d.br||'')};
 }
-function invMtypeLbl(mt){return mt==='return'?'📥 ສົ່ງກັບ':mt==='transfer'?'🔄 ໂອນ':'📤 ສົ່ງໄປ';}
+function invMtypeLbl(mt){return mt==='return'?'📥 ສົ່ງກັບ':mt==='transfer'?'🔄 ໂອນ':mt==='status'?'🔧 ປ່ຽນສະຖານະ':'📤 ສົ່ງໄປ';}
+function invCondShort(c){return c==='bad'?'ໃຊ້ບໍ່ໄດ້':c==='fixing'?'ກຳລັງສ້ອມ':'ໃຊ້ໄດ້';}
+function invCondEmoji(c){return c==='bad'?'🔴':c==='fixing'?'🟡':'🟢';}
 // ຈຳນວນຄົງເຫຼືອສຸດທິ ຂອງ item ຢູ່ unit (ຮັບເຂົ້າ - ສົ່ງອອກ)
 function invNetAt(itemId,unit){
   let n=0;
@@ -2201,26 +2214,77 @@ function invNetAt(itemId,unit){
   });
   return n;
 }
-// ຄ່າທີ່ຕ້ອງບວກຄືນໃສ່ຄັງຫຼັກ (HQ qty) ເມື່ອຍ້ອນຄືນ/ລຶບ record: out→+q, return→-q, transfer→0
-function _invHqReverse(r){if(!r)return 0;const q=parseInt(r.qty)||0;const mt=r.mtype||'out';return mt==='out'?q:mt==='return'?-q:0;}
-// ຜົນຂອງ record ຕໍ່ net ຂອງ item ຢູ່ unit ໃດໜຶ່ງ
-function _invUnitContrib(r,unit){if(!r)return 0;const ft=invFromTo(r);const q=parseInt(r.qty)||0;let n=0;if(ft.to===unit)n+=q;if(ft.from===unit)n-=q;return n;}
+// ===== Condition-aware ledger =====
+// pool key ຂອງ master item ຕາມສະຖານະ: good→qty, bad→qtyBad, fixing→qtyFix
+function _invPoolKey(c){return c==='bad'?'qtyBad':c==='fixing'?'qtyFix':'qty';}
+// buckets {good,bad,fixing} ຂອງ item ຢູ່ໜ່ວຍ loc — ຄິດຈາກ ledger (ໜ່ວຍເລີ່ມ 0). exclId=ຂ້າມ record (ຕອນແກ້ໄຂ)
+function invBucketsAt(itemId,loc,exclId){
+  const b={good:0,bad:0,fixing:0};
+  DB.invd.forEach(d=>{
+    if(d.itemId!==itemId)return;
+    if(exclId&&d.id===exclId)return;
+    const q=parseInt(d.qty)||0;const mt=d.mtype||'out';const ft=invFromTo(d);
+    if(mt==='status'){ if(ft.from===loc){b[d.fromCond||'good']=(b[d.fromCond||'good']||0)-q;b[d.cond||'bad']=(b[d.cond||'bad']||0)+q;} return; }
+    const c=d.cond||'good';
+    if(ft.to===loc)b[c]=(b[c]||0)+q;
+    if(ft.from===loc)b[c]=(b[c]||0)-q;
+  });
+  return b;
+}
+// ນຳໃຊ້/ຍ້ອນຄືນ ຜົນຂອງ record ຕໍ່ pool ຄັງຫຼັກ (sign=+1 ນຳໃຊ້, -1 ຍ້ອນຄືນ)
+function _invApplyHq(r,sign){
+  const item=DB.inv.find(x=>x.id===r.itemId);if(!item)return;
+  const q=(parseInt(r.qty)||0)*sign;const mt=r.mtype||'out';const ft=invFromTo(r);
+  const add=(c,d)=>{const k=_invPoolKey(c);item[k]=(parseInt(item[k])||0)+d;};
+  if(mt==='out')add(r.cond||'good',-q);
+  else if(mt==='return')add(r.cond||'good',q);
+  else if(mt==='status'&&ft.from===INV_HQ){add(r.fromCond||'good',-q);add(r.cond||'bad',q);}
+  // transfer & status@unit: ບໍ່ກະທົບຄັງຫຼັກ
+}
+// ຈຳນວນທີ່ຄັງຫຼັກມີ ຕາມສະຖານະ (ຕັດຜົນ record ທີ່ກຳລັງແກ້ໄຂອອກ)
+function _invHqAvail(item,cond,excl){
+  let val=parseInt(item[_invPoolKey(cond)])||0;
+  if(excl&&excl.itemId===item.id){
+    const q=parseInt(excl.qty)||0;const mt=excl.mtype||'out';const ft=invFromTo(excl);
+    if(mt==='out'&&(excl.cond||'good')===cond)val+=q;
+    else if(mt==='return'&&(excl.cond||'good')===cond)val-=q;
+    else if(mt==='status'&&ft.from===INV_HQ){if((excl.fromCond||'good')===cond)val+=q;if((excl.cond||'bad')===cond)val-=q;}
+  }
+  return val;
+}
 function onInvMtypeChange(){
   const mt=v('ivd-mtype')||'out';
-  const fw=g('ivd-from-wrap'),tl=g('ivd-to-label');
-  if(mt==='out'){if(fw)fw.style.display='none';if(tl)tl.textContent='ສົ່ງໄປໜ່ວຍ *';}
-  else if(mt==='return'){if(fw)fw.style.display='';if(tl)tl.textContent='ໄປ (ສາຂາຫຼັກ)';}
-  else{if(fw)fw.style.display='';if(tl)tl.textContent='ໄປໜ່ວຍ *';}
+  const show=(id,on)=>{const e=g(id);if(e)e.style.display=on?'':'none';};
+  const lbl=(id,t)=>{const e=g(id);if(e)e.textContent=t;};
+  if(mt==='out'){
+    show('ivd-from-wrap',false);show('ivd-to-wrap',true);show('ivd-condfrom-wrap',false);
+    lbl('ivd-to-label','ສົ່ງໄປໜ່ວຍ *');lbl('ivd-cond-label','ສະພາບທີ່ສົ່ງ');
+  }else if(mt==='return'){
+    show('ivd-from-wrap',true);show('ivd-to-wrap',false);show('ivd-condfrom-wrap',false);
+    lbl('ivd-from-label','ຈາກໜ່ວຍ *');lbl('ivd-cond-label','ສະພາບທີ່ສົ່ງກັບ');
+  }else if(mt==='transfer'){
+    show('ivd-from-wrap',true);show('ivd-to-wrap',true);show('ivd-condfrom-wrap',false);
+    lbl('ivd-from-label','ຈາກໜ່ວຍ *');lbl('ivd-to-label','ໄປໜ່ວຍ *');lbl('ivd-cond-label','ສະພາບ');
+  }else{ // status
+    show('ivd-from-wrap',true);show('ivd-to-wrap',false);show('ivd-condfrom-wrap',true);
+    lbl('ivd-from-label','ຢູ່ບ່ອນ *');lbl('ivd-cond-label','ເປັນສະພາບ *');
+  }
   onInvDpItemChange();
 }
 function onInvDpItemChange(){
   const id=parseInt(v('ivd-item'))||0;
-  const r=DB.inv.find(x=>x.id===id);
+  const item=DB.inv.find(x=>x.id===id);
   const mt=v('ivd-mtype')||'out';
   const h=g('ivd-stock-hint');if(!h)return;
-  if(!r){h.textContent='';return;}
-  if(mt==='out')h.textContent='(ໃນຄັງ: '+(r.qty||0)+')';
-  else{const src=v('ivd-from');h.textContent=src?('(ຢູ່ '+src+': '+invNetAt(id,src)+')'):'';}
+  if(!item){h.textContent='';return;}
+  if(mt==='out'){
+    h.textContent='(ຄັງຫຼັກ: 🟢'+(parseInt(item.qty)||0)+((parseInt(item.qtyBad)||0)?' 🔴'+item.qtyBad:'')+((parseInt(item.qtyFix)||0)?' 🟡'+item.qtyFix:'')+')';
+  }else{
+    const src=v('ivd-from');
+    if(src===INV_HQ){h.textContent='(ຄັງຫຼັກ: 🟢'+(parseInt(item.qty)||0)+' 🔴'+(parseInt(item.qtyBad)||0)+' 🟡'+(parseInt(item.qtyFix)||0)+')';}
+    else if(src){const b=invBucketsAt(id,src);h.textContent='('+src+': 🟢'+b.good+' 🔴'+b.bad+' 🟡'+b.fixing+')';}
+    else h.textContent='';
+  }
 }
 function svInvD(){
   if(!requireAdmin())return;
@@ -2228,49 +2292,55 @@ function svInvD(){
   const oldRec=eid?DB.invd.find(x=>x.id===eid):null; // record ເກົ່າ (ຕອນແກ້ໄຂ)
   const itemId=parseInt(v('ivd-item'))||0;
   if(!itemId)return toast('⚠️ ເລືອກອຸປະກອນ');
+  const item=DB.inv.find(x=>x.id===itemId);
+  if(!item)return toast('⚠️ ບໍ່ພົບອຸປະກອນ');
   const mt=v('ivd-mtype')||'out';
   const qty=parseInt(v('ivd-qty'))||0;
   if(qty<1)return toast('⚠️ ໃສ່ຈຳນວນ');
-  const item=DB.inv.find(x=>x.id===itemId);
-  if(!item)return toast('⚠️ ບໍ່ພົບອຸປະກອນ');
-  // ຄ່າ base ທີ່ຕັດຜົນ record ເກົ່າອອກກ່ອນ (ສະເພາະຖ້າ oldRec ກະທົບ item ດຽວກັນ) → ກວດຄວາມຖືກຕ້ອງ
-  const sameItem=oldRec&&oldRec.itemId===itemId;
-  const baseHq=(parseInt(item.qty)||0)+(sameItem?_invHqReverse(oldRec):0);
-  const netAt=unit=>invNetAt(itemId,unit)-(sameItem?_invUnitContrib(oldRec,unit):0);
-  let from,to,newHq=parseInt(item.qty)||0;
+  const cond=v('ivd-cond')||'good';   // ສະພາບປາຍທາງ / ທີ່ຍ້າຍ / ເປັນສະພາບ(status)
+  let from,to,fromCond;
+  const excl=oldRec; // ຕັດຜົນ record ເກົ່າອອກຕອນກວດ (ຖ້າແກ້ໄຂ)
   if(mt==='out'){
-    if(!v('ivd-br'))return toast('⚠️ ເລືອກໜ່ວຍປາຍທາງ');
+    if(!v('ivd-br')||v('ivd-br')==='__ADD__')return toast('⚠️ ເລືອກໜ່ວຍປາຍທາງ');
     from=INV_HQ;to=v('ivd-br');
-    if(qty>baseHq)return toast('⚠️ ຈຳນວນເກີນທີ່ມີໃນຄັງ ('+baseHq+')');
-    newHq=baseHq-qty; // ອອກຈາກຄັງຫຼັກ
+    const avail=_invHqAvail(item,cond,excl);
+    if(qty>avail)return toast('⚠️ ຄັງຫຼັກມີ '+invCondShort(cond)+' ພຽງ '+avail);
   }else if(mt==='return'){
     if(!v('ivd-from'))return toast('⚠️ ເລືອກໜ່ວຍຕົ້ນທາງ');
     from=v('ivd-from');to=INV_HQ;
-    const net=netAt(from);
-    if(qty>net)return toast('⚠️ ໜ່ວຍ '+from+' ມີແຕ່ '+net);
-    newHq=baseHq+qty; // ຄືນເຂົ້າຄັງຫຼັກ
-  }else{ // transfer
+    const avail=from===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,from,eid)[cond]||0);
+    if(qty>avail)return toast('⚠️ '+from+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
+  }else if(mt==='transfer'){
     if(!v('ivd-from'))return toast('⚠️ ເລືອກໜ່ວຍຕົ້ນທາງ');
-    if(!v('ivd-br'))return toast('⚠️ ເລືອກໜ່ວຍປາຍທາງ');
+    if(!v('ivd-br')||v('ivd-br')==='__ADD__')return toast('⚠️ ເລືອກໜ່ວຍປາຍທາງ');
     from=v('ivd-from');to=v('ivd-br');
     if(from===to)return toast('⚠️ ຕົ້ນທາງ/ປາຍທາງ ຄືກັນ');
-    const net=netAt(from);
-    if(qty>net)return toast('⚠️ ໜ່ວຍ '+from+' ມີແຕ່ '+net);
-    newHq=baseHq; // ຄັງຫຼັກບໍ່ປ່ຽນ (ຍ້າຍລະຫວ່າງໜ່ວຍ)
+    const avail=from===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,from,eid)[cond]||0);
+    if(qty>avail)return toast('⚠️ '+from+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
+  }else{ // status — ປ່ຽນສະຖານະຢູ່ບ່ອນ (ບໍ່ຍ້າຍ)
+    const loc=v('ivd-from');
+    if(!loc)return toast('⚠️ ເລືອກບ່ອນ (ໜ່ວຍ/ຄັງຫຼັກ)');
+    fromCond=v('ivd-cond-from')||'good';
+    if(fromCond===cond)return toast('⚠️ ສະພາບ ຈາກ/ເປັນ ຄືກັນ');
+    from=loc;to=loc;
+    const avail=loc===INV_HQ?_invHqAvail(item,fromCond,excl):(invBucketsAt(itemId,loc,eid)[fromCond]||0);
+    if(qty>avail)return toast('⚠️ '+loc+' ມີ '+invCondShort(fromCond)+' ພຽງ '+avail);
   }
-  // ===== ຜ່ານການກວດແລ້ວ → ຄ່ອຍ mutate =====
-  // ຖ້າແກ້ໄຂ ແລະ oldRec ກະທົບ item ຄົນລະໂຕ → ຍ້ອນຄືນຄັງຫຼັກຂອງ item ເກົ່ານັ້ນ
-  if(oldRec&&!sameItem){const oi=DB.inv.find(x=>x.id===oldRec.itemId);if(oi)oi.qty=(parseInt(oi.qty)||0)+_invHqReverse(oldRec);}
-  item.qty=newHq;
-  if(oldRec)DB.invd=DB.invd.filter(x=>x.id!==eid);
+  // ===== ຜ່ານການກວດ → mutate =====
+  if(oldRec){_invApplyHq(oldRec,-1);DB.invd=DB.invd.filter(x=>x.id!==eid);}
   const rec={id:eid||Date.now(),itemId:itemId,itemName:item.name,cat:item.cat,mtype:mt,
-    qty:qty,from:from,to:to,br:to,dt:v('ivd-date')||new Date().toISOString().slice(0,10),by:v('ivd-by'),note:v('ivd-note'),
-    st:oldRec?(oldRec.st||'sent'):'sent',receivedAt:oldRec?(oldRec.receivedAt||''):''};
+    qty:qty,from:from,to:to,br:to,cond:cond,dt:v('ivd-date')||new Date().toISOString().slice(0,10),
+    by:v('ivd-by'),note:v('ivd-note'),
+    st:mt==='status'?'received':(oldRec?(oldRec.st||'sent'):'sent'),
+    receivedAt:oldRec?(oldRec.receivedAt||''):''};
+  if(mt==='status')rec.fromCond=fromCond;
   DB.invd.push(rec);
-  AUDIT.log(eid?'edit':'add','Dispatch',item.name,invMtypeLbl(mt)+' '+from+'→'+to+' × '+qty);
+  _invApplyHq(rec,1);
+  const lbl=mt==='status'?('🔧 '+item.name+' '+invCondShort(fromCond)+'→'+invCondShort(cond)+' ຢູ່ '+from):(invMtypeLbl(mt)+' '+item.name+' '+from+'→'+to);
+  AUDIT.log(eid?'edit':'add','Dispatch',item.name,lbl+' × '+qty);
   DB.save();clrInvD();renderInvAll();
   syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
-  toast((eid?'✏️ ອັບເດດ ':'🚚 ')+invMtypeLbl(mt)+' '+qty+' → '+to);
+  toast((eid?'✏️ ອັບເດດ · ':'✅ ')+lbl+' ×'+qty);
 }
 function editInvD(id){
   if(!requireAdmin())return;
@@ -2279,8 +2349,14 @@ function editInvD(id){
   if(g('ivd-mtype'))g('ivd-mtype').value=mt;
   onInvMtypeChange();
   if(g('ivd-item'))g('ivd-item').value=r.itemId;
-  if(mt!=='out'&&g('ivd-from'))g('ivd-from').value=ft.from;   // return/transfer: ຕົ້ນທາງ
-  if(mt!=='return'&&g('ivd-br'))g('ivd-br').value=ft.to;      // out/transfer: ປາຍທາງ
+  if(mt==='status'){
+    if(g('ivd-from'))g('ivd-from').value=ft.from;
+    if(g('ivd-cond-from'))g('ivd-cond-from').value=r.fromCond||'good';
+  }else{
+    if(mt!=='out'&&g('ivd-from'))g('ivd-from').value=ft.from;   // return/transfer: ຕົ້ນທາງ
+    if(mt!=='return'&&g('ivd-br'))g('ivd-br').value=ft.to;      // out/transfer: ປາຍທາງ
+  }
+  if(g('ivd-cond'))g('ivd-cond').value=r.cond||'good';
   if(g('ivd-qty'))g('ivd-qty').value=r.qty;
   if(g('ivd-date'))g('ivd-date').value=r.dt||'';
   if(g('ivd-by'))g('ivd-by').value=r.by||'';
@@ -2292,6 +2368,8 @@ function editInvD(id){
 }
 function clrInvD(){['ivd-item','ivd-br','ivd-from','ivd-qty','ivd-by','ivd-note','ivd-edit-id'].forEach(i=>{if(g(i))g(i).value='';});
   if(g('ivd-mtype'))g('ivd-mtype').value='out';
+  if(g('ivd-cond'))g('ivd-cond').value='good';
+  if(g('ivd-cond-from'))g('ivd-cond-from').value='good';
   if(g('ivd-date'))g('ivd-date').value=new Date().toISOString().slice(0,10);
   if(g('ivd-stock-hint'))g('ivd-stock-hint').textContent='';
   const b=g('ivd-save-btn');if(b)b.textContent='🚚 ບັນທຶກສົ່ງ';
@@ -2308,9 +2386,7 @@ function delInvD(id){
   const r=DB.invd.find(x=>x.id===id);if(!r)return;
   const ft=invFromTo(r);
   if(!confirm('ລຶບການເຄື່ອນໄຫວ "'+r.itemName+' '+ft.from+'→'+ft.to+'"?'))return;
-  const item=DB.inv.find(x=>x.id===r.itemId);
-  // ຍ້ອນຄືນຜົນຕໍ່ຄັງຫຼັກ (out→+q, return→-q, transfer→0)
-  if(item)item.qty=(parseInt(item.qty)||0)+_invHqReverse(r);
+  _invApplyHq(r,-1); // ຍ້ອນຄືນຜົນຕໍ່ pool ຄັງຫຼັກ (ຕາມສະຖານະ)
   DB.invd=DB.invd.filter(x=>x.id!==id);tombAdd('Dispatch',id);
   AUDIT.log('delete','Dispatch',r.itemName,ft.from+'→'+ft.to);
   DB.save();renderInvAll();
@@ -2328,17 +2404,21 @@ function renderInvD(){
   if(to)list=list.filter(r=>String(r.dt||'')<=to);
   const cnt=g('ivd-cnt');if(cnt)cnt.textContent=list.length+(q||fbr||fst||from||to?'/'+DB.invd.length:'');
   if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີການເຄື່ອນໄຫວ</div>';return;}
-  c.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>ອຸປະກອນ</th><th>ປະເພດ</th><th>ຈາກ → ໄປ</th><th>ຈຳນວນ</th><th>ວັນທີ</th><th>ຜູ້ດຳເນີນ</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead><tbody>'
-    +list.map(r=>{const ft=invFromTo(r);return '<tr>'
+  c.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>ອຸປະກອນ</th><th>ປະເພດ</th><th>ຈາກ → ໄປ</th><th>ສະພາບ</th><th>ຈຳນວນ</th><th>ວັນທີ</th><th>ຜູ້ດຳເນີນ</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead><tbody>'
+    +list.map(r=>{const ft=invFromTo(r);const isSt=(r.mtype==='status');
+      const route=isSt?('🔧 ຢູ່ '+escHtml(ft.from)):(escHtml(ft.from)+' <span style="color:var(--text3);">→</span> '+escHtml(ft.to));
+      const condCell=isSt?(invCondEmoji(r.fromCond||'good')+'→'+invCondEmoji(r.cond||'bad')):(invCondEmoji(r.cond||'good')+' '+invCondShort(r.cond||'good'));
+      return '<tr>'
       +'<td style="font-weight:600;color:var(--p2);">'+escHtml(r.itemName)+'</td>'
       +'<td style="font-size:12px;">'+invMtypeLbl(r.mtype||'out')+'</td>'
-      +'<td style="font-size:12px;">'+escHtml(ft.from)+' <span style="color:var(--text3);">→</span> '+escHtml(ft.to)+'</td>'
+      +'<td style="font-size:12px;">'+route+'</td>'
+      +'<td style="font-size:11.5px;white-space:nowrap;">'+condCell+'</td>'
       +'<td style="font-weight:700;">'+(r.qty||0)+'</td>'
       +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.dt)||'—')+'</td>'
       +'<td style="font-size:12px;">'+escHtml(r.by||'—')+'</td>'
-      +'<td>'+(r.st==='received'?'<span class="binv binv-recv">✅ ຮັບແລ້ວ</span>':'<span class="binv binv-sent">🚚 ກຳລັງສົ່ງ</span>')+'</td>'
+      +'<td>'+(isSt?'<span class="binv binv-ok">✔ ບັນທຶກ</span>':(r.st==='received'?'<span class="binv binv-recv">✅ ຮັບແລ້ວ</span>':'<span class="binv binv-sent">🚚 ກຳລັງສົ່ງ</span>'))+'</td>'
       +'<td style="text-align:center;"><div style="display:inline-flex;gap:4px;">'
-        +(r.st!=='received'?'<button title="ຢືນຢັນຮັບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markInvDRecv('+r.id+')">✅</button>':'')
+        +((!isSt&&r.st!=='received')?'<button title="ຢືນຢັນຮັບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markInvDRecv('+r.id+')">✅</button>':'')
         +'<button title="ແກ້ໄຂ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editInvD('+r.id+')">✏️</button>'
         +'<button title="ລຶບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delInvD('+r.id+')">🗑</button>'
       +'</div></td></tr>';}).join('')+'</tbody></table></div>';
@@ -2348,21 +2428,14 @@ function renderInvD(){
 function showInvBranch(name){
   name=String(name);
   const moves=DB.invd.filter(d=>{const ft=invFromTo(d);return ft.from===name||ft.to===name;});
-  // ຄົງເຫຼືອສຸດທິຕໍ່ item (keyed by itemId) — ຮັບເຂົ້າ - ສົ່ງອອກ
-  const net={};
-  moves.forEach(d=>{
-    const id=d.itemId;const ft=invFromTo(d);const q=parseInt(d.qty)||0;
-    if(!net[id])net[id]={name:String(d.itemName||''),cat:d.cat||'',qty:0,last:''};
-    if(ft.to===name)net[id].qty+=q;
-    if(ft.from===name)net[id].qty-=q;
-    if(String(d.dt||'')>net[id].last)net[id].last=String(d.dt||'');
+  // ສະຖານະຕໍ່ item ຢູ່ໜ່ວຍນີ້ ຄິດຈາກ ledger (condition-aware)
+  const ids=[...new Set(moves.map(d=>d.itemId))];
+  const nameOf={};moves.forEach(d=>{if(d.itemName)nameOf[d.itemId]=String(d.itemName);});
+  const groups={good:[],bad:[],fixing:[]};let held=0;
+  ids.forEach(id=>{const b=invBucketsAt(id,name);let any=false;
+    ['good','bad','fixing'].forEach(c=>{if(b[c]>0){groups[c].push({name:nameOf[id]||'',qty:b[c]});any=true;}});
+    if(any)held++;
   });
-  // condition ດຶງຈາກຄັງຫຼັກ (ຕໍ່ item)
-  const condOf=id=>{const it=DB.inv.find(x=>x.id===parseInt(id));return it?(String(it.cond||'good')):'good';};
-  const held=Object.keys(net).filter(k=>net[k].qty>0);
-  const groups={good:[],bad:[],fixing:[]};
-  held.forEach(id=>{const c=condOf(id);(groups[c]||groups.good).push({id:id,...net[id]});});
-  const totalQty=held.reduce((s,id)=>s+net[id].qty,0);
 
   // ໜ່ວຍນຶ່ງໝວດ
   const section=(cond,icon,label,color,brd)=>{
@@ -2380,12 +2453,12 @@ function showInvBranch(name){
   else{
     // ສະຫຼຸບເທິງສຸດ
     html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px;">'
-      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;">'+held.length+'</div><div style="font-size:10.5px;color:var(--text2);">ລາຍການ</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;">'+held+'</div><div style="font-size:10.5px;color:var(--text2);">ລາຍການ</div></div>'
       +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green);">'+(groups.good.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ໄດ້</div></div>'
       +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">'+(groups.bad.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ບໍ່ໄດ້</div></div>'
       +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--amber);">'+(groups.fixing.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ກຳລັງສ້ອມ</div></div>'
       +'</div>';
-    if(!held.length)html+='<div style="font-size:12px;color:var(--text3);padding:8px 0;">ບໍ່ມີອາໄຫຼ່ຄົງເຫຼືອ (ສົ່ງກັບ/ໂອນໄປໝົດ)</div>';
+    if(!held)html+='<div style="font-size:12px;color:var(--text3);padding:8px 0;">ບໍ່ມີອາໄຫຼ່ຄົງເຫຼືອ (ສົ່ງກັບ/ໂອນໄປໝົດ)</div>';
     else{
       html+=section('good','🟢','ໃຊ້ໄດ້','var(--green)','rgba(16,185,129,0.4)');
       html+=section('bad','🔴','ໃຊ້ບໍ່ໄດ້ (ເສຍ)','var(--red)','rgba(239,68,68,0.4)');
@@ -2393,9 +2466,10 @@ function showInvBranch(name){
     }
     // ປະຫວັດການເຄື່ອນໄຫວ
     html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:16px 0 6px;">🚚 ປະຫວັດການເຄື່ອນໄຫວ ('+moves.length+' ຄັ້ງ)</div>';
-    moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);
+    moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);const isSt=(d.mtype==='status');
+      const rt=isSt?('🔧 '+invCondShort(d.fromCond||'good')+'→'+invCondShort(d.cond||'bad')):(escHtml(ft.from)+' → '+escHtml(ft.to)+' · '+invCondEmoji(d.cond||'good'));
       html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">'
-        +'<span style="color:var(--text);">'+invMtypeLbl(d.mtype||'out')+' '+escHtml(d.itemName)+' ×'+(d.qty||0)+'<br><span style="font-size:10.5px;color:var(--text3);">'+escHtml(ft.from)+' → '+escHtml(ft.to)+'</span></span>'
+        +'<span style="color:var(--text);">'+invMtypeLbl(d.mtype||'out')+' '+escHtml(d.itemName)+' ×'+(d.qty||0)+'<br><span style="font-size:10.5px;color:var(--text3);">'+rt+'</span></span>'
         +'<span style="color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(d.dt)||'')+'</span></div>';
     });
   }
@@ -2457,8 +2531,8 @@ function populateInvDropdowns(){
     h+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມໜ່ວຍໃໝ່...</option>';
     db2.innerHTML=h;if(cur)db2.value=cur;}
   const dfrom=g('ivd-from');
-  if(dfrom){const cur=dfrom.value;let h='<option value="">-- ເລືອກໜ່ວຍຕົ້ນທາງ --</option>';
-    brs.forEach(b=>h+='<option value="'+escHtml(b)+'">'+escHtml(b)+'</option>');
+  if(dfrom){const cur=dfrom.value;let h='<option value="">-- ເລືອກ --</option><option value="'+escHtml(INV_HQ)+'">🏦 '+escHtml(INV_HQ)+'</option>';
+    brs.forEach(b=>{if(String(b)!==INV_HQ)h+='<option value="'+escHtml(b)+'">'+escHtml(b)+'</option>';});
     dfrom.innerHTML=h;if(cur)dfrom.value=cur;}
   const fb=g('ivd-f-br');
   if(fb){const cur=fb.value;let h='<option value="">🏢 ທຸກໜ່ວຍ</option>';
@@ -2508,8 +2582,9 @@ function exportInvXlsx(){
 function exportInvDXlsx(){
   toast('⏳ ກຳລັງສ້າງ Excel...');
   loadXlsxThen(()=>{
-    const mtL={out:'ສົ່ງໄປ',return:'ສົ່ງກັບ',transfer:'ໂອນ'};
-    const rows=DB.invd.map((r,i)=>{const ft=invFromTo(r);return {'#':i+1,'ອຸປະກອນ':r.itemName||'','ປະເພດ':r.cat||'','ການເຄື່ອນໄຫວ':mtL[r.mtype||'out'],'ຈາກ':ft.from,'ໄປ':ft.to,'ຈຳນວນ':r.qty||0,'ວັນທີ':fmtDate(r.dt)||'','ຜູ້ດຳເນີນ':r.by||'','ສະຖານະ':r.st==='received'?'ຮັບແລ້ວ':'ກຳລັງສົ່ງ','ໝາຍເຫດ':r.note||''};});
+    const mtL={out:'ສົ່ງໄປ',return:'ສົ່ງກັບ',transfer:'ໂອນ',status:'ປ່ຽນສະຖານະ'};
+    const rows=DB.invd.map((r,i)=>{const ft=invFromTo(r);const isSt=r.mtype==='status';
+      return {'#':i+1,'ອຸປະກອນ':r.itemName||'','ປະເພດ':r.cat||'','ການເຄື່ອນໄຫວ':mtL[r.mtype||'out'],'ຈາກ':ft.from,'ໄປ':ft.to,'ສະພາບ':isSt?(invCondShort(r.fromCond||'good')+'→'+invCondShort(r.cond||'bad')):invCondShort(r.cond||'good'),'ຈຳນວນ':r.qty||0,'ວັນທີ':fmtDate(r.dt)||'','ຜູ້ດຳເນີນ':r.by||'','ສະຖານະ':isSt?'ບັນທຶກ':(r.st==='received'?'ຮັບແລ້ວ':'ກຳລັງສົ່ງ'),'ໝາຍເຫດ':r.note||''};});
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{}]),'Dispatch');
     XLSX.writeFile(wb,'APB_Dispatch_'+new Date().toISOString().slice(0,10)+'.xlsx');
@@ -2935,7 +3010,7 @@ function sortByDate(rows){
   return rows;
 }
 // Normalize: ບັງຄັບ field ຂໍ້ຄວາມເປັນ string (ກັນ number ຈາກ Sheets → filter/search/compare ບໍ່ກົງ)
-const NORM_TEXT_FIELDS=['atmId','br','tp','dv','sys','st','user','tc','rq','ds','ac','is','rs','nt','name','addr','mac','location','note','os','type','solution','dept','serial','vlan','cpu','ram','hr','cat','unit','itemName','by','inDate','receivedAt','img','cond','mtype','from','to'];
+const NORM_TEXT_FIELDS=['atmId','br','tp','dv','sys','st','user','tc','rq','ds','ac','is','rs','nt','name','addr','mac','location','note','os','type','solution','dept','serial','vlan','cpu','ram','hr','cat','unit','itemName','by','inDate','receivedAt','img','cond','fromCond','mtype','from','to'];
 function normRec(r){
   if(!r||typeof r!=='object')return r;
   NORM_TEXT_FIELDS.forEach(k=>{ if(r[k]!=null&&typeof r[k]!=='string')r[k]=String(r[k]); });
@@ -2944,7 +3019,7 @@ function normRec(r){
 function _nDoneAt(v){if(!v)return '';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s))return s;if(s.includes('T')){try{const d=new Date(s);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}catch(e){}}return s;}
 function normByType(type,r){
   if(!r||typeof r!=='object')return r;
-  if(type==='Items'){const o=normRec({...r,inDate:fmtDate(r.inDate)});o.qty=parseInt(o.qty)||0;o.min=parseInt(o.min)||0;o.id=parseInt(o.id)||o.id;return o;}
+  if(type==='Items'){const o=normRec({...r,inDate:fmtDate(r.inDate)});o.qty=parseInt(o.qty)||0;o.min=parseInt(o.min)||0;o.qtyBad=parseInt(o.qtyBad)||0;o.qtyFix=parseInt(o.qtyFix)||0;o.id=parseInt(o.id)||o.id;return o;}
   if(type==='Dispatch'){const o=normRec({...r,dt:fmtDate(r.dt)});o.qty=parseInt(o.qty)||0;o.itemId=parseInt(o.itemId)||0;o.id=parseInt(o.id)||o.id;return o;}
   if(type==='IP')return normRec({...r,bought:fmtDate(r.bought)});
   if(type==='Report')return normRec({...r,dt:fmtDate(r.dt)});
