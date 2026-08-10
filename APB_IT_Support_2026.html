@@ -1216,7 +1216,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <div class="stat-card"><div class="stat-lbl">ລາຍການ</div><div class="stat-num" id="inv-s-items">0</div><div class="stat-sub" id="inv-s-items2">—</div></div>
     <div class="stat-card"><div class="stat-lbl">🟢 ໃຊ້ໄດ້</div><div class="stat-num" id="inv-s-good" style="color:var(--green);">0</div><div class="stat-sub" id="inv-s-good2">—</div></div>
     <div class="stat-card"><div class="stat-lbl">🔴 ໃຊ້ບໍ່ໄດ້</div><div class="stat-num" id="inv-s-bad" style="color:var(--red);">0</div><div class="stat-sub" id="inv-s-bad2">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">ສົ່ງແລ້ວ</div><div class="stat-num" id="inv-s-sent">0</div><div class="stat-sub" id="inv-s-sent2">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">📦 ຄັງຫຼັກ</div><div class="stat-num" id="inv-s-stock">0</div><div class="stat-sub" id="inv-s-stock2">—</div></div>
   </div>
 
   <!-- Low stock alert -->
@@ -2608,15 +2608,15 @@ function populateInvDropdowns(){
 function renderInvStats(){
   const items=DB.inv,disp=DB.invd;
   const set=(id,val)=>{const e=g(id);if(e)e.textContent=val;};
-  const totalSent=disp.reduce((s,d)=>s+(parseInt(d.qty)||0),0);
-  const pending=disp.filter(d=>d.st!=='received').length;
   const low=items.filter(r=>{const q=parseInt(r.qty)||0,m=parseInt(r.min)||0;return q<=0||(m&&q<=m);});
-  // ໃຊ້ໄດ້ / ໃຊ້ບໍ່ໄດ້ (ຄັງຫຼັກ + ໜ່ວຍ) ແຍກຕາມປະເພດ
+  // ໃຊ້ໄດ້ / ໃຊ້ບໍ່ໄດ້ (ຄັງຫຼັກ + ໜ່ວຍ) ແຍກຕາມປະເພດ + ຈຳນວນຢູ່ຄັງຫຼັກ
   const brs=getBranches().map(String).filter(b=>b!==INV_HQ);
-  const catGood={},catBad={};let totGood=0,totBad=0,totFix=0;
+  const catGood={},catBad={};let totGood=0,totBad=0,totFix=0,hqG=0,hqB=0,hqF=0;
   items.forEach(it=>{
     const cat=String(it.cat||'ອື່ນໆ');
-    let gd=parseInt(it.qty)||0,bd=parseInt(it.qtyBad)||0,fx=parseInt(it.qtyFix)||0;
+    const ig=parseInt(it.qty)||0,ib=parseInt(it.qtyBad)||0,iff=parseInt(it.qtyFix)||0;
+    hqG+=ig;hqB+=ib;hqF+=iff;
+    let gd=ig,bd=ib,fx=iff;
     brs.forEach(bn=>{const bk=invBucketsAt(it.id,bn);if(bk.good>0)gd+=bk.good;if(bk.bad>0)bd+=bk.bad;if(bk.fixing>0)fx+=bk.fixing;});
     catGood[cat]=(catGood[cat]||0)+gd;catBad[cat]=(catBad[cat]||0)+bd;
     totGood+=gd;totBad+=bd;totFix+=fx;
@@ -2628,8 +2628,8 @@ function renderInvStats(){
   set('inv-s-good2',catSub(catGood));
   set('inv-s-bad',totBad);
   set('inv-s-bad2',catSub(catBad)+(totFix?' · 🟡 ສ້ອມ '+totFix:''));
-  set('inv-s-sent',totalSent);
-  set('inv-s-sent2',disp.length+' ຄັ້ງ'+(pending?' · '+pending+' ກຳລັງສົ່ງ':''));
+  set('inv-s-stock',hqG+hqB+hqF);
+  set('inv-s-stock2','🟢'+hqG+(hqB?' · 🔴'+hqB:'')+(hqF?' · 🟡'+hqF:''));
   const lc=g('inv-low-card'),ll=g('inv-low-list');
   if(lc&&ll){
     if(low.length){lc.style.display='block';
