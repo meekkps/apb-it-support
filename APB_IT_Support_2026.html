@@ -1532,6 +1532,21 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     </div>
   </div>
 </div>
+<div id="inv-cat-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-hd">
+      <div class="modal-title">🏷️ ຈັດການປະເພດອຸປະກອນ</div>
+      <button class="modal-close" onclick="document.getElementById('inv-cat-modal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="inv-cat-new-inp" placeholder="ຊື່ປະເພດໃໝ່..." style="flex:1;background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;color:var(--text);outline:none;" onkeydown="if(event.key==='Enter')addInvCatFromMgr()">
+        <button class="btn btn-grad" onclick="addInvCatFromMgr()" style="white-space:nowrap;">➕ ເພີ່ມ</button>
+      </div>
+      <div id="inv-cat-list"></div>
+    </div>
+  </div>
+</div>
 <div id="rep-dv-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
   <div class="modal-box" style="max-width:420px;">
     <div class="modal-hd">
@@ -2572,7 +2587,65 @@ function onInvCatChange(el){
     CFG.invCats.push(n.trim());CFG.save();
     populateInvDropdowns();el.value=n.trim();
     toast('✅ ເພີ່ມແລ້ວ');
+  }else if(el.value==='__MGR__'){
+    el.value='';
+    openInvCatMgr();
   }
+}
+function openInvCatMgr(){if(isViewer()){toast('🔒 ບໍ່ມີສິດ');return;}renderInvCatMgr();g('inv-cat-modal').style.display='flex';}
+function renderInvCatMgr(){
+  const list=g('inv-cat-list');if(!list)return;
+  const cats=CFG.invCats||[];
+  if(!cats.length){list.innerHTML='<div style="text-align:center;color:var(--text2);padding:1rem;">ບໍ່ມີປະເພດ</div>';return;}
+  list.innerHTML=cats.map((t,i)=>{
+    const used=DB.inv.filter(x=>String(x.cat||'')===t).length;
+    return '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);">'
+    +'<span style="flex:1;font-size:14px;color:var(--text);">'+escHtml(t)+(used?' <span style="font-size:11px;color:var(--text3);">('+used+')</span>':'')+'</span>'
+    +'<button class="btn btn-sm" onclick="editInvCat('+i+')" title="ແກ້ໄຂ" style="padding:4px 10px;">✏️</button>'
+    +'<button class="btn btn-sm" onclick="deleteInvCat('+i+')" title="ລຶບ" style="padding:4px 10px;color:#e53935;">🗑</button>'
+    +(i>0?'<button class="btn btn-sm" onclick="moveInvCat('+i+',-1)" style="padding:4px 8px;">▲</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +(i<cats.length-1?'<button class="btn btn-sm" onclick="moveInvCat('+i+',1)" style="padding:4px 8px;">▼</button>':'<span style="display:inline-block;width:34px;"></span>')
+    +'</div>';
+  }).join('');
+}
+function editInvCat(i){
+  if(!requireAdmin())return;
+  const old=CFG.invCats[i];
+  const name=prompt('✏️ ແກ້ໄຂປະເພດ\n\nຊື່ໃໝ່:',old);
+  if(!name||!name.trim()||name.trim()===old)return;
+  const n=name.trim();
+  if(CFG.invCats.includes(n)){toast('⚠️ ມີປະເພດນີ້ແລ້ວ');return;}
+  DB.inv.forEach(r=>{if(String(r.cat||'')===old)r.cat=n;});
+  DB.invd.forEach(r=>{if(String(r.cat||'')===old)r.cat=n;});
+  DB.save();
+  CFG.invCats[i]=n;CFG.save();
+  populateInvDropdowns();renderInvCatMgr();renderInvAll();
+  syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
+  toast('✅ ແກ້ໄຂເປັນ "'+n+'" ແລ້ວ!');
+}
+function deleteInvCat(i){
+  if(!requireAdmin())return;
+  const t=CFG.invCats[i];
+  const used=DB.inv.filter(x=>String(x.cat||'')===t).length;
+  if(!confirm('🗑 ລຶບປະເພດ "'+t+'"?'+(used?'\n(ມີ '+used+' ລາຍການໃຊ້ປະເພດນີ້ — ລາຍການຈະຍັງຄົງຢູ່)':'')))return;
+  CFG.invCats.splice(i,1);CFG.save();
+  populateInvDropdowns();renderInvCatMgr();
+  toast('🗑 ລຶບ "'+t+'" ແລ້ວ');
+}
+function moveInvCat(i,dir){
+  const j=i+dir;if(j<0||j>=CFG.invCats.length)return;
+  const tmp=CFG.invCats[i];CFG.invCats[i]=CFG.invCats[j];CFG.invCats[j]=tmp;
+  CFG.save();populateInvDropdowns();renderInvCatMgr();
+}
+function addInvCatFromMgr(){
+  if(!requireAdmin())return;
+  const inp=g('inv-cat-new-inp');if(!inp)return;
+  const n=inp.value.trim();
+  if(!n){toast('⚠️ ກະລຸນາໃສ່ຊື່ປະເພດ');return;}
+  if(CFG.invCats.includes(n)){toast('⚠️ ມີປະເພດນີ້ແລ້ວ');return;}
+  CFG.invCats.push(n);CFG.save();
+  inp.value='';populateInvDropdowns();renderInvCatMgr();
+  toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
 }
 function populateInvDropdowns(){
   const cats=CFG.invCats||[];
@@ -2580,6 +2653,7 @@ function populateInvDropdowns(){
   if(ic){const cur=ic.value;let h='<option value="">-- ເລືອກປະເພດ --</option>';
     cats.forEach(t=>h+='<option value="'+escHtml(t)+'">'+escHtml(t)+'</option>');
     h+='<option value="__ADD__" style="color:#3B6D11;font-weight:600;background:#EAF3DE;">➕ ເພີ່ມປະເພດໃໝ່...</option>';
+    h+='<option value="__MGR__" style="color:#1d4ed8;font-weight:600;background:#e8effb;">⚙️ ຈັດການປະເພດ (ແກ້/ລຶບ)...</option>';
     ic.innerHTML=h;if(cur&&cats.includes(cur))ic.value=cur;}
   const fc=g('iv-f-cat');
   if(fc){const cur=fc.value;let h='<option value="">🏷️ ທຸກປະເພດ</option>';
