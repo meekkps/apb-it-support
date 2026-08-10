@@ -1225,6 +1225,12 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
     <div class="card-body" id="inv-low-list" style="padding:8px 16px;"></div>
   </div>
 
+  <!-- Unusable / needs-repair alert -->
+  <div class="card" id="inv-bad-card" style="display:none;border-color:rgba(239,68,68,0.3);">
+    <div class="card-hd"><span class="card-title" style="color:var(--red);">🔴 ອຸປະກອນທີ່ໃຊ້ບໍ່ໄດ້ / ຕ້ອງສ້ອມ</span><span style="font-size:11.5px;color:var(--text2);">ຢູ່ບ່ອນໃດແນ່</span></div>
+    <div class="card-body" id="inv-bad-list" style="padding:8px 16px;"></div>
+  </div>
+
   <!-- Item form -->
   <div class="card">
     <div class="card-hd"><span class="card-title" id="inv-form-title"><span class="cdot"></span>+ ເພີ່ມລາຍການ</span></div>
@@ -1286,7 +1292,7 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
       <input type="hidden" id="ivd-edit-id">
       <div class="frow c3">
         <div class="field"><label>ປະເພດ *</label>
-          <select id="ivd-mtype" onchange="onInvMtypeChange()"><option value="out">📤 ສົ່ງໄປໜ່ວຍ</option><option value="return">📥 ສົ່ງກັບສາຂາຫຼັກ</option><option value="transfer">🔄 ໂອນໄປໜ່ວຍອື່ນ</option><option value="status">🔧 ແຈ້ງເສຍ/ປ່ຽນສະຖານະ</option></select>
+          <select id="ivd-mtype" onchange="onInvMtypeChange()"><option value="out">📤 ສົ່ງໄປໜ່ວຍ</option><option value="return">📥 ສົ່ງກັບສາຂາຫຼັກ</option><option value="transfer">🔄 ໂອນໄປໜ່ວຍອື່ນ</option><option value="status">🔧 ແຈ້ງເສຍ/ປ່ຽນສະຖານະ</option><option value="writeoff">🗑 ຖິ້ມ/ຕັດອອກ</option></select>
         </div>
         <div class="field"><label>ອຸປະກອນ *</label><select id="ivd-item" onchange="onInvDpItemChange()"></select></div>
         <div class="field" id="ivd-from-wrap" style="display:none;"><label id="ivd-from-label">ຈາກໜ່ວຍ *</label><select id="ivd-from" onchange="onInvDpItemChange();onBranchChange(this)"></select></div>
@@ -2195,12 +2201,13 @@ function renderInv(){
 
 /* ---- Movement (ສົ່ງ/ຄືນ/ໂອນ) ---- */
 const INV_HQ='ສາຂາຫຼັກ';
+const INV_SINK='(ຖິ້ມ/ຕັດອອກ)';
 // from/to ຂອງ record (backward-compat: record ເກົ່າ = out, HQ→br)
 function invFromTo(d){
   if(d.to!=null||d.from!=null)return {from:String(d.from||INV_HQ),to:String(d.to||d.br||'')};
   return {from:INV_HQ,to:String(d.br||'')};
 }
-function invMtypeLbl(mt){return mt==='return'?'📥 ສົ່ງກັບ':mt==='transfer'?'🔄 ໂອນ':mt==='status'?'🔧 ປ່ຽນສະຖານະ':'📤 ສົ່ງໄປ';}
+function invMtypeLbl(mt){return mt==='return'?'📥 ສົ່ງກັບ':mt==='transfer'?'🔄 ໂອນ':mt==='status'?'🔧 ປ່ຽນສະຖານະ':mt==='writeoff'?'🗑 ຖິ້ມ/ຕັດອອກ':'📤 ສົ່ງໄປ';}
 function invCondShort(c){return c==='bad'?'ໃຊ້ບໍ່ໄດ້':c==='fixing'?'ກຳລັງສ້ອມ':'ໃຊ້ໄດ້';}
 function invCondEmoji(c){return c==='bad'?'🔴':c==='fixing'?'🟡':'🟢';}
 // ຈຳນວນຄົງເຫຼືອສຸດທິ ຂອງ item ຢູ່ unit (ຮັບເຂົ້າ - ສົ່ງອອກ)
@@ -2239,7 +2246,8 @@ function _invApplyHq(r,sign){
   if(mt==='out')add(r.cond||'good',-q);
   else if(mt==='return')add(r.cond||'good',q);
   else if(mt==='status'&&ft.from===INV_HQ){add(r.fromCond||'good',-q);add(r.cond||'bad',q);}
-  // transfer & status@unit: ບໍ່ກະທົບຄັງຫຼັກ
+  else if(mt==='writeoff'&&ft.from===INV_HQ)add(r.cond||'bad',-q); // ຖິ້ມ → ຫັກອອກຈາກ pool
+  // transfer & status@unit & writeoff@unit: ບໍ່ກະທົບຄັງຫຼັກ
 }
 // ຈຳນວນທີ່ຄັງຫຼັກມີ ຕາມສະຖານະ (ຕັດຜົນ record ທີ່ກຳລັງແກ້ໄຂອອກ)
 function _invHqAvail(item,cond,excl){
@@ -2249,6 +2257,7 @@ function _invHqAvail(item,cond,excl){
     if(mt==='out'&&(excl.cond||'good')===cond)val+=q;
     else if(mt==='return'&&(excl.cond||'good')===cond)val-=q;
     else if(mt==='status'&&ft.from===INV_HQ){if((excl.fromCond||'good')===cond)val+=q;if((excl.cond||'bad')===cond)val-=q;}
+    else if(mt==='writeoff'&&ft.from===INV_HQ&&(excl.cond||'bad')===cond)val+=q;
   }
   return val;
 }
@@ -2265,6 +2274,9 @@ function onInvMtypeChange(){
   }else if(mt==='transfer'){
     show('ivd-from-wrap',true);show('ivd-to-wrap',true);show('ivd-condfrom-wrap',false);
     lbl('ivd-from-label','ຈາກໜ່ວຍ *');lbl('ivd-to-label','ໄປໜ່ວຍ *');lbl('ivd-cond-label','ສະພາບ');
+  }else if(mt==='writeoff'){
+    show('ivd-from-wrap',true);show('ivd-to-wrap',false);show('ivd-condfrom-wrap',false);
+    lbl('ivd-from-label','ຖິ້ມຈາກ *');lbl('ivd-cond-label','ສະພາບທີ່ຖິ້ມ');
   }else{ // status
     show('ivd-from-wrap',true);show('ivd-to-wrap',false);show('ivd-condfrom-wrap',true);
     lbl('ivd-from-label','ຢູ່ບ່ອນ *');lbl('ivd-cond-label','ເປັນສະພາບ *');
@@ -2317,6 +2329,12 @@ function svInvD(){
     if(from===to)return toast('⚠️ ຕົ້ນທາງ/ປາຍທາງ ຄືກັນ');
     const avail=from===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,from,eid)[cond]||0);
     if(qty>avail)return toast('⚠️ '+from+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
+  }else if(mt==='writeoff'){ // ຖິ້ມ/ຕັດອອກ (ຫັກອອກຖາວອນ)
+    const loc=v('ivd-from');
+    if(!loc)return toast('⚠️ ເລືອກບ່ອນ (ໜ່ວຍ/ຄັງຫຼັກ)');
+    from=loc;to=INV_SINK;
+    const avail=loc===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,loc,eid)[cond]||0);
+    if(qty>avail)return toast('⚠️ '+loc+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
   }else{ // status — ປ່ຽນສະຖານະຢູ່ບ່ອນ (ບໍ່ຍ້າຍ)
     const loc=v('ivd-from');
     if(!loc)return toast('⚠️ ເລືອກບ່ອນ (ໜ່ວຍ/ຄັງຫຼັກ)');
@@ -2331,12 +2349,14 @@ function svInvD(){
   const rec={id:eid||Date.now(),itemId:itemId,itemName:item.name,cat:item.cat,mtype:mt,
     qty:qty,from:from,to:to,br:to,cond:cond,dt:v('ivd-date')||new Date().toISOString().slice(0,10),
     by:v('ivd-by'),note:v('ivd-note'),
-    st:mt==='status'?'received':(oldRec?(oldRec.st||'sent'):'sent'),
+    st:(mt==='status'||mt==='writeoff')?'received':(oldRec?(oldRec.st||'sent'):'sent'),
     receivedAt:oldRec?(oldRec.receivedAt||''):''};
   if(mt==='status')rec.fromCond=fromCond;
   DB.invd.push(rec);
   _invApplyHq(rec,1);
-  const lbl=mt==='status'?('🔧 '+item.name+' '+invCondShort(fromCond)+'→'+invCondShort(cond)+' ຢູ່ '+from):(invMtypeLbl(mt)+' '+item.name+' '+from+'→'+to);
+  const lbl=mt==='status'?('🔧 '+item.name+' '+invCondShort(fromCond)+'→'+invCondShort(cond)+' ຢູ່ '+from)
+    :mt==='writeoff'?('🗑 ຖິ້ມ '+item.name+' '+invCondShort(cond)+' ຈາກ '+from)
+    :(invMtypeLbl(mt)+' '+item.name+' '+from+'→'+to);
   AUDIT.log(eid?'edit':'add','Dispatch',item.name,lbl+' × '+qty);
   DB.save();clrInvD();renderInvAll();
   syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
@@ -2353,8 +2373,8 @@ function editInvD(id){
     if(g('ivd-from'))g('ivd-from').value=ft.from;
     if(g('ivd-cond-from'))g('ivd-cond-from').value=r.fromCond||'good';
   }else{
-    if(mt!=='out'&&g('ivd-from'))g('ivd-from').value=ft.from;   // return/transfer: ຕົ້ນທາງ
-    if(mt!=='return'&&g('ivd-br'))g('ivd-br').value=ft.to;      // out/transfer: ປາຍທາງ
+    if(mt!=='out'&&g('ivd-from'))g('ivd-from').value=ft.from;          // return/transfer/writeoff: ຕົ້ນທາງ
+    if((mt==='out'||mt==='transfer')&&g('ivd-br'))g('ivd-br').value=ft.to; // out/transfer: ປາຍທາງ
   }
   if(g('ivd-cond'))g('ivd-cond').value=r.cond||'good';
   if(g('ivd-qty'))g('ivd-qty').value=r.qty;
@@ -2405,8 +2425,8 @@ function renderInvD(){
   const cnt=g('ivd-cnt');if(cnt)cnt.textContent=list.length+(q||fbr||fst||from||to?'/'+DB.invd.length:'');
   if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີການເຄື່ອນໄຫວ</div>';return;}
   c.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>ອຸປະກອນ</th><th>ປະເພດ</th><th>ຈາກ → ໄປ</th><th>ສະພາບ</th><th>ຈຳນວນ</th><th>ວັນທີ</th><th>ຜູ້ດຳເນີນ</th><th>ສະຖານະ</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead><tbody>'
-    +list.map(r=>{const ft=invFromTo(r);const isSt=(r.mtype==='status');
-      const route=isSt?('🔧 ຢູ່ '+escHtml(ft.from)):(escHtml(ft.from)+' <span style="color:var(--text3);">→</span> '+escHtml(ft.to));
+    +list.map(r=>{const ft=invFromTo(r);const isSt=(r.mtype==='status');const isWo=(r.mtype==='writeoff');
+      const route=isSt?('🔧 ຢູ່ '+escHtml(ft.from)):isWo?('🗑 ຖິ້ມຈາກ '+escHtml(ft.from)):(escHtml(ft.from)+' <span style="color:var(--text3);">→</span> '+escHtml(ft.to));
       const condCell=isSt?(invCondEmoji(r.fromCond||'good')+'→'+invCondEmoji(r.cond||'bad')):(invCondEmoji(r.cond||'good')+' '+invCondShort(r.cond||'good'));
       return '<tr>'
       +'<td style="font-weight:600;color:var(--p2);">'+escHtml(r.itemName)+'</td>'
@@ -2416,9 +2436,9 @@ function renderInvD(){
       +'<td style="font-weight:700;">'+(r.qty||0)+'</td>'
       +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.dt)||'—')+'</td>'
       +'<td style="font-size:12px;">'+escHtml(r.by||'—')+'</td>'
-      +'<td>'+(isSt?'<span class="binv binv-ok">✔ ບັນທຶກ</span>':(r.st==='received'?'<span class="binv binv-recv">✅ ຮັບແລ້ວ</span>':'<span class="binv binv-sent">🚚 ກຳລັງສົ່ງ</span>'))+'</td>'
+      +'<td>'+(isWo?'<span class="binv binv-low">🗑 ຕັດອອກ</span>':isSt?'<span class="binv binv-ok">✔ ບັນທຶກ</span>':(r.st==='received'?'<span class="binv binv-recv">✅ ຮັບແລ້ວ</span>':'<span class="binv binv-sent">🚚 ກຳລັງສົ່ງ</span>'))+'</td>'
       +'<td style="text-align:center;"><div style="display:inline-flex;gap:4px;">'
-        +((!isSt&&r.st!=='received')?'<button title="ຢືນຢັນຮັບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markInvDRecv('+r.id+')">✅</button>':'')
+        +((!isSt&&!isWo&&r.st!=='received')?'<button title="ຢືນຢັນຮັບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(15,169,104,0.3);background:rgba(15,169,104,0.08);color:var(--green);cursor:pointer;" onclick="markInvDRecv('+r.id+')">✅</button>':'')
         +'<button title="ແກ້ໄຂ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:var(--text2);cursor:pointer;" onclick="editInvD('+r.id+')">✏️</button>'
         +'<button title="ລຶບ" style="width:29px;height:29px;border-radius:8px;border:1.5px solid rgba(224,59,90,0.3);background:rgba(224,59,90,0.06);color:var(--red);cursor:pointer;" onclick="delInvD('+r.id+')">🗑</button>'
       +'</div></td></tr>';}).join('')+'</tbody></table></div>';
@@ -2487,10 +2507,10 @@ function showInvUnitItem(itemId){
   // ປະຫວັດ
   html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:6px 0 6px;">🚚 ປະຫວັດ ('+moves.length+' ຄັ້ງ)</div>';
   if(!moves.length)html+='<div style="font-size:12px;color:var(--text3);">—</div>';
-  moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);const isSt=(d.mtype==='status');
-    const dir=(ft.to===name&&!isSt)?'📥 ຮັບເຂົ້າ':((ft.from===name&&!isSt)?'📤 ສົ່ງອອກ':'🔧');
-    const rt=isSt?('ປ່ຽນ '+invCondShort(d.fromCond||'good')+' → '+invCondShort(d.cond||'bad')):(escHtml(ft.from)+' → '+escHtml(ft.to)+' · '+invCondEmoji(d.cond||'good')+' '+invCondShort(d.cond||'good'));
-    const stt=isSt?'':(d.st==='received'?' · <span style="color:var(--green);">✅ ຮັບແລ້ວ</span>':' · <span style="color:var(--amber);">🚚 ກຳລັງສົ່ງ</span>');
+  moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);const isSt=(d.mtype==='status');const isWo=(d.mtype==='writeoff');
+    const dir=isWo?'🗑 ຖິ້ມ/ຕັດອອກ':isSt?'🔧 ປ່ຽນສະຖານະ':(ft.to===name?'📥 ຮັບເຂົ້າ':'📤 ສົ່ງອອກ');
+    const rt=isSt?('ປ່ຽນ '+invCondShort(d.fromCond||'good')+' → '+invCondShort(d.cond||'bad')):isWo?('ຖິ້ມ '+invCondEmoji(d.cond||'bad')+' '+invCondShort(d.cond||'bad')):(escHtml(ft.from)+' → '+escHtml(ft.to)+' · '+invCondEmoji(d.cond||'good')+' '+invCondShort(d.cond||'good'));
+    const stt=(isSt||isWo)?'':(d.st==='received'?' · <span style="color:var(--green);">✅ ຮັບແລ້ວ</span>':' · <span style="color:var(--amber);">🚚 ກຳລັງສົ່ງ</span>');
     html+='<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">'
       +'<div style="display:flex;justify-content:space-between;"><span style="color:var(--text);font-weight:600;">'+dir+' '+invMtypeLbl(d.mtype||'out')+' ×'+(d.qty||0)+'</span><span style="color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(d.dt)||'')+'</span></div>'
       +'<div style="font-size:10.5px;color:var(--text3);margin-top:2px;">'+rt+stt+(d.by?' · '+escHtml(d.by):'')+'</div>'
@@ -2586,7 +2606,28 @@ function renderInvStats(){
     }else lc.style.display='none';
   }
 }
-function renderInvAll(){populateInvDropdowns();if(typeof onInvMtypeChange==='function')onInvMtypeChange();renderInv();renderInvD();renderInvBr();renderInvStats();}
+// ຄັງຮູ້ໄດ້ວ່າໂຕໃດໃຊ້ບໍ່ໄດ້ — ລວມທຸກເຄື່ອງ 🔴/🟡 (ຄັງຫຼັກ + ໜ່ວຍໃດແນ່)
+function renderInvBad(){
+  const card=g('inv-bad-card'),list=g('inv-bad-list');if(!card||!list)return;
+  const brs=getBranches().map(String).filter(b=>b!==INV_HQ);
+  const rows=[];
+  DB.inv.forEach(it=>{
+    const hb=parseInt(it.qtyBad)||0,hf=parseInt(it.qtyFix)||0;
+    const locs=[];let tBad=hb,tFix=hf;
+    if(hb||hf)locs.push('🏦 ຄັງຫຼັກ'+(hb?' <b style="color:var(--red);">🔴'+hb+'</b>':'')+(hf?' <b style="color:var(--amber);">🟡'+hf+'</b>':''));
+    brs.forEach(bn=>{const bk=invBucketsAt(it.id,bn);if(bk.bad>0||bk.fixing>0){tBad+=bk.bad;tFix+=bk.fixing;
+      locs.push('🏢 '+escHtml(bn)+(bk.bad>0?' <b style="color:var(--red);">🔴'+bk.bad+'</b>':'')+(bk.fixing>0?' <b style="color:var(--amber);">🟡'+bk.fixing+'</b>':''));}});
+    if(locs.length)rows.push({name:it.name,cat:it.cat,locs:locs,tBad:tBad,tFix:tFix});
+  });
+  if(!rows.length){card.style.display='none';list.innerHTML='';return;}
+  rows.sort((a,b)=>(b.tBad+b.tFix)-(a.tBad+a.tFix));
+  card.style.display='block';
+  list.innerHTML=rows.map(r=>'<div style="padding:8px 0;border-bottom:1px solid var(--border);">'
+    +'<div style="font-weight:600;font-size:13.5px;color:var(--text);">'+escHtml(r.name)+' <span style="font-size:11px;color:var(--text3);font-weight:400;">'+escHtml(r.cat||'')+'</span></div>'
+    +'<div style="font-size:11.5px;color:var(--text2);margin-top:3px;display:flex;flex-wrap:wrap;gap:10px;">'+r.locs.join('')+'</div>'
+    +'</div>').join('');
+}
+function renderInvAll(){populateInvDropdowns();if(typeof onInvMtypeChange==='function')onInvMtypeChange();renderInv();renderInvD();renderInvBr();renderInvStats();renderInvBad();}
 
 /* ---- Export ---- */
 function exportInvXlsx(){
@@ -2606,7 +2647,7 @@ function exportInvXlsx(){
 function exportInvDXlsx(){
   toast('⏳ ກຳລັງສ້າງ Excel...');
   loadXlsxThen(()=>{
-    const mtL={out:'ສົ່ງໄປ',return:'ສົ່ງກັບ',transfer:'ໂອນ',status:'ປ່ຽນສະຖານະ'};
+    const mtL={out:'ສົ່ງໄປ',return:'ສົ່ງກັບ',transfer:'ໂອນ',status:'ປ່ຽນສະຖານະ',writeoff:'ຖິ້ມ/ຕັດອອກ'};
     const rows=DB.invd.map((r,i)=>{const ft=invFromTo(r);const isSt=r.mtype==='status';
       return {'#':i+1,'ອຸປະກອນ':r.itemName||'','ປະເພດ':r.cat||'','ການເຄື່ອນໄຫວ':mtL[r.mtype||'out'],'ຈາກ':ft.from,'ໄປ':ft.to,'ສະພາບ':isSt?(invCondShort(r.fromCond||'good')+'→'+invCondShort(r.cond||'bad')):invCondShort(r.cond||'good'),'ຈຳນວນ':r.qty||0,'ວັນທີ':fmtDate(r.dt)||'','ຜູ້ດຳເນີນ':r.by||'','ສະຖານະ':isSt?'ບັນທຶກ':(r.st==='received'?'ຮັບແລ້ວ':'ກຳລັງສົ່ງ'),'ໝາຍເຫດ':r.note||''};});
     const wb=XLSX.utils.book_new();
