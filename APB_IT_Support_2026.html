@@ -2692,7 +2692,8 @@ async function sbPull(){
     DB.rpt=dedup(pr(rp).map(r=>normRec({...r,dt:fmtDate(r.dt)})));
     DB.ip=dedup(pr(ri).map(r=>normRec({...r,bought:fmtDate(r.bought)})));
     // pw/inv/invd: merge (ບໍ່ overwrite) — ກັນ table ຫວ່າງລ້າງ local
-    const mrg=(remoteArr,cur)=>{const rem=dedup((remoteArr||[]).map(r=>normRec({...r})));const ids=new Set(rem.map(x=>String(x.id)));const extra=(cur||[]).filter(x=>x&&!ids.has(String(x.id)));return dedup(rem.concat(extra));};
+    const _pnow=Date.now(),_PEND=6*3600*1000;
+    const mrg=(remoteArr,cur)=>{const rem=dedup((remoteArr||[]).map(r=>normRec({...r})));const ids=new Set(rem.map(x=>String(x.id)));const extra=(cur||[]).filter(x=>x&&!ids.has(String(x.id))&&(_pnow-Number(x.id)<_PEND));return dedup(rem.concat(extra));};
     DB.pw=mrg(pr(rpw),DB.pw);
     DB.inv=mrg(pr(rinv),DB.inv);
     DB.invd=mrg(pr(rinvd),DB.invd);
@@ -2738,7 +2739,9 @@ async function sbMerge(table,dbKey,lsKey,arr){
     const cur=(rows||[]).find(x=>String(x.id)==='main');
     if(cur&&Array.isArray(cur.data)){
       const ids=new Set(merged.map(r=>String(r&&r.id)));
-      const extra=cur.data.filter(r=>r&&r.id!=null&&!ids.has(String(r.id))&&!tomb[String(r.id)]);
+      const _n=Date.now(),_P=6*3600*1000;
+      // ເກັບແຖວ Supabase ທີ່ local ບໍ່ມີ ສະເພາະທີ່ຫາກໍ່ສ້າງ < 6 ຊມ → ແຖວເກົ່າທີ່ຖືກລຶບຈະບໍ່ກັບມາ
+      const extra=cur.data.filter(r=>r&&r.id!=null&&!ids.has(String(r.id))&&!tomb[String(r.id)]&&(_n-Number(r.id)<_P));
       if(extra.length){merged=merged.concat(extra);_sbGrew=true;}
     }
   }catch(e){}
@@ -2949,13 +2952,16 @@ async function pullFromSheets(silent){
     // MERGE (ບໍ່ຂຽນທັບ): ລວມ Sheet + ແຖວທ້ອງຖິ່ນທີ່ຍັງບໍ່ທັນ sync ຂຶ້ນ → ກັນຂໍ້ມູນໃໝ່ຫາຍ
     const _needPush={};
     const _tombAll=tombGet();
+    const PEND_MS=6*3600*1000; // ໜ້າຕ່າງ "ຫາກໍ່ເພີ່ມ ຍັງບໍ່ທັນ sync" = 6 ຊົ່ວໂມງ
+    const _now=Date.now();
     const merge=(res,cur,map,sheetName)=>{
       if(!res||!res.ok)return cur; // ດຶງບໍ່ໄດ້ → ເກັບເກົ່າ
       const tomb=_tombAll[sheetName]||{};
       const fromSheet=dedup((res.data||[]).map(map)).filter(r=>!tomb[String(r.id)]);
       const sheetIds=new Set(fromSheet.map(r=>String(r.id)));
-      // ແຖວທ້ອງຖິ່ນທີ່ Sheet ຍັງບໍ່ມີ ແລະ ບໍ່ຖືກລົບ = ຂໍ້ມູນທີ່ຫາກໍ່ເພີ່ມ ຍັງບໍ່ທັນ push
-      const localExtra=(cur||[]).filter(r=>r&&!sheetIds.has(String(r.id))&&!tomb[String(r.id)]);
+      // Sheets = ແຫຼ່ງຈິງ. ເກັບແຖວທ້ອງຖິ່ນສະເພາະທີ່ "ຫາກໍ່ສ້າງ < 6 ຊມ" (id = timestamp) ເທົ່ານັ້ນ
+      // → ແຖວເກົ່າທີ່ Sheet ບໍ່ມີແລ້ວ (ຖືກລຶບຢູ່ເຄື່ອງອື່ນ) ຈະບໍ່ resurrect ກັບມາ
+      const localExtra=(cur||[]).filter(r=>r&&!sheetIds.has(String(r.id))&&!tomb[String(r.id)]&&(_now-Number(r.id)<PEND_MS));
       if(fromSheet.length===0&&(cur||[]).length>3){console.warn('empty pull ignored');return cur;}
       if(localExtra.length>0)_needPush[sheetName]=true; // ຕ້ອງ push ຄືນໃຫ້ Sheet ຕາມທັນ
       return dedup(fromSheet.concat(localExtra));
