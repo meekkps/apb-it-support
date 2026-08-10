@@ -2098,9 +2098,12 @@ function svInv(){
   if(v('iv-qty')==='')return toast('⚠️ ໃສ່ຈຳນວນ');
   const eid=v('iv-edit-id');
   const old=eid?DB.inv.find(x=>x.id===parseInt(eid)):null;
+  // ຈຳນວນທີ່ໃສ່ ເຂົ້າ pool ຕາມສະຖານະທີ່ເລືອກ, pool ອື່ນ = ຄ່າເກົ່າ (ຮັກສາໄວ້)
+  const c=v('iv-cond')||'good';const q=parseInt(v('iv-qty'))||0;
+  const oG=old?(parseInt(old.qty)||0):0,oB=old?(parseInt(old.qtyBad)||0):0,oF=old?(parseInt(old.qtyFix)||0):0;
   const rec={id:eid?parseInt(eid):Date.now(),name:v('iv-name'),cat:v('iv-cat'),serial:v('iv-serial'),
-    qty:parseInt(v('iv-qty'))||0,unit:'ອັນ',min:parseInt(v('iv-min'))||0,cond:v('iv-cond')||'good',
-    qtyBad:old?(parseInt(old.qtyBad)||0):0,qtyFix:old?(parseInt(old.qtyFix)||0):0,
+    qty:c==='good'?q:oG,unit:'ອັນ',min:parseInt(v('iv-min'))||0,cond:c,
+    qtyBad:c==='bad'?q:oB,qtyFix:c==='fixing'?q:oF,
     inDate:v('iv-date'),img:v('iv-img'),note:v('iv-note')};
   if(eid){const i=DB.inv.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.inv[i]=rec;else DB.inv.push(rec);AUDIT.log('edit','Inventory',rec.name,rec.cat);toast('✅ ອັບເດດ!');}
   else{DB.inv.push(rec);AUDIT.log('add','Inventory',rec.name,rec.cat);toast('✅ ບັນທຶກ!');}
@@ -2117,9 +2120,13 @@ function editInv(id){
   if(!requireAdmin())return;
   const r=DB.inv.find(x=>x.id===id);if(!r)return;
   g('iv-edit-id').value=id;g('iv-name').value=r.name||'';g('iv-cat').value=r.cat||'';
-  g('iv-serial').value=r.serial||'';g('iv-qty').value=r.qty!=null?r.qty:'';
+  g('iv-serial').value=r.serial||'';
   g('iv-min').value=r.min!=null?r.min:'';g('iv-date').value=fmtDate(r.inDate)||'';g('iv-note').value=r.note||'';
-  if(g('iv-cond'))g('iv-cond').value=r.cond||'good';
+  // ສະແດງ pool ຫຼັກ (ໃຊ້ໄດ້ > ເສຍ > ສ້ອມ) — ແກ້ pool ໃດ ຮັກສາ pool ອື່ນໄວ້
+  const gd=parseInt(r.qty)||0,bd=parseInt(r.qtyBad)||0,fx=parseInt(r.qtyFix)||0;
+  let ec='good',eq=gd;
+  if(gd>0){ec='good';eq=gd;}else if(bd>0){ec='bad';eq=bd;}else if(fx>0){ec='fixing';eq=fx;}
+  g('iv-qty').value=eq;if(g('iv-cond'))g('iv-cond').value=ec;
   g('iv-img').value=r.img||'';
   const p=g('iv-img-prev');
   if(r.img){p.src=r.img;p.style.display='block';g('iv-img-hint').textContent='📷 ປ່ຽນຮູບ';}
@@ -2166,13 +2173,26 @@ function invCondBadge(c){
   if(s==='fixing')return '<span class="binv" style="background:rgba(245,158,11,0.14);color:#92400e;">🟡 ກຳລັງສ້ອມ</span>';
   return '<span class="binv binv-ok">🟢 ໃຊ້ໄດ້</span>';
 }
+// badge ສະຖານະ ອີງ pool ຈິງ (ຄັງຫຼັກ): ສະແດງທຸກ pool ທີ່ມີ
+function invPoolBadge(r){
+  const gd=parseInt(r.qty)||0,bd=parseInt(r.qtyBad)||0,fx=parseInt(r.qtyFix)||0;
+  if(!bd&&!fx)return '<span class="binv binv-ok">🟢 ໃຊ້ໄດ້</span>';
+  let s='';
+  if(gd>0)s+='<span class="binv binv-ok" style="margin-right:3px;">🟢'+gd+'</span>';
+  if(bd>0)s+='<span class="binv binv-low" style="margin-right:3px;">🔴'+bd+'</span>';
+  if(fx>0)s+='<span class="binv" style="background:rgba(245,158,11,0.14);color:#92400e;">🟡'+fx+'</span>';
+  return s;
+}
 function renderInv(){
   const c=g('inv-list');if(!c)return;
   const q=v('iv-search').toLowerCase(),fc=v('iv-f-cat'),fs=v('iv-f-stock'),fcond=v('iv-f-cond');
   let list=DB.inv.slice().reverse();
   if(q)list=list.filter(r=>((r.name||'')+(r.serial||'')+(r.note||'')).toLowerCase().includes(q));
   if(fc)list=list.filter(r=>String(r.cat||'')===fc);
-  if(fcond)list=list.filter(r=>String(r.cond||'good')===fcond);
+  // ກັ່ນຕອງຕາມ pool ຈິງ: ໃຊ້ໄດ້=qty>0, ໃຊ້ບໍ່ໄດ້=qtyBad>0, ກຳລັງສ້ອມ=qtyFix>0
+  if(fcond==='good')list=list.filter(r=>(parseInt(r.qty)||0)>0);
+  else if(fcond==='bad')list=list.filter(r=>(parseInt(r.qtyBad)||0)>0);
+  else if(fcond==='fixing')list=list.filter(r=>(parseInt(r.qtyFix)||0)>0);
   if(fs==='low')list=list.filter(r=>{const qy=parseInt(r.qty)||0,m=parseInt(r.min)||0;return qy>0&&m&&qy<=m;});
   if(fs==='out')list=list.filter(r=>(parseInt(r.qty)||0)<=0);
   if(fs==='ok')list=list.filter(r=>{const qy=parseInt(r.qty)||0,m=parseInt(r.min)||0;return qy>0&&(!m||qy>m);});
@@ -2187,7 +2207,7 @@ function renderInv(){
       +'<td>'+invCatBadge(r.cat)+'</td>'
       +'<td style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--text2);">'+escHtml(r.serial||'—')+'</td>'
       +'<td style="font-weight:700;">🟢'+(r.qty||0)+((parseInt(r.qtyBad)||0)?' <span style="color:var(--red);font-size:11px;font-weight:600;">🔴'+r.qtyBad+'</span>':'')+((parseInt(r.qtyFix)||0)?' <span style="color:var(--amber);font-size:11px;font-weight:600;">🟡'+r.qtyFix+'</span>':'')+'</td>'
-      +'<td>'+invCondBadge(r.cond)+'</td>'
+      +'<td>'+invPoolBadge(r)+'</td>'
       +'<td style="color:var(--text2);">'+sent+'</td>'
       +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.inDate)||'—')+'</td>'
       +'<td>'+invStockBadge(r)+'</td>'
