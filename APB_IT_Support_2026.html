@@ -2425,28 +2425,21 @@ function renderInvD(){
 }
 
 /* ---- Branch summary + cats + stats ---- */
+// mini-badge ສະແດງຈຳນວນຕາມສະຖານະ
+function _invCondMini(b){let s='';if(b.good>0)s+=' <span style="color:var(--green);font-weight:700;">🟢'+b.good+'</span>';if(b.bad>0)s+=' <span style="color:var(--red);font-weight:700;">🔴'+b.bad+'</span>';if(b.fixing>0)s+=' <span style="color:var(--amber);font-weight:700;">🟡'+b.fixing+'</span>';return s;}
 function showInvBranch(name){
-  name=String(name);
+  name=String(name);window._invBrCur=name;
   const moves=DB.invd.filter(d=>{const ft=invFromTo(d);return ft.from===name||ft.to===name;});
   // ສະຖານະຕໍ່ item ຢູ່ໜ່ວຍນີ້ ຄິດຈາກ ledger (condition-aware)
   const ids=[...new Set(moves.map(d=>d.itemId))];
-  const nameOf={};moves.forEach(d=>{if(d.itemName)nameOf[d.itemId]=String(d.itemName);});
-  const groups={good:[],bad:[],fixing:[]};let held=0;
-  ids.forEach(id=>{const b=invBucketsAt(id,name);let any=false;
-    ['good','bad','fixing'].forEach(c=>{if(b[c]>0){groups[c].push({name:nameOf[id]||'',qty:b[c]});any=true;}});
-    if(any)held++;
+  const nameOf={},catOf={};
+  moves.forEach(d=>{if(d.itemName)nameOf[d.itemId]=String(d.itemName);if(d.cat)catOf[d.itemId]=String(d.cat);});
+  ids.forEach(id=>{if(!catOf[id]){const it=DB.inv.find(x=>x.id===id);if(it&&it.cat)catOf[id]=String(it.cat);}});
+  const catMap={};let held=0,tG=0,tB=0,tF=0;
+  ids.forEach(id=>{const b=invBucketsAt(id,name);const t=b.good+b.bad+b.fixing;if(t<=0)return;
+    held++;tG+=b.good;tB+=b.bad;tF+=b.fixing;
+    const cat=catOf[id]||'ອື່ນໆ';(catMap[cat]=catMap[cat]||[]).push({id:id,name:nameOf[id]||'',b:b,t:t});
   });
-
-  // ໜ່ວຍນຶ່ງໝວດ
-  const section=(cond,icon,label,color,brd)=>{
-    const arr=(groups[cond]||[]).sort((a,b)=>b.qty-a.qty);
-    let h='<div style="font-size:12px;font-weight:700;color:'+color+';margin:12px 0 6px;">'+icon+' '+label+' ('+arr.length+')</div>';
-    if(!arr.length)h+='<div style="font-size:12px;color:var(--text3);padding:2px 0 6px;">—</div>';
-    else{h+='<div style="display:flex;flex-wrap:wrap;gap:6px;">';
-      arr.forEach(it=>{h+='<span style="border:1.5px solid '+brd+';border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--text);">'+escHtml(it.name)+' <b style="font-weight:700;">×'+it.qty+'</b></span>';});
-      h+='</div>';}
-    return h;
-  };
 
   let html='';
   if(!moves.length)html='<div style="text-align:center;padding:1.5rem;color:var(--text2);">ຍັງບໍ່ມີການເຄື່ອນໄຫວ</div>';
@@ -2454,26 +2447,57 @@ function showInvBranch(name){
     // ສະຫຼຸບເທິງສຸດ
     html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px;">'
       +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;">'+held+'</div><div style="font-size:10.5px;color:var(--text2);">ລາຍການ</div></div>'
-      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green);">'+(groups.good.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ໄດ້</div></div>'
-      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">'+(groups.bad.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ບໍ່ໄດ້</div></div>'
-      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--amber);">'+(groups.fixing.reduce((s,x)=>s+x.qty,0))+'</div><div style="font-size:10.5px;color:var(--text2);">ກຳລັງສ້ອມ</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green);">'+tG+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ໄດ້</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">'+tB+'</div><div style="font-size:10.5px;color:var(--text2);">ໃຊ້ບໍ່ໄດ້</div></div>'
+      +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--amber);">'+tF+'</div><div style="font-size:10.5px;color:var(--text2);">ກຳລັງສ້ອມ</div></div>'
       +'</div>';
+    html+='<div style="font-size:10.5px;color:var(--text3);margin:2px 0 4px;">ກົດອຸປະກອນ ເພື່ອເບິ່ງລາຍລະອຽດ / ປະຫວັດ</div>';
     if(!held)html+='<div style="font-size:12px;color:var(--text3);padding:8px 0;">ບໍ່ມີອາໄຫຼ່ຄົງເຫຼືອ (ສົ່ງກັບ/ໂອນໄປໝົດ)</div>';
     else{
-      html+=section('good','🟢','ໃຊ້ໄດ້','var(--green)','rgba(16,185,129,0.4)');
-      html+=section('bad','🔴','ໃຊ້ບໍ່ໄດ້ (ເສຍ)','var(--red)','rgba(239,68,68,0.4)');
-      html+=section('fixing','🟡','ກຳລັງສ້ອມ','var(--amber)','rgba(245,158,11,0.4)');
+      // ແຍກຕາມປະເພດ
+      Object.keys(catMap).sort().forEach(cat=>{
+        html+='<div style="margin:12px 0 6px;">'+invCatBadge(cat)+'</div>';
+        html+='<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+        catMap[cat].sort((a,b)=>b.t-a.t).forEach(it=>{
+          html+='<span onclick="showInvUnitItem('+it.id+')" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 11px;font-size:12.5px;color:var(--text);cursor:pointer;background:var(--glass);">'+escHtml(it.name)+_invCondMini(it.b)+' <span style="color:var(--text3);font-size:11px;">›</span></span>';
+        });
+        html+='</div>';
+      });
     }
-    // ປະຫວັດການເຄື່ອນໄຫວ
-    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:16px 0 6px;">🚚 ປະຫວັດການເຄື່ອນໄຫວ ('+moves.length+' ຄັ້ງ)</div>';
-    moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);const isSt=(d.mtype==='status');
-      const rt=isSt?('🔧 '+invCondShort(d.fromCond||'good')+'→'+invCondShort(d.cond||'bad')):(escHtml(ft.from)+' → '+escHtml(ft.to)+' · '+invCondEmoji(d.cond||'good'));
-      html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">'
-        +'<span style="color:var(--text);">'+invMtypeLbl(d.mtype||'out')+' '+escHtml(d.itemName)+' ×'+(d.qty||0)+'<br><span style="font-size:10.5px;color:var(--text3);">'+rt+'</span></span>'
-        +'<span style="color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(d.dt)||'')+'</span></div>';
-    });
   }
   g('modal-title').textContent='🏢 '+name;
+  g('modal-body').innerHTML=html;
+  g('detail-modal').style.display='flex';
+}
+// ລາຍລະອຽດ 1 ອຸປະກອນ ຢູ່ໜ່ວຍ: ຄົງເຫຼືອຕາມສະຖານະ + ປະຫວັດ (ສົ່ງຕອນໃດ, ໃຊ້ໄດ້ຫຼືບໍ່)
+function showInvUnitItem(itemId){
+  const name=window._invBrCur;if(!name)return;
+  itemId=parseInt(itemId);
+  const item=DB.inv.find(x=>x.id===itemId);
+  const b=invBucketsAt(itemId,name);
+  const moves=DB.invd.filter(d=>{if(d.itemId!==itemId)return false;const ft=invFromTo(d);return ft.from===name||ft.to===name;});
+  const iname=item?item.name:((moves[0]&&moves[0].itemName)||'');
+  let html='<button onclick="showInvBranch(window._invBrCur)" style="background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12.5px;color:var(--text2);cursor:pointer;margin-bottom:10px;">← ກັບຄືນ '+escHtml(name)+'</button>';
+  // ຄົງເຫຼືອຕາມສະຖານະ
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
+    +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green);">'+b.good+'</div><div style="font-size:10.5px;color:var(--text2);">🟢 ໃຊ້ໄດ້</div></div>'
+    +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">'+b.bad+'</div><div style="font-size:10.5px;color:var(--text2);">🔴 ໃຊ້ບໍ່ໄດ້</div></div>'
+    +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--amber);">'+b.fixing+'</div><div style="font-size:10.5px;color:var(--text2);">🟡 ກຳລັງສ້ອມ</div></div>'
+    +'</div>';
+  // ປະຫວັດ
+  html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:6px 0 6px;">🚚 ປະຫວັດ ('+moves.length+' ຄັ້ງ)</div>';
+  if(!moves.length)html+='<div style="font-size:12px;color:var(--text3);">—</div>';
+  moves.slice().reverse().forEach(d=>{const ft=invFromTo(d);const isSt=(d.mtype==='status');
+    const dir=(ft.to===name&&!isSt)?'📥 ຮັບເຂົ້າ':((ft.from===name&&!isSt)?'📤 ສົ່ງອອກ':'🔧');
+    const rt=isSt?('ປ່ຽນ '+invCondShort(d.fromCond||'good')+' → '+invCondShort(d.cond||'bad')):(escHtml(ft.from)+' → '+escHtml(ft.to)+' · '+invCondEmoji(d.cond||'good')+' '+invCondShort(d.cond||'good'));
+    const stt=isSt?'':(d.st==='received'?' · <span style="color:var(--green);">✅ ຮັບແລ້ວ</span>':' · <span style="color:var(--amber);">🚚 ກຳລັງສົ່ງ</span>');
+    html+='<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">'
+      +'<div style="display:flex;justify-content:space-between;"><span style="color:var(--text);font-weight:600;">'+dir+' '+invMtypeLbl(d.mtype||'out')+' ×'+(d.qty||0)+'</span><span style="color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(d.dt)||'')+'</span></div>'
+      +'<div style="font-size:10.5px;color:var(--text3);margin-top:2px;">'+rt+stt+(d.by?' · '+escHtml(d.by):'')+'</div>'
+      +(d.note?'<div style="font-size:10.5px;color:var(--text3);margin-top:1px;">📝 '+escHtml(d.note)+'</div>':'')
+      +'</div>';
+  });
+  g('modal-title').textContent='📦 '+iname+' · '+name;
   g('modal-body').innerHTML=html;
   g('detail-modal').style.display='flex';
 }
