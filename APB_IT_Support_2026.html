@@ -1294,7 +1294,17 @@ body.dark .blob-3{background:#f472b6;opacity:0.15;}
         <div class="field"><label>ປະເພດ *</label>
           <select id="ivd-mtype" onchange="onInvMtypeChange()"><option value="out">📤 ສົ່ງໄປໜ່ວຍ</option><option value="return">📥 ສົ່ງກັບສາຂາຫຼັກ</option><option value="transfer">🔄 ໂອນໄປໜ່ວຍອື່ນ</option><option value="status">🔧 ແຈ້ງເສຍ/ປ່ຽນສະຖານະ</option><option value="writeoff">🗑 ຖິ້ມ/ຕັດອອກ</option></select>
         </div>
-        <div class="field"><label>ອຸປະກອນ *</label><select id="ivd-item" onchange="onInvDpItemChange()"></select></div>
+        <div class="field" style="position:relative;"><label>ອຸປະກອນ *</label>
+          <input type="hidden" id="ivd-item">
+          <div id="ivd-item-btn" onclick="toggleInvItemPop()" style="width:100%;box-sizing:border-box;background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;min-height:37px;">
+            <span id="ivd-item-disp" style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">-- ເລືອກອຸປະກອນ --</span>
+            <span style="color:var(--text3);font-size:10px;flex-shrink:0;">▾</span>
+          </div>
+          <div id="ivd-item-pop" style="display:none;border:1.5px solid var(--border);border-radius:10px;margin-top:4px;max-height:260px;overflow:auto;background:var(--bg1);">
+            <input id="ivd-item-search" oninput="renderInvItemPop()" placeholder="🔍 ຄົ້ນຫາ ຊື່/SN..." style="width:100%;box-sizing:border-box;border:none;border-bottom:1px solid var(--border);background:var(--glass);padding:9px 12px;font-size:13px;color:var(--text);outline:none;position:sticky;top:0;">
+            <div id="ivd-item-list"></div>
+          </div>
+        </div>
         <div class="field" id="ivd-from-wrap" style="display:none;"><label id="ivd-from-label">ຈາກໜ່ວຍ *</label><select id="ivd-from" onchange="onInvDpItemChange();onBranchChange(this)"></select></div>
       </div>
       <div class="frow c3">
@@ -2403,7 +2413,7 @@ function editInvD(id){
   const mt=r.mtype||'out';const ft=invFromTo(r);
   if(g('ivd-mtype'))g('ivd-mtype').value=mt;
   onInvMtypeChange();
-  if(g('ivd-item'))g('ivd-item').value=r.itemId;
+  if(g('ivd-item')){g('ivd-item').value=r.itemId;updInvItemDisp();}
   if(mt==='status'){
     if(g('ivd-from'))g('ivd-from').value=ft.from;
     if(g('ivd-cond-from'))g('ivd-cond-from').value=r.fromCond||'good';
@@ -2422,6 +2432,7 @@ function editInvD(id){
   const card=g('inv-dp-form');if(card)card.scrollIntoView({behavior:'smooth',block:'center'});
 }
 function clrInvD(){['ivd-item','ivd-br','ivd-from','ivd-qty','ivd-by','ivd-note','ivd-edit-id'].forEach(i=>{if(g(i))g(i).value='';});
+  updInvItemDisp();const _pop=g('ivd-item-pop');if(_pop)_pop.style.display='none';
   if(g('ivd-mtype'))g('ivd-mtype').value='out';
   if(g('ivd-cond'))g('ivd-cond').value='good';
   if(g('ivd-cond-from'))g('ivd-cond-from').value='good';
@@ -2659,6 +2670,47 @@ function addInvCatFromMgr(){
   inp.value='';populateInvDropdowns();renderInvCatMgr();
   toast('✅ ເພີ່ມ "'+n+'" ແລ້ວ!');
 }
+/* ---- Custom dropdown ອຸປະກອນ (ຊື່ໃຫຍ່ + SN ນ້ອຍ + ຄົ້ນຫາ) ---- */
+function updInvItemDisp(){
+  const disp=g('ivd-item-disp');if(!disp)return;
+  const id=v('ivd-item');const r=id?DB.inv.find(x=>x.id===parseInt(id)):null;
+  if(!r){disp.textContent='-- ເລືອກອຸປະກອນ --';disp.style.color='var(--text2)';return;}
+  const sn=String(r.serial||'').trim();
+  disp.style.color='var(--text)';
+  disp.innerHTML='<span style="font-weight:600;">'+escHtml(r.name)+'</span>'+(sn?' <span style="font-size:10.5px;color:var(--text3);">🔖 '+escHtml(sn)+'</span>':'')+' <span style="font-size:11px;color:var(--text3);">('+(r.qty||0)+')</span>';
+}
+function toggleInvItemPop(){
+  const pop=g('ivd-item-pop');if(!pop)return;
+  const show=(pop.style.display==='none'||!pop.style.display);
+  pop.style.display=show?'block':'none';
+  if(show){renderInvItemPop();const s=g('ivd-item-search');if(s){s.value='';s.focus();}}
+}
+function renderInvItemPop(){
+  const list=g('ivd-item-list');if(!list)return;
+  const q=(v('ivd-item-search')||'').toLowerCase();
+  const cur=v('ivd-item');
+  const items=DB.inv.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)))
+    .filter(r=>!q||((r.name||'')+' '+(r.serial||'')).toLowerCase().includes(q));
+  if(!items.length){list.innerHTML='<div style="padding:10px 12px;color:var(--text3);font-size:12px;">ບໍ່ພົບ</div>';return;}
+  list.innerHTML=items.map(r=>{
+    const sn=String(r.serial||'').trim();const sel=String(r.id)===String(cur);
+    return '<div onclick="pickInvItem('+r.id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);'+(sel?'background:var(--glass);':'')+'">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--text);display:flex;justify-content:space-between;gap:8px;"><span style="overflow:hidden;text-overflow:ellipsis;">'+escHtml(r.name)+'</span><span style="color:var(--text3);font-weight:400;font-size:11.5px;flex-shrink:0;">ຄົງ '+(r.qty||0)+'</span></div>'
+      +(sn?'<div style="font-size:10.5px;color:var(--text3);margin-top:1px;">🔖 SN: '+escHtml(sn)+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+function pickInvItem(id){
+  const r=DB.inv.find(x=>x.id===parseInt(id));if(!r)return;
+  const inp=g('ivd-item');if(inp)inp.value=r.id;
+  updInvItemDisp();
+  const pop=g('ivd-item-pop');if(pop)pop.style.display='none';
+  onInvDpItemChange();
+}
+document.addEventListener('click',function(e){
+  const f=e.target.closest&&e.target.closest('#ivd-item-btn, #ivd-item-pop');
+  if(!f){const pop=g('ivd-item-pop');if(pop&&pop.style.display==='block')pop.style.display='none';}
+});
 function populateInvDropdowns(){
   const cats=CFG.invCats||[];
   const ic=g('iv-cat');
@@ -2671,12 +2723,7 @@ function populateInvDropdowns(){
   if(fc){const cur=fc.value;let h='<option value="">🏷️ ທຸກປະເພດ</option>';
     cats.forEach(t=>h+='<option value="'+escHtml(t)+'">'+escHtml(t)+'</option>');
     fc.innerHTML=h;if(cur)fc.value=cur;}
-  const di=g('ivd-item');
-  if(di){const cur=di.value;let h='<option value="">-- ເລືອກອຸປະກອນ --</option>';
-    DB.inv.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(r=>{
-      const sn=String(r.serial||'').trim();
-      h+='<option value="'+r.id+'">'+escHtml(r.name)+(sn?' · SN:'+escHtml(sn):'')+' ('+(r.qty||0)+')</option>';});
-    di.innerHTML=h;if(cur)di.value=cur;}
+  updInvItemDisp(); // custom dropdown ອຸປະກອນ (ຊື່ + SN ນ້ອຍ) — ລາຍການ render ຕອນເປີດ
   const brs=getBranches();
   const db2=g('ivd-br');
   if(db2){const cur=db2.value;let h='<option value="">-- ເລືອກໜ່ວຍ --</option>';
