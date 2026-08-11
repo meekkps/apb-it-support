@@ -2541,6 +2541,8 @@ function showInvUnitItem(itemId){
   const iname=item?item.name:((moves[0]&&moves[0].itemName)||'');
   const isn=String((item&&item.serial)||'').trim();const icat=String((item&&item.cat)||(moves[0]&&moves[0].cat)||'').trim();
   let html='<button onclick="showInvBranch(window._invBrCur)" style="background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12.5px;color:var(--text2);cursor:pointer;margin-bottom:10px;">← ກັບຄືນ '+escHtml(name)+'</button>';
+  // ຮູບກ່ອງ
+  if(item&&item.img)html+='<img src="'+item.img+'" style="max-width:100%;max-height:200px;border-radius:12px;display:block;margin:0 auto 12px;border:1px solid var(--border);">';
   // ລາຍລະອຽດອາໄຫຼ່ (SN / ປະເພດ)
   if(isn||icat){
     html+='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;font-size:12.5px;color:var(--text2);">'
