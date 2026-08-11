@@ -2105,7 +2105,7 @@ function invCatBadge(c){
   return '<span class="binv '+cls+'">'+escHtml(s||'—')+'</span>';
 }
 function invStockBadge(r){
-  const q=parseInt(r.qty)||0,m=parseInt(r.min)||0;
+  const q=(typeof invHqPools==='function')?invHqPools(r).good:(parseInt(r.qty)||0);const m=parseInt(r.min)||0;
   if(q<=0)return '<span class="binv binv-low">🚫 ໝົດ</span>';
   if(m&&q<=m)return '<span class="binv binv-low">⚠️ ໃກ້ໝົດ</span>';
   return '<span class="binv binv-ok">✅ ພໍ</span>';
@@ -2171,8 +2171,8 @@ function showInvItem(id){
   const condL={good:'🟢 ໃຊ້ໄດ້',bad:'🔴 ໃຊ້ບໍ່ໄດ້ (ເສຍ)',fixing:'🟡 ກຳລັງສ້ອມ'};
   let html='';
   if(r.img)html+='<img src="'+r.img+'" style="max-width:100%;max-height:220px;border-radius:12px;display:block;margin:0 auto 12px;border:1px solid var(--border);">';
-  const hqBad=parseInt(r.qtyBad)||0,hqFix=parseInt(r.qtyFix)||0;
-  const stockStr='🟢 '+(r.qty||0)+' ໃຊ້ໄດ້'+(hqBad?' · 🔴 '+hqBad+' ເສຍ':'')+(hqFix?' · 🟡 '+hqFix+' ສ້ອມ':'');
+  const _hq=invHqPools(r);const hqBad=_hq.bad,hqFix=_hq.fixing;
+  const stockStr='🟢 '+_hq.good+' ໃຊ້ໄດ້'+(hqBad?' · 🔴 '+hqBad+' ເສຍ':'')+(hqFix?' · 🟡 '+hqFix+' ສ້ອມ':'');
   html+=row('ຊື່',r.name)+row('ປະເພດ',r.cat)+row('Serial',r.serial)
     +row('ໃນຄັງຫຼັກ',stockStr)+(r.min?row('ຂັ້ນຕໍ່າ',r.min+' ອັນ'):'')
     +row('ນຳເຂົ້າ',fmtDate(r.inDate))+row('ສົ່ງໄປແລ້ວ',String(totalSent))+row('ໝາຍເຫດ',r.note);
@@ -2194,7 +2194,8 @@ function invCondBadge(c){
 }
 // badge ສະຖານະ ອີງ pool ຈິງ (ຄັງຫຼັກ): ສະແດງທຸກ pool ທີ່ມີ
 function invPoolBadge(r){
-  const gd=parseInt(r.qty)||0,bd=parseInt(r.qtyBad)||0,fx=parseInt(r.qtyFix)||0;
+  const hq=invHqPools(r);const gd=hq.good,bd=hq.bad,fx=hq.fixing;
+  if(gd<=0&&bd<=0&&fx<=0)return '<span class="binv" style="color:var(--text3);">— ໝົດ</span>';
   if(!bd&&!fx)return '<span class="binv binv-ok">🟢 ໃຊ້ໄດ້</span>';
   let s='';
   if(gd>0)s+='<span class="binv binv-ok" style="margin-right:3px;">🟢'+gd+'</span>';
@@ -2208,24 +2209,25 @@ function renderInv(){
   let list=DB.inv.slice().reverse();
   if(q)list=list.filter(r=>((r.name||'')+(r.serial||'')+(r.note||'')).toLowerCase().includes(q));
   if(fc)list=list.filter(r=>String(r.cat||'')===fc);
-  // ກັ່ນຕອງຕາມ pool ຈິງ: ໃຊ້ໄດ້=qty>0, ໃຊ້ບໍ່ໄດ້=qtyBad>0, ກຳລັງສ້ອມ=qtyFix>0
-  if(fcond==='good')list=list.filter(r=>(parseInt(r.qty)||0)>0);
-  else if(fcond==='bad')list=list.filter(r=>(parseInt(r.qtyBad)||0)>0);
-  else if(fcond==='fixing')list=list.filter(r=>(parseInt(r.qtyFix)||0)>0);
-  if(fs==='low')list=list.filter(r=>{const qy=parseInt(r.qty)||0,m=parseInt(r.min)||0;return qy>0&&m&&qy<=m;});
-  if(fs==='out')list=list.filter(r=>(parseInt(r.qty)||0)<=0);
-  if(fs==='ok')list=list.filter(r=>{const qy=parseInt(r.qty)||0,m=parseInt(r.min)||0;return qy>0&&(!m||qy>m);});
+  // ກັ່ນຕອງຕາມ pool ຄັງຫຼັກ (ຄິດຈາກ ledger): ໃຊ້ໄດ້/ໃຊ້ບໍ່ໄດ້/ກຳລັງສ້ອມ
+  if(fcond==='good')list=list.filter(r=>invHqPools(r).good>0);
+  else if(fcond==='bad')list=list.filter(r=>invHqPools(r).bad>0);
+  else if(fcond==='fixing')list=list.filter(r=>invHqPools(r).fixing>0);
+  if(fs==='low')list=list.filter(r=>{const qy=invHqPools(r).good,m=parseInt(r.min)||0;return qy>0&&m&&qy<=m;});
+  if(fs==='out')list=list.filter(r=>invHqPools(r).good<=0);
+  if(fs==='ok')list=list.filter(r=>{const qy=invHqPools(r).good,m=parseInt(r.min)||0;return qy>0&&(!m||qy>m);});
   const cnt=g('inv-cnt');if(cnt)cnt.textContent=list.length+(q||fc||fs||fcond?'/'+DB.inv.length:'');
   if(!list.length){c.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text2);">ຍັງບໍ່ມີລາຍການ</div>';return;}
   c.innerHTML='<div class="tbl-wrap"><table><thead><tr><th>ຮູບ</th><th>ຊື່</th><th>ປະເພດ</th><th>Serial</th><th>ໃນຄັງ</th><th>ສະຖານະ</th><th>ສົ່ງແລ້ວ</th><th>ນຳເຂົ້າ</th><th>Stock</th><th style="text-align:center;">ດຳເນີນ</th></tr></thead><tbody>'
     +list.map(r=>{
       const sent=DB.invd.filter(d=>d.itemId===r.id).reduce((s,d)=>s+(parseInt(d.qty)||0),0);
+      const hq=invHqPools(r);
       return '<tr>'
       +'<td>'+(r.img?'<img class="inv-thumb" src="'+r.img+'" onclick="showInvItem('+r.id+')" style="cursor:pointer;">':'<div class="inv-thumb-ph">📦</div>')+'</td>'
       +'<td style="font-weight:600;color:var(--p2);cursor:pointer;" onclick="showInvItem('+r.id+')">'+escHtml(r.name)+'</td>'
       +'<td>'+invCatBadge(r.cat)+'</td>'
       +'<td style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--text2);">'+escHtml(r.serial||'—')+'</td>'
-      +'<td style="font-weight:700;">🟢'+(r.qty||0)+((parseInt(r.qtyBad)||0)?' <span style="color:var(--red);font-size:11px;font-weight:600;">🔴'+r.qtyBad+'</span>':'')+((parseInt(r.qtyFix)||0)?' <span style="color:var(--amber);font-size:11px;font-weight:600;">🟡'+r.qtyFix+'</span>':'')+'</td>'
+      +'<td style="font-weight:700;">🟢'+hq.good+(hq.bad>0?' <span style="color:var(--red);font-size:11px;font-weight:600;">🔴'+hq.bad+'</span>':'')+(hq.fixing>0?' <span style="color:var(--amber);font-size:11px;font-weight:600;">🟡'+hq.fixing+'</span>':'')+'</td>'
       +'<td>'+invPoolBadge(r)+'</td>'
       +'<td style="color:var(--text2);">'+sent+'</td>'
       +'<td style="font-size:11.5px;color:var(--text2);white-space:nowrap;">'+escHtml(fmtDate(r.inDate)||'—')+'</td>'
@@ -2277,28 +2279,14 @@ function invBucketsAt(itemId,loc,exclId){
   });
   return b;
 }
-// ນຳໃຊ້/ຍ້ອນຄືນ ຜົນຂອງ record ຕໍ່ pool ຄັງຫຼັກ (sign=+1 ນຳໃຊ້, -1 ຍ້ອນຄືນ)
-function _invApplyHq(r,sign){
-  const item=DB.inv.find(x=>x.id===r.itemId);if(!item)return;
-  const q=(parseInt(r.qty)||0)*sign;const mt=r.mtype||'out';const ft=invFromTo(r);
-  const add=(c,d)=>{const k=_invPoolKey(c);item[k]=(parseInt(item[k])||0)+d;};
-  if(mt==='out')add(r.cond||'good',-q);
-  else if(mt==='return')add(r.cond||'good',q);
-  else if(mt==='status'&&ft.from===INV_HQ){add(r.fromCond||'good',-q);add(r.cond||'bad',q);}
-  else if(mt==='writeoff'&&ft.from===INV_HQ)add(r.cond||'bad',-q); // ຖິ້ມ → ຫັກອອກຈາກ pool
-  // transfer & status@unit & writeoff@unit: ບໍ່ກະທົບຄັງຫຼັກ
+// ຄັງຫຼັກປັດຈຸບັນ (ຕໍ່ສະຖານະ) = ຈຳນວນເລີ່ມຕົ້ນ (item.qty/qtyBad/qtyFix) + net ຈາກ ledger ຢູ່ຄັງຫຼັກ
+// → ຄິດຈາກປະຫວັດການເຄື່ອນໄຫວສະເໝີ ບໍ່ມີວັນຕີກັນ (single source of truth)
+function invHqPools(item,exclId){
+  const b=invBucketsAt(item.id,INV_HQ,exclId);
+  return {good:(parseInt(item.qty)||0)+b.good, bad:(parseInt(item.qtyBad)||0)+b.bad, fixing:(parseInt(item.qtyFix)||0)+b.fixing};
 }
-// ຈຳນວນທີ່ຄັງຫຼັກມີ ຕາມສະຖານະ (ຕັດຜົນ record ທີ່ກຳລັງແກ້ໄຂອອກ)
-function _invHqAvail(item,cond,excl){
-  let val=parseInt(item[_invPoolKey(cond)])||0;
-  if(excl&&excl.itemId===item.id){
-    const q=parseInt(excl.qty)||0;const mt=excl.mtype||'out';const ft=invFromTo(excl);
-    if(mt==='out'&&(excl.cond||'good')===cond)val+=q;
-    else if(mt==='return'&&(excl.cond||'good')===cond)val-=q;
-    else if(mt==='status'&&ft.from===INV_HQ){if((excl.fromCond||'good')===cond)val+=q;if((excl.cond||'bad')===cond)val-=q;}
-    else if(mt==='writeoff'&&ft.from===INV_HQ&&(excl.cond||'bad')===cond)val+=q;
-  }
-  return val;
+// ຈຳນວນທີ່ຄັງຫຼັກມີ ຕາມສະຖານະ (exclId=ຂ້າມ record ທີ່ກຳລັງແກ້ໄຂ)
+function _invHqAvail(item,cond,exclId){return invHqPools(item,exclId)[cond]||0;
 }
 function onInvMtypeChange(){
   const mt=v('ivd-mtype')||'out';
@@ -2328,11 +2316,12 @@ function onInvDpItemChange(){
   const mt=v('ivd-mtype')||'out';
   const h=g('ivd-stock-hint');if(!h)return;
   if(!item){h.textContent='';return;}
+  const hq=invHqPools(item);
   if(mt==='out'){
-    h.textContent='(ຄັງຫຼັກ: 🟢'+(parseInt(item.qty)||0)+((parseInt(item.qtyBad)||0)?' 🔴'+item.qtyBad:'')+((parseInt(item.qtyFix)||0)?' 🟡'+item.qtyFix:'')+')';
+    h.textContent='(ຄັງຫຼັກ: 🟢'+hq.good+(hq.bad?' 🔴'+hq.bad:'')+(hq.fixing?' 🟡'+hq.fixing:'')+')';
   }else{
     const src=v('ivd-from');
-    if(src===INV_HQ){h.textContent='(ຄັງຫຼັກ: 🟢'+(parseInt(item.qty)||0)+' 🔴'+(parseInt(item.qtyBad)||0)+' 🟡'+(parseInt(item.qtyFix)||0)+')';}
+    if(src===INV_HQ){h.textContent='(ຄັງຫຼັກ: 🟢'+hq.good+' 🔴'+hq.bad+' 🟡'+hq.fixing+')';}
     else if(src){const b=invBucketsAt(id,src);h.textContent='('+src+': 🟢'+b.good+' 🔴'+b.bad+' 🟡'+b.fixing+')';}
     else h.textContent='';
   }
@@ -2350,29 +2339,28 @@ function svInvD(){
   if(qty<1)return toast('⚠️ ໃສ່ຈຳນວນ');
   const cond=v('ivd-cond')||'good';   // ສະພາບປາຍທາງ / ທີ່ຍ້າຍ / ເປັນສະພາບ(status)
   let from,to,fromCond;
-  const excl=oldRec; // ຕັດຜົນ record ເກົ່າອອກຕອນກວດ (ຖ້າແກ້ໄຂ)
   if(mt==='out'){
     if(!v('ivd-br')||v('ivd-br')==='__ADD__')return toast('⚠️ ເລືອກໜ່ວຍປາຍທາງ');
     from=INV_HQ;to=v('ivd-br');
-    const avail=_invHqAvail(item,cond,excl);
+    const avail=_invHqAvail(item,cond,eid);
     if(qty>avail)return toast('⚠️ ຄັງຫຼັກມີ '+invCondShort(cond)+' ພຽງ '+avail);
   }else if(mt==='return'){
     if(!v('ivd-from'))return toast('⚠️ ເລືອກໜ່ວຍຕົ້ນທາງ');
     from=v('ivd-from');to=INV_HQ;
-    const avail=from===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,from,eid)[cond]||0);
+    const avail=from===INV_HQ?_invHqAvail(item,cond,eid):(invBucketsAt(itemId,from,eid)[cond]||0);
     if(qty>avail)return toast('⚠️ '+from+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
   }else if(mt==='transfer'){
     if(!v('ivd-from'))return toast('⚠️ ເລືອກໜ່ວຍຕົ້ນທາງ');
     if(!v('ivd-br')||v('ivd-br')==='__ADD__')return toast('⚠️ ເລືອກໜ່ວຍປາຍທາງ');
     from=v('ivd-from');to=v('ivd-br');
     if(from===to)return toast('⚠️ ຕົ້ນທາງ/ປາຍທາງ ຄືກັນ');
-    const avail=from===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,from,eid)[cond]||0);
+    const avail=from===INV_HQ?_invHqAvail(item,cond,eid):(invBucketsAt(itemId,from,eid)[cond]||0);
     if(qty>avail)return toast('⚠️ '+from+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
   }else if(mt==='writeoff'){ // ຖິ້ມ/ຕັດອອກ (ຫັກອອກຖາວອນ)
     const loc=v('ivd-from');
     if(!loc)return toast('⚠️ ເລືອກບ່ອນ (ໜ່ວຍ/ຄັງຫຼັກ)');
     from=loc;to=INV_SINK;
-    const avail=loc===INV_HQ?_invHqAvail(item,cond,excl):(invBucketsAt(itemId,loc,eid)[cond]||0);
+    const avail=loc===INV_HQ?_invHqAvail(item,cond,eid):(invBucketsAt(itemId,loc,eid)[cond]||0);
     if(qty>avail)return toast('⚠️ '+loc+' ມີ '+invCondShort(cond)+' ພຽງ '+avail);
   }else{ // status — ປ່ຽນສະຖານະຢູ່ບ່ອນ (ບໍ່ຍ້າຍ)
     const loc=v('ivd-from');
@@ -2380,11 +2368,11 @@ function svInvD(){
     fromCond=v('ivd-cond-from')||'good';
     if(fromCond===cond)return toast('⚠️ ສະພາບ ຈາກ/ເປັນ ຄືກັນ');
     from=loc;to=loc;
-    const avail=loc===INV_HQ?_invHqAvail(item,fromCond,excl):(invBucketsAt(itemId,loc,eid)[fromCond]||0);
+    const avail=loc===INV_HQ?_invHqAvail(item,fromCond,eid):(invBucketsAt(itemId,loc,eid)[fromCond]||0);
     if(qty>avail)return toast('⚠️ '+loc+' ມີ '+invCondShort(fromCond)+' ພຽງ '+avail);
   }
-  // ===== ຜ່ານການກວດ → mutate =====
-  if(oldRec){_invApplyHq(oldRec,-1);DB.invd=DB.invd.filter(x=>x.id!==eid);}
+  // ===== ຜ່ານການກວດ → ບັນທຶກ (ບໍ່ແຕະ pool item — ຄິດຈາກ ledger) =====
+  if(oldRec){DB.invd=DB.invd.filter(x=>x.id!==eid);}
   const rec={id:eid||Date.now(),itemId:itemId,itemName:item.name,cat:item.cat,mtype:mt,
     qty:qty,from:from,to:to,br:to,cond:cond,dt:v('ivd-date')||new Date().toISOString().slice(0,10),
     by:v('ivd-by'),note:v('ivd-note'),
@@ -2392,13 +2380,12 @@ function svInvD(){
     receivedAt:oldRec?(oldRec.receivedAt||''):''};
   if(mt==='status')rec.fromCond=fromCond;
   DB.invd.push(rec);
-  _invApplyHq(rec,1);
   const lbl=mt==='status'?('🔧 '+item.name+' '+invCondShort(fromCond)+'→'+invCondShort(cond)+' ຢູ່ '+from)
     :mt==='writeoff'?('🗑 ຖິ້ມ '+item.name+' '+invCondShort(cond)+' ຈາກ '+from)
     :(invMtypeLbl(mt)+' '+item.name+' '+from+'→'+to);
   AUDIT.log(eid?'edit':'add','Dispatch',item.name,lbl+' × '+qty);
   DB.save();clrInvD();renderInvAll();
-  syncToSheets('Items',DB.inv);syncToSheets('Dispatch',DB.invd);
+  syncToSheets('Dispatch',DB.invd);
   toast((eid?'✏️ ອັບເດດ · ':'✅ ')+lbl+' ×'+qty);
 }
 function editInvD(id){
@@ -2446,11 +2433,10 @@ function delInvD(id){
   const r=DB.invd.find(x=>x.id===id);if(!r)return;
   const ft=invFromTo(r);
   if(!confirm('ລຶບການເຄື່ອນໄຫວ "'+r.itemName+' '+ft.from+'→'+ft.to+'"?'))return;
-  _invApplyHq(r,-1); // ຍ້ອນຄືນຜົນຕໍ່ pool ຄັງຫຼັກ (ຕາມສະຖານະ)
-  DB.invd=DB.invd.filter(x=>x.id!==id);tombAdd('Dispatch',id);
+  DB.invd=DB.invd.filter(x=>x.id!==id);tombAdd('Dispatch',id); // pool ຄິດຈາກ ledger → ບໍ່ຕ້ອງຍ້ອນຄືນ
   AUDIT.log('delete','Dispatch',r.itemName,ft.from+'→'+ft.to);
   DB.save();renderInvAll();
-  syncToSheets('Items',DB.inv);deleteFromSheets('Dispatch',id);
+  deleteFromSheets('Dispatch',id);
   toast('🗑 ລຶບແລ້ວ');
 }
 function renderInvD(){
@@ -2741,9 +2727,9 @@ function renderInvStats(){
   const catGood={},catBad={};let totGood=0,totBad=0,totFix=0,hqG=0,hqB=0,hqF=0;
   items.forEach(it=>{
     const cat=String(it.cat||'ອື່ນໆ');
-    const ig=parseInt(it.qty)||0,ib=parseInt(it.qtyBad)||0,iff=parseInt(it.qtyFix)||0;
-    hqG+=ig;hqB+=ib;hqF+=iff;
-    let gd=ig,bd=ib,fx=iff;
+    const hq=invHqPools(it);              // ຄັງຫຼັກ (ຄິດຈາກ ledger)
+    hqG+=Math.max(0,hq.good);hqB+=Math.max(0,hq.bad);hqF+=Math.max(0,hq.fixing);
+    let gd=Math.max(0,hq.good),bd=Math.max(0,hq.bad),fx=Math.max(0,hq.fixing);
     brs.forEach(bn=>{const bk=invBucketsAt(it.id,bn);if(bk.good>0)gd+=bk.good;if(bk.bad>0)bd+=bk.bad;if(bk.fixing>0)fx+=bk.fixing;});
     catGood[cat]=(catGood[cat]||0)+gd;catBad[cat]=(catBad[cat]||0)+bd;
     totGood+=gd;totBad+=bd;totFix+=fx;
@@ -2764,7 +2750,7 @@ function renderInvBad(){
   const brs=getBranches().map(String).filter(b=>b!==INV_HQ);
   const rows=[];
   DB.inv.forEach(it=>{
-    const hb=parseInt(it.qtyBad)||0,hf=parseInt(it.qtyFix)||0;
+    const _hq=invHqPools(it);const hb=Math.max(0,_hq.bad),hf=Math.max(0,_hq.fixing);
     const locs=[];let tBad=hb,tFix=hf;
     if(hb||hf)locs.push('🏦 ຄັງຫຼັກ'+(hb?' <b style="color:var(--red);">🔴'+hb+'</b>':'')+(hf?' <b style="color:var(--amber);">🟡'+hf+'</b>':''));
     brs.forEach(bn=>{const bk=invBucketsAt(it.id,bn);if(bk.bad>0||bk.fixing>0){tBad+=bk.bad;tFix+=bk.fixing;
