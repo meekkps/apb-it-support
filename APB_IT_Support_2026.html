@@ -2675,7 +2675,7 @@ function updInvItemDisp(){
   if(!r){disp.textContent='-- ເລືອກອຸປະກອນ --';disp.style.color='var(--text2)';return;}
   const sn=String(r.serial||'').trim();
   disp.style.color='var(--text)';
-  disp.innerHTML='<span style="font-weight:600;">'+escHtml(r.name)+'</span>'+(sn?' <span style="font-size:10.5px;color:var(--text3);">🔖 '+escHtml(sn)+'</span>':'')+' <span style="font-size:11px;color:var(--text3);">('+(r.qty||0)+')</span>';
+  disp.innerHTML='<span style="font-weight:600;">'+escHtml(r.name)+'</span>'+(sn?' <span style="font-size:10.5px;color:var(--text3);">🔖 '+escHtml(sn)+'</span>':'')+' <span style="font-size:11px;color:var(--text3);">('+invHqPools(r).good+')</span>';
 }
 function toggleInvItemPop(){
   const pop=g('ivd-item-pop');if(!pop)return;
@@ -2693,7 +2693,7 @@ function renderInvItemPop(){
   list.innerHTML=items.map(r=>{
     const sn=String(r.serial||'').trim();const sel=String(r.id)===String(cur);
     return '<div onclick="pickInvItem('+r.id+')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);'+(sel?'background:var(--glass);':'')+'">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--text);display:flex;justify-content:space-between;gap:8px;"><span style="overflow:hidden;text-overflow:ellipsis;">'+escHtml(r.name)+'</span><span style="color:var(--text3);font-weight:400;font-size:11.5px;flex-shrink:0;">ຄົງ '+(r.qty||0)+'</span></div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--text);display:flex;justify-content:space-between;gap:8px;"><span style="overflow:hidden;text-overflow:ellipsis;">'+escHtml(r.name)+'</span><span style="color:var(--text3);font-weight:400;font-size:11.5px;flex-shrink:0;">ຄົງ '+invHqPools(r).good+'</span></div>'
       +(sn?'<div style="font-size:10.5px;color:var(--text3);margin-top:1px;">🔖 SN: '+escHtml(sn)+'</div>':'')
       +'</div>';
   }).join('');
@@ -2792,7 +2792,8 @@ function exportInvXlsx(){
     const condL={good:'ໃຊ້ໄດ້',bad:'ໃຊ້ບໍ່ໄດ້',fixing:'ກຳລັງສ້ອມ'};
     const rows=DB.inv.map((r,i)=>{
       const sent=DB.invd.filter(d=>d.itemId===r.id).reduce((s,d)=>s+(parseInt(d.qty)||0),0);
-      return {'#':i+1,'ຊື່':r.name||'','ປະເພດ':r.cat||'','Serial':r.serial||'','ໃນຄັງ':r.qty||0,'ສະຖານະ':condL[r.cond||'good'],'ຂັ້ນຕໍ່າ':r.min||0,'ສົ່ງແລ້ວ':sent,'ນຳເຂົ້າ':fmtDate(r.inDate)||'','ໝາຍເຫດ':r.note||''};
+      const hq=invHqPools(r);
+      return {'#':i+1,'ຊື່':r.name||'','ປະເພດ':r.cat||'','Serial':r.serial||'','ໃນຄັງ':hq.good,'ໃຊ້ບໍ່ໄດ້':hq.bad,'ກຳລັງສ້ອມ':hq.fixing,'ສະຖານະ':condL[r.cond||'good'],'ຂັ້ນຕໍ່າ':r.min||0,'ສົ່ງແລ້ວ':sent,'ນຳເຂົ້າ':fmtDate(r.inDate)||'','ໝາຍເຫດ':r.note||''};
     });
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{}]),'Items');
