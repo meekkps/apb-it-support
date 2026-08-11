@@ -2195,16 +2195,6 @@ function invCondBadge(c){
   if(s==='fixing')return '<span class="binv" style="background:rgba(245,158,11,0.14);color:#92400e;">🟡 ກຳລັງສ້ອມ</span>';
   return '<span class="binv binv-ok">🟢 ໃຊ້ໄດ້</span>';
 }
-// badge ສະຖານະ ອີງ pool ຈິງ (ຄັງຫຼັກ): ສະແດງທຸກ pool ທີ່ມີ
-function invPoolBadge(r){
-  const hq=invHqPools(r);const gd=hq.good,bd=hq.bad,fx=hq.fixing;
-  if(gd<=0&&bd<=0&&fx<=0)return '<span class="binv" style="color:var(--text3);">— ໝົດ</span>';
-  let s='';
-  if(gd>0)s+='<span class="binv binv-ok" style="margin-right:3px;">🟢 ໃຊ້ໄດ້'+(gd>1?' '+gd:'')+'</span>';
-  if(bd>0)s+='<span class="binv binv-low" style="margin-right:3px;font-weight:700;">🔴 ໃຊ້ບໍ່ໄດ້'+(bd>1?' '+bd:'')+'</span>';
-  if(fx>0)s+='<span class="binv" style="background:rgba(245,158,11,0.14);color:#92400e;">🟡 ກຳລັງສ້ອມ'+(fx>1?' '+fx:'')+'</span>';
-  return s;
-}
 // cell ໃນຄັງ: ສະແດງສະເພາະ pool ທີ່ມີ (ບໍ່ໂຊ 0), ເສຍ=ສີແດງ
 function invPoolQtyCell(hq){
   const parts=[];
