@@ -2495,7 +2495,8 @@ function showInvBranch(name){
   const catMap={};let held=0,tG=0,tB=0,tF=0;
   ids.forEach(id=>{const b=invBucketsAt(id,name);const t=b.good+b.bad+b.fixing;if(t<=0)return;
     held++;tG+=b.good;tB+=b.bad;tF+=b.fixing;
-    const cat=catOf[id]||'ອື່ນໆ';(catMap[cat]=catMap[cat]||[]).push({id:id,name:nameOf[id]||'',b:b,t:t});
+    const cat=catOf[id]||'ອື່ນໆ';const _it=DB.inv.find(x=>x.id===id);
+    (catMap[cat]=catMap[cat]||[]).push({id:id,name:nameOf[id]||'',b:b,t:t,sn:String((_it&&_it.serial)||'').trim()});
   });
 
   let html='';
@@ -2516,7 +2517,10 @@ function showInvBranch(name){
         html+='<div style="margin:12px 0 6px;">'+invCatBadge(cat)+'</div>';
         html+='<div style="display:flex;flex-wrap:wrap;gap:6px;">';
         catMap[cat].sort((a,b)=>b.t-a.t).forEach(it=>{
-          html+='<span onclick="showInvUnitItem('+it.id+')" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 11px;font-size:12.5px;color:var(--text);cursor:pointer;background:var(--glass);">'+escHtml(it.name)+_invCondMini(it.b)+' <span style="color:var(--text3);font-size:11px;">›</span></span>';
+          html+='<span onclick="showInvUnitItem('+it.id+')" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 11px;font-size:12.5px;color:var(--text);cursor:pointer;background:var(--glass);display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;">'
+            +'<span>'+escHtml(it.name)+_invCondMini(it.b)+' <span style="color:var(--text3);font-size:11px;">›</span></span>'
+            +(it.sn?'<span style="font-size:10px;color:var(--text3);">🔖 SN: '+escHtml(it.sn)+'</span>':'')
+            +'</span>';
         });
         html+='</div>';
       });
@@ -2534,7 +2538,15 @@ function showInvUnitItem(itemId){
   const b=invBucketsAt(itemId,name);
   const moves=DB.invd.filter(d=>{if(d.itemId!==itemId)return false;const ft=invFromTo(d);return ft.from===name||ft.to===name;});
   const iname=item?item.name:((moves[0]&&moves[0].itemName)||'');
+  const isn=String((item&&item.serial)||'').trim();const icat=String((item&&item.cat)||(moves[0]&&moves[0].cat)||'').trim();
   let html='<button onclick="showInvBranch(window._invBrCur)" style="background:var(--glass);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12.5px;color:var(--text2);cursor:pointer;margin-bottom:10px;">← ກັບຄືນ '+escHtml(name)+'</button>';
+  // ລາຍລະອຽດອາໄຫຼ່ (SN / ປະເພດ)
+  if(isn||icat){
+    html+='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;font-size:12.5px;color:var(--text2);">'
+      +(icat?invCatBadge(icat):'')
+      +(isn?'<span style="border:1.5px solid var(--border2);border-radius:8px;padding:4px 10px;background:var(--glass);">🔖 SN: <b style="color:var(--text);">'+escHtml(isn)+'</b></span>':'')
+      +'</div>';
+  }
   // ຄົງເຫຼືອຕາມສະຖານະ
   html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
     +'<div style="background:var(--bg1);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--green);">'+b.good+'</div><div style="font-size:10.5px;color:var(--text2);">🟢 ໃຊ້ໄດ້</div></div>'
@@ -2662,7 +2674,8 @@ function populateInvDropdowns(){
   const di=g('ivd-item');
   if(di){const cur=di.value;let h='<option value="">-- ເລືອກອຸປະກອນ --</option>';
     DB.inv.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).forEach(r=>{
-      h+='<option value="'+r.id+'">'+escHtml(r.name)+' ('+(r.qty||0)+')</option>';});
+      const sn=String(r.serial||'').trim();
+      h+='<option value="'+r.id+'">'+escHtml(r.name)+(sn?' · SN:'+escHtml(sn):'')+' ('+(r.qty||0)+')</option>';});
     di.innerHTML=h;if(cur)di.value=cur;}
   const brs=getBranches();
   const db2=g('ivd-br');
