@@ -2116,13 +2116,11 @@ function svInv(){
   if(!v('iv-cat'))return toast('⚠️ ເລືອກປະເພດ');
   if(v('iv-qty')==='')return toast('⚠️ ໃສ່ຈຳນວນ');
   const eid=v('iv-edit-id');
-  const old=eid?DB.inv.find(x=>x.id===parseInt(eid)):null;
-  // ຈຳນວນທີ່ໃສ່ ເຂົ້າ pool ຕາມສະຖານະທີ່ເລືອກ, pool ອື່ນ = ຄ່າເກົ່າ (ຮັກສາໄວ້)
+  // ຈຳນວນເລີ່ມຕົ້ນ = q ໃນສະຖານະທີ່ເລືອກ, pool ອື່ນ = 0 (item = ຈຳນວນ+ສະຖານະດຽວ; ຄັງປັດຈຸບັນຄິດຈາກ ledger)
   const c=v('iv-cond')||'good';const q=parseInt(v('iv-qty'))||0;
-  const oG=old?(parseInt(old.qty)||0):0,oB=old?(parseInt(old.qtyBad)||0):0,oF=old?(parseInt(old.qtyFix)||0):0;
   const rec={id:eid?parseInt(eid):Date.now(),name:v('iv-name'),cat:v('iv-cat'),serial:v('iv-serial'),
-    qty:c==='good'?q:oG,unit:'ອັນ',min:parseInt(v('iv-min'))||0,cond:c,
-    qtyBad:c==='bad'?q:oB,qtyFix:c==='fixing'?q:oF,
+    qty:c==='good'?q:0,unit:'ອັນ',min:parseInt(v('iv-min'))||0,cond:c,
+    qtyBad:c==='bad'?q:0,qtyFix:c==='fixing'?q:0,
     inDate:v('iv-date'),img:v('iv-img'),note:v('iv-note')};
   if(eid){const i=DB.inv.findIndex(x=>x.id===parseInt(eid));if(i>-1)DB.inv[i]=rec;else DB.inv.push(rec);AUDIT.log('edit','Inventory',rec.name,rec.cat);toast('✅ ອັບເດດ!');}
   else{DB.inv.push(rec);AUDIT.log('add','Inventory',rec.name,rec.cat);toast('✅ ບັນທຶກ!');}
@@ -2283,7 +2281,7 @@ function invBucketsAt(itemId,loc,exclId){
 // → ຄິດຈາກປະຫວັດການເຄື່ອນໄຫວສະເໝີ ບໍ່ມີວັນຕີກັນ (single source of truth)
 function invHqPools(item,exclId){
   const b=invBucketsAt(item.id,INV_HQ,exclId);
-  return {good:(parseInt(item.qty)||0)+b.good, bad:(parseInt(item.qtyBad)||0)+b.bad, fixing:(parseInt(item.qtyFix)||0)+b.fixing};
+  return {good:Math.max(0,(parseInt(item.qty)||0)+b.good), bad:Math.max(0,(parseInt(item.qtyBad)||0)+b.bad), fixing:Math.max(0,(parseInt(item.qtyFix)||0)+b.fixing)};
 }
 // ຈຳນວນທີ່ຄັງຫຼັກມີ ຕາມສະຖານະ (exclId=ຂ້າມ record ທີ່ກຳລັງແກ້ໄຂ)
 function _invHqAvail(item,cond,exclId){return invHqPools(item,exclId)[cond]||0;
